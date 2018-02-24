@@ -15,7 +15,7 @@ app.use(cookieParser())
 app.use('/api/v1/status', require('./status/index'))
 app.use('/api/v1/user', require('./user/index'))
 
-mongoose.connect(config.mongo_connection).then(resp => {
+mongoose.connect(config.mongoConnection).then(resp => {
     debug('connected to mongo server')
 }).catch(error => {
     debug('error connecting to mongo server')

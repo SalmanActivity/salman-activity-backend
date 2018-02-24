@@ -1,4 +1,4 @@
 module.exports = {
-    'mongo_connection': '[MONGO_CONNECTION_URI]',
-    'secret_key': '[APPLICATION_SECRET_KEY]'
+    'mongoConnection': '[MONGO_CONNECTION_URI]',
+    'secretKey': '[APPLICATION_SECRET_KEY]'
 }
