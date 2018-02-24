@@ -1,0 +1,80 @@
+var passwordHash = require('password-hash')
+var jwt = require('jsonwebtoken')
+var config = require('../config')
+var user = require('./user')
+
+function login(req, res, next) {
+    let username = undefined
+    let password = undefined
+
+    new Promise((resolve, reject) => {
+        if (req.body.username && req.body.password) {
+            username = req.body.username
+            password = req.body.password
+            resolve()
+        } else {
+            res.status(401)
+            reject('empty username and password')
+        }
+    }).then(() => {
+        return user.findOne({username}).exec()
+            .then(userDocument => userDocument)
+            .catch(error => Promise.reject('internal server error'))
+    }).then((userDocument) => {
+        if (userDocument && passwordHash.verify(password, userDocument.password))
+            return {
+                name: userDocument.name,
+                username: userDocument.username
+            }
+        else {
+            res.status(403)
+            return Promise.reject('wrong username or password')
+        }
+    }).then(payload => {
+        let token = jwt.sign(payload, config.secretKey)
+        return res.header('Authorization', 'JWT ' + token).status(200).json({
+            status: 'success',
+            success: true,
+            token
+        })
+    }).catch((error) => {
+        res.json({
+            status: 'failed',
+            success: false,
+            cause: error
+        })
+    })
+}
+
+function auth(req, res, next) {
+    let token = undefined
+    if (req.body.token)
+        token = req.body.token
+    if (req.header('Authorization')) {
+        let tokenHeader = req.header('Authorization')
+        let tokenArr = tokenHeader.split(' ')
+        if (tokenArr.length == 2 && tokenArr[0].toLowerCase() == 'jwt')
+            token = tokenArr[1]
+    }
+
+    let successCallback = next
+    let failedCallback = () => {
+        res.status(403).json({
+            status: 'failed',
+            success: false,
+            cause: 'unauthorized access'
+        })
+    }
+
+    if (token)
+        jwt.verify(token, config.secretKey, function(err, data) {
+            if (err)
+                failedCallback()    
+            else
+                successCallback()
+        })
+    else
+        failedCallback()
+}
+
+module.exports = { login, auth }
