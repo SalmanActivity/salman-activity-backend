@@ -1,0 +1,4 @@
+{
+    "mongoConnection": "mongodb://localhost:27017/salman-activity-db",
+    "secretKey": "secret_key"
+}
