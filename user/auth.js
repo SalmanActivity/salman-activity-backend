@@ -57,7 +57,10 @@ function auth(req, res, next) {
             token = tokenArr[1]
     }
 
-    let successCallback = next
+    let successCallback = (user) => {
+        req.user = user
+        next()
+    }
     let failedCallback = () => {
         res.status(403).json({
             status: 'failed',
@@ -71,7 +74,8 @@ function auth(req, res, next) {
             if (err)
                 failedCallback()    
             else
-                successCallback()
+                user.findOne({username}).exec()
+                    .then(successCallback, failedCallback)
         })
     else
         failedCallback()
