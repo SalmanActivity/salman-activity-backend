@@ -32,16 +32,13 @@ function login(req, res, next) {
         }
     }).then(payload => {
         let token = jwt.sign(payload, config.secretKey)
-        return res.header('Authorization', 'JWT ' + token).status(200).json({
-            status: 'success',
-            success: true,
-            data: {token}
-        })
+        return res.header('Authorization', 'JWT ' + token).status(200).json({token})
     }).catch((error) => {
         res.json({
-            status: 'failed',
-            success: false,
-            cause: error
+            error: {
+                msg: 'login failed',
+                cause: error
+            }
         })
     })
 }
@@ -56,6 +53,7 @@ function auth(req, res, next) {
         if (tokenArr.length == 2 && tokenArr[0].toLowerCase() == 'jwt')
             token = tokenArr[1]
     }
+    req.token = token
 
     let successCallback = (user) => {
         req.user = user
@@ -63,9 +61,10 @@ function auth(req, res, next) {
     }
     let failedCallback = () => {
         res.status(403).json({
-            status: 'failed',
-            success: false,
-            cause: 'unauthorized access'
+            error: {
+                msg: 'cannot perform action',
+                cause: 'unauthorized access'
+            }
         })
     }
 
