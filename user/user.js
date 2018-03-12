@@ -1,4 +1,5 @@
 var mongoose = require('mongoose')
+var divisionSchema = require('../division/division').schema
 
 var userSchema = mongoose.Schema({
     name: {
@@ -14,7 +15,16 @@ var userSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    roles: [String]
+    division: divisionSchema,
+    enabled: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
+    roles: [{
+        type: String,
+        enum: ['admin', 'division']
+    }]
 })
 
 module.exports = mongoose.model('user', userSchema)
