@@ -14,14 +14,14 @@ function login(req, res, next) {
             resolve()
         } else {
             res.status(401)
-            reject('empty username and password')
+            reject('empty username or password')
         }
     }).then(() => {
         return user.findOne({username}).exec()
             .then(userDocument => userDocument)
             .catch(error => Promise.reject('internal server error'))
     }).then((userDocument) => {
-        if (userDocument && passwordHash.verify(password, userDocument.password))
+        if (userDocument && userDocument.enabled && passwordHash.verify(password, userDocument.password))
             return {
                 name: userDocument.name,
                 username: userDocument.username
