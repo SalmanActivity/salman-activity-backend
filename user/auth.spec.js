@@ -164,4 +164,8 @@ describe('testing login function', function() {
         responseSpy.header.reset()
     })
 
+    after(function() {
+        userModelMocked.restore()
+    })
+
 })
