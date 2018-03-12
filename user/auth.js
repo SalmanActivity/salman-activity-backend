@@ -7,7 +7,7 @@ function login(req, res, next) {
     let username = undefined
     let password = undefined
 
-    new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         if (req.body.username && req.body.password) {
             username = req.body.username
             password = req.body.password
