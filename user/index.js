@@ -8,7 +8,9 @@ router.post('/check_auth', auth.auth, (req, res, next) => {
     res.json({
         status: 'success',
         success: true,
-        login: true
+        data:{
+            login: true
+        }
     })
 })
 

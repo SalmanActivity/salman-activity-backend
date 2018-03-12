@@ -35,7 +35,7 @@ function login(req, res, next) {
         return res.header('Authorization', 'JWT ' + token).status(200).json({
             status: 'success',
             success: true,
-            token
+            data: {token}
         })
     }).catch((error) => {
         res.json({
