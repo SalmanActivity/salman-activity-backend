@@ -205,11 +205,38 @@ describe('auth middleware test', function() {
             header: sinon.stub().withArgs('Authorization').returns('JWT ' + token)
         }
         let next = sinon.spy()
-        
+        responseSpy.status.callsFake(function(statusCode) {
+            if (statusCode == 403)
+                done('failed auth')
+            return this
+        })
+
         auth.auth(requestMocked, responseSpy, function() {
             sinon.assert.match(requestMocked.user, user)
             done()
         })
+
+        responseSpy.returnsThis
+    })
+
+    it('should process next middleware when token in body and valid', (done) => {
+        let config = require('../config')
+        let user = { name: 'test user 1', username: 'some_user_with_username_1' }
+        let token = jwt.sign(user, config.secretKey)
+        let requestMocked = {header:function(){}, body: { token }}
+        let next = sinon.spy()
+        responseSpy.status.callsFake(function(statusCode) {
+            if (statusCode == 403)
+                done('failed auth')
+            return this
+        })
+
+        auth.auth(requestMocked, responseSpy, function() {
+            sinon.assert.match(requestMocked.user, user)
+            done()
+        })
+
+        responseSpy.returnsThis
     })
 
 })
