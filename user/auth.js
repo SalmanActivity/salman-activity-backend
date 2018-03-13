@@ -65,7 +65,7 @@ function auth(req, res, next) {
     .then(token => util.promisify(jwt.verify)(token, config.secretKey))
     .then(data => user.findOne({username: data.username}).exec())
     .then(user => {
-        req.user = user
+        req.user = user.toJSON()
     })
     .then(next)
     .catch((err) => {

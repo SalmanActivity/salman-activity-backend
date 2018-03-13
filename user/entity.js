@@ -1,9 +1,10 @@
 var user = require('./user')
+var ObjectId = require('mongoose').Types.ObjectId
 var schemaUtil = require('../util/schemaUtil')
 
 function filterUserByRole(user, userObject) {
     const publicAttr = ['id', 'name', 'username', 'division', 'enabled', 'admin']
-    
+
     if (userObject instanceof Array) {
         let resultArray = []
         for (let i = 0; i < userObject.length; i++) {
@@ -14,16 +15,20 @@ function filterUserByRole(user, userObject) {
         return resultArray
     }
     
-    if (typeof userObject === 'object') {
+    if (userObject && typeof userObject === 'object') {
+        if (userObject.toJSON)
+            userObject = userObject.toJSON()
         if (user.id != userObject.id && !user.admin)
             try {
                 currDivId = user.division.id
                 userDivId = userObject.division.id
-                return schemaUtil.fillObjectFields(publicAttr,userObject)
+                if (currDivId == userDivId)
+                    return schemaUtil.fillObjectFields(publicAttr, userObject)
+                throw 'different division'
             } catch (e) {
                 return null
             }
-        return userObject
+        return schemaUtil.fillObjectFields(publicAttr, userObject)
     }
 
     return null
@@ -37,7 +42,14 @@ function findAllUsers(req, res, next) {
 }
 
 function findSpecificUser(req, res, next) {
-    return user.findOne({id:req.query.id}).exec()
+    return new Promise((resolve, reject) => {
+        try {
+            resolve(new ObjectId(req.params.userId))
+        } catch(e) {
+            resolve(new ObjectId('000000000000000000000000'))
+        }
+    })
+    .then(_id => user.findOne({_id}).exec())
     .then(user => {
         user = filterUserByRole(req.user, user)
         if (user)
@@ -48,10 +60,17 @@ function findSpecificUser(req, res, next) {
                 cause: 'user not found'
             })
     })
-    .catch(err => res.status(500).json({
-        msg: 'cannot retrieve specific user',
-        cause: 'internal server error'
-    }))
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({
+            msg: 'cannot retrieve specific user',
+            cause: 'internal server error',err
+        })
+    })
+}
+
+function deleteSpecificUser(req, res, next) {
+    // user.deleteOne({id: })
 }
 
 module.exports = { findAllUsers, findSpecificUser }
