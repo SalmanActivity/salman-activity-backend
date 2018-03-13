@@ -41,14 +41,18 @@ function findAllUsers(req, res, next) {
     })
 }
 
-function findSpecificUser(req, res, next) {
+function getUserObjectId(userId) {
     return new Promise((resolve, reject) => {
         try {
-            resolve(new ObjectId(req.params.userId))
+            resolve(new ObjectId(userId))
         } catch(e) {
             resolve(new ObjectId('000000000000000000000000'))
         }
     })
+}
+
+function findSpecificUser(req, res, next) {
+    return userObjectId(req.params.userId)
     .then(_id => user.findOne({_id}).exec())
     .then(user => {
         user = filterUserByRole(req.user, user)
@@ -60,17 +64,37 @@ function findSpecificUser(req, res, next) {
                 cause: 'user not found'
             })
     })
-    .catch(err => {
-        console.log(err)
-        res.status(500).json({
-            msg: 'cannot retrieve specific user',
-            cause: 'internal server error',err
-        })
-    })
+    .catch(err => res.status(500).json({
+        msg: 'cannot retrieve specific user',
+        cause: 'internal server error'
+    }))
 }
 
 function deleteSpecificUser(req, res, next) {
-    // user.deleteOne({id: })
+    return userObjectId(req.params.userId)
+    .then(_id => user.findOne({_id}).exec())
+    .then(user => {
+        if (use) {
+            user.enabled = false
+            return user.save()
+        } else
+            Promise.reject('USER_NOT_FOUND')
+    })
+    .then(() => {
+        res.status(202).end()
+    })
+    .catch(err => {
+        if (err === 'USER_NOT_FOUND')
+            res.status(404).json({
+                msg: 'cannot delete specific user',
+                cause: 'user not found'
+            })
+        else
+            res.status(500).json({
+                msg: 'cannot delete specific user',
+                cause: 'internal server error'
+            })
+    })
 }
 
-module.exports = { findAllUsers, findSpecificUser }
+module.exports = { findAllUsers, findSpecificUser, deleteSpecificUser }

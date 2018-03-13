@@ -16,6 +16,6 @@ router.get('/', auth.auth, entity.findAllUsers)
 router.get('/:userId', auth.auth, entity.findSpecificUser)
 router.post('/', auth.auth, auth.admin)
 router.put('/:id', auth.auth, auth.admin)
-router.delete('/:id', auth.auth, auth.admin)
+router.delete('/:userId', auth.auth, auth.admin)
 
 module.exports = router;
