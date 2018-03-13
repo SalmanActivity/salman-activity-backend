@@ -26,5 +26,6 @@ var userSchema = mongoose.Schema({
         default: false
     }
 })
+userSchema.plugin(require('meanie-mongoose-to-json'))
 
 module.exports = mongoose.model('user', userSchema)
