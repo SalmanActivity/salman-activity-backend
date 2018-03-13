@@ -174,7 +174,7 @@ describe('login endpoint test', function() {
 describe('auth middleware test', function() {
 
     var responseSpy, userModelMocked, config
-    before(function() {
+    beforeEach(function() {
         let userDocuments = [
             {
                 name: 'test user 1',
@@ -194,6 +194,10 @@ describe('auth middleware test', function() {
         }
 
         config = sinon.stub(require('../config'), 'secretKey').value('test_secret')
+    })
+
+    afterEach(function() {
+        userModelMocked.restore()
     })
 
     it('should process next middleware when token in header and valid', (done) => {
@@ -235,8 +239,67 @@ describe('auth middleware test', function() {
             sinon.assert.match(requestMocked.user, user)
             done()
         })
+    })
 
-        responseSpy.returnsThis
+    it('should return error when token in header and invalid', (done) => {
+        let config = require('../config')
+        let user = { name: 'test user 1', username: 'some_user_with_username_1' }
+        let token = jwt.sign(user, 'not_the_secret_key')
+        let requestMocked = {
+            body: {},
+            header: sinon.stub().withArgs('Authorization').returns('JWT ' + token)
+        }
+        let next = sinon.spy()
+
+        auth.auth(requestMocked, responseSpy, next).then(() => {
+            sinon.assert.calledWith(responseSpy.status, 403)
+            let jsonCallArg = responseSpy.json.getCall(0).args[0]
+            if (!jsonCallArg)
+                sinon.assert.fail('json response is null')
+            sinon.assert.match(jsonCallArg.error.msg, 'cannot perform action')
+            sinon.assert.match(jsonCallArg.error.cause, 'unauthorized access')
+            sinon.assert.notCalled(next)
+            done()
+        })
+    })
+
+    it('should return error when token in body and invalid', (done) => {
+        let config = require('../config')
+        let user = { name: 'test user 1', username: 'some_user_with_username_1' }
+        let token = jwt.sign(user, 'not_the_secret_key')
+        let requestMocked = {
+            body: {token},
+            header: sinon.stub()
+        }
+        let next = sinon.spy()
+
+        auth.auth(requestMocked, responseSpy, next).then(() => {
+            sinon.assert.calledWith(responseSpy.status, 403)
+            let jsonCallArg = responseSpy.json.getCall(0).args[0]
+            if (!jsonCallArg)
+                sinon.assert.fail('json response is null')
+            sinon.assert.match(jsonCallArg.error.msg, 'cannot perform action')
+            sinon.assert.match(jsonCallArg.error.cause, 'unauthorized access')
+            sinon.assert.notCalled(next)
+            done()
+        })
+    })
+
+    it('should return error when no token is provided', (done) => {
+        let config = require('../config')
+        let requestMocked = {body: {}, header: sinon.stub()}
+        let next = sinon.spy()
+
+        auth.auth(requestMocked, responseSpy, next).then(() => {
+            sinon.assert.calledWith(responseSpy.status, 403)
+            let jsonCallArg = responseSpy.json.getCall(0).args[0]
+            if (!jsonCallArg)
+                sinon.assert.fail('json response is null')
+            sinon.assert.match(jsonCallArg.error.msg, 'cannot perform action')
+            sinon.assert.match(jsonCallArg.error.cause, 'unauthorized access')
+            sinon.assert.notCalled(next)
+            done()
+        })
     })
 
 })
