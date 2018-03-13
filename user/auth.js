@@ -1,3 +1,4 @@
+var util = require('util')
 var passwordHash = require('password-hash')
 var jwt = require('jsonwebtoken')
 var config = require('../config')
@@ -55,29 +56,26 @@ function auth(req, res, next) {
     }
     req.token = token
 
-    let successCallback = (user) => {
+    return new Promise((resolve, reject) => {
+        if (token)
+            resolve(token)
+        else
+            reject()
+    })
+    .then(token => util.promisify(jwt.verify)(token, config.secretKey))
+    .then(data => user.findOne({username: data.username}).exec())
+    .then(user => {
         req.user = user
-        next()
-    }
-    let failedCallback = () => {
+    })
+    .then(next)
+    .catch((err) => {
         res.status(403).json({
             error: {
                 msg: 'cannot perform action',
                 cause: 'unauthorized access'
             }
         })
-    }
-
-    if (token)
-        jwt.verify(token, config.secretKey, function(err, data) {
-            if (err)
-                failedCallback()    
-            else
-                user.findOne({username: data.username}).exec()
-                    .then(successCallback, failedCallback)
-        })
-    else
-        failedCallback()
+    })
 }
 
 module.exports = { login, auth }
