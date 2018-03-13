@@ -1,30 +1,57 @@
 var user = require('./user')
 var schemaUtil = require('../util/schemaUtil')
 
-const publicAttr = ['id', 'name', 'username', 'division', 'enabled', 'admin']
+function filterUserByRole(user, userObject) {
+    const publicAttr = ['id', 'name', 'username', 'division', 'enabled', 'admin']
+    
+    if (userObject instanceof Array) {
+        let resultArray = []
+        for (let i = 0; i < userObject.length; i++) {
+            let userFiltered = filterUserByRole(user, userObject[i])
+            if (userFiltered)
+                resultArray.push(userFiltered)
+        }
+        return resultArray
+    }
+    
+    if (typeof userObject === 'object') {
+        if (user.id != userObject.id && !user.admin)
+            try {
+                currDivId = user.division.id
+                userDivId = userObject.division.id
+                return schemaUtil.fillObjectFields(publicAttr,userObject)
+            } catch (e) {
+                return null
+            }
+        return userObject
+    }
+
+    return null
+}
 
 function findAllUsers(req, res, next) {
-    return user.find().then(users => {
+    return user.find().exec().then(users => {
         users = users.map(val => val.toJSON())
-
-        // admin can see them all, division just its division
-        if (!req.user.admin) {
-            let result = []
-            for (let user of users)
-                try {
-                    currDivId = req.user.division.id
-                    userDivId = user.division.id
-                    if (currDivId == userDivId)
-                        result.push(user)
-                } catch (e) {
-                    if (user.id == req.user.id)
-                        result.push(user)
-                }
-            users = result
-        }
-
-        res.json(schemaUtil.fillObjectFields(publicAttr, users))
+        res.json(filterUserByRole(req.user, users))
     })
 }
 
-module.exports = { findAllUsers }
+function findSpecificUser(req, res, next) {
+    return user.findOne({id:req.query.id}).exec()
+    .then(user => {
+        user = filterUserByRole(req.user, user)
+        if (user)
+            res.json(user)
+        else
+            res.status(404).json({
+                msg: 'cannot retrieve specific user',
+                cause: 'user not found'
+            })
+    })
+    .catch(err => res.status(500).json({
+        msg: 'cannot retrieve specific user',
+        cause: 'internal server error'
+    }))
+}
+
+module.exports = { findAllUsers, findSpecificUser }

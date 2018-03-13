@@ -13,7 +13,7 @@ router.post('/check_auth', auth.auth, (req, res, next) => {
 })
 
 router.get('/', auth.auth, entity.findAllUsers)
-router.get('/:id', auth.auth)
+router.get('/:id', auth.auth, entity.findSpecificUser)
 router.post('/', auth.auth, auth.admin)
 router.put('/:id', auth.auth, auth.admin)
 router.delete('/:id', auth.auth, auth.admin)
