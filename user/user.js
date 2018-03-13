@@ -21,10 +21,10 @@ var userSchema = mongoose.Schema({
         required: true,
         default: true
     },
-    roles: [{
-        type: String,
-        enum: ['admin', 'division']
-    }]
+    admin: {
+        type: Boolean,
+        default: false
+    }
 })
 
 module.exports = mongoose.model('user', userSchema)
