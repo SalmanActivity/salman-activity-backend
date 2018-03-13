@@ -73,7 +73,7 @@ function auth(req, res, next) {
             if (err)
                 failedCallback()    
             else
-                user.findOne({username}).exec()
+                user.findOne({username: data.username}).exec()
                     .then(successCallback, failedCallback)
         })
     else
