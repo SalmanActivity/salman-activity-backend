@@ -78,4 +78,22 @@ function auth(req, res, next) {
     })
 }
 
-module.exports = { login, auth }
+function admin(req, res, next) {
+    return new Promise((resolve, reject) => {
+        if (req.user && req.user.admin)
+            resolve()
+        else
+            rejet()
+    })
+    .then(next)
+    .catch(() => {
+        res.status(403).json({
+            error: {
+                msg: 'only admin can perform this action',
+                cause: 'unauthorized access'
+            }
+        })
+    })
+}
+
+module.exports = { login, auth, admin }
