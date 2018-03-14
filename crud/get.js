@@ -1,6 +1,6 @@
 var bluebird = require('bluebird')
 var async = require('async')
-var debug = require('debug')('crud-debug')
+var error = require('./error')
 
 function getFetchConvertFilter(fetchFunction, convertFunction, filterFunction, filterField) {
     return (req, res, next) => {
@@ -32,18 +32,7 @@ function getFetchConvertFilter(fetchFunction, convertFunction, filterFunction, f
             // display result
             res.status(200).json(valArr)
         })
-        .catch(err => {
-            debug(err)
-            if (!err.status)
-                err = {status: 500, cause: 'internal server error'}
-            
-            res.status(err.status).json({
-                error: {
-                    msg: 'cannot fetch objects',
-                    cause: err.cause
-                }
-            })
-        })
+        .catch(error.displayError(res, 'cannot fetch specific object'))
     }
 }
 
@@ -72,18 +61,7 @@ function getOneFetchConvertFilter(fetchFunction, convertFunction, filterFunction
             // display result
             res.status(200).json(result)
         })
-        .catch(err => {
-            debug(err)
-            if (!err.status)
-                err = {status: 500, cause: 'internal server error'}
-            
-            res.status(err.status).json({
-                error: {
-                    msg: 'cannot fetch specific object',
-                    cause: err.cause
-                }
-            })
-        })
+        .catch(error.displayError(res, 'cannot fetch specific object'))
     }
 }
 
