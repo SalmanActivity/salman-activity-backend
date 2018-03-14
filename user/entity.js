@@ -71,17 +71,17 @@ function findSpecificUser(req, res, next) {
 }
 
 function deleteSpecificUser(req, res, next) {
-    return userObjectId(req.params.userId)
+    return getUserObjectId(req.params.userId)
     .then(_id => user.findOne({_id}).exec())
     .then(user => {
-        if (use) {
+        if (user) {
             user.enabled = false
             return user.save()
         } else
-            Promise.reject('USER_NOT_FOUND')
+            return Promise.reject('USER_NOT_FOUND')
     })
-    .then(() => {
-        res.status(202).end()
+    .then(user => {
+        res.status(202).json(user)
     })
     .catch(err => {
         if (err === 'USER_NOT_FOUND')
