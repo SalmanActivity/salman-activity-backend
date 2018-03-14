@@ -10,6 +10,7 @@ let division1 = new divisionModel({
 let user1 = new userModel({
     name: 'Test User 1',
     username: 'test_user_1',
+    email: 'test_user_1@test.com',
     password: passwordHash.generate('test_user_1_pass'),
     division: division1,
     enabled: true,
@@ -19,6 +20,7 @@ let user1 = new userModel({
 let admin1 = new userModel({
     name: 'Test Admin 1',
     username: 'test_admin_1',
+    email: 'test_admin_1@test.com',
     password: passwordHash.generate('test_admin_1_pass'),
     division: null,
     enabled: true,
