@@ -15,7 +15,7 @@ router.post('/check_auth', auth.auth, (req, res, next) => {
 router.get('/', auth.auth, entity.findAllUsers)
 router.get('/:userId', auth.auth, entity.findSpecificUser)
 router.post('/', auth.auth, auth.admin, entity.createNewUser)
-router.put('/:id', auth.auth, auth.admin)
+router.put('/:userId', auth.auth, auth.admin, entity.updateUser)
 router.delete('/:userId', auth.auth, auth.admin, entity.deleteSpecificUser)
 
 module.exports = router;
