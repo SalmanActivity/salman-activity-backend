@@ -1,4 +1,6 @@
 var bluebird = require('bluebird')
+var joi = require('joi')
+var passwordHash = require('password-hash')
 var user = bluebird.promisifyAll(require('./user'))
 var division = bluebird.promisifyAll(require('../division/division'))
 var ObjectId = require('mongoose').Types.ObjectId
@@ -101,9 +103,23 @@ function deleteSpecificUser(req, res, next) {
 
 function createNewUser(req, res, next) {
     return new Promise((resolve, reject) => {
+        let schema = joi.object().keys({
+            name: joi.string().min(3).max(255).required(),
+            username: joi.string().min(3).max(64).required(),
+            email: joi.string().email().min(3).max(255).required(),
+            password: joi.string().min(3).max(100).required(),
+            division: joi.string().alphanum().length(24),
+            enabled: joi.boolean(),
+            admin: joi.boolean()
+        })
+        let validationResult = schema.validate(req.body)
+        if (validationResult.error)
+            return reject({status:500, cause: validationResult.error.details[0].message })
+
         let obj = schemaUtil.fillObjectFields(['name','username','email','password','division','admin'], req.body)
         if (!obj.username || !obj.email)
-            reject({status: 500, cause: 'undefined username and email'})
+            reject({status: 500, cause: 'undefined username or email'})
+        obj.password = passwordHash.generate(obj.password)
         
         if (obj.division)
             division.findOneAsync({_id:obj.division}).then(div => {
