@@ -1,5 +1,5 @@
 var mongoose = require('mongoose')
-var debug = require('debug')('seed')
+var debug = require('debug')('salman-activity-backend:server')
 var config = require('../config')
 var documents = require('../seed')
 
@@ -41,10 +41,7 @@ mongoose.connect(config.mongoConnection).then(resp => {
 })
 .then(() => {
   debug('success seeding database')
-  mongoose.disconnect()
-  process.exit()
 })
 .catch(error => {
   debug('error occured', error)
-  process.exit()
 })

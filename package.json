@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "node ./scripts/web.js",
     "seed-dev": "DEBUG=seed node ./scripts/seed_db.js",
-    "dev": "DEBUG=salman-activity-backend:server ENV=dev nodemon ./bin/www",
+    "dev": "DEBUG=salman-activity-backend:server ENV=dev nodemon ./scripts/devServer.js",
     "test": "mocha ./**/*.spec.js"
   },
   "engineStrict": true,
@@ -13,6 +13,7 @@
     "node": ">= 6.0.0"
   },
   "dependencies": {
+    "async": "^2.6.0",
     "bluebird": "^3.5.1",
     "body-parser": "~1.13.2",
     "cookie-parser": "~1.3.5",
