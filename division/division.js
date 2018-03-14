@@ -11,5 +11,6 @@ var divisionSchema = mongoose.Schema({
         default: true
     },
 })
+divisionSchema.plugin(require('meanie-mongoose-to-json'))
 
 module.exports = mongoose.model('division', divisionSchema)
