@@ -1,4 +1,6 @@
-var user = require('./user')
+var bluebird = require('bluebird')
+var user = bluebird.promisifyAll(require('./user'))
+var division = bluebird.promisifyAll(require('../division/division'))
 var ObjectId = require('mongoose').Types.ObjectId
 var schemaUtil = require('../util/schemaUtil')
 
@@ -97,4 +99,59 @@ function deleteSpecificUser(req, res, next) {
     })
 }
 
-module.exports = { findAllUsers, findSpecificUser, deleteSpecificUser }
+function createNewUser(req, res, next) {
+    return new Promise((resolve, reject) => {
+        let obj = schemaUtil.fillObjectFields(['name','username','email','password','division','admin'], req.body)
+        if (!obj.username || !obj.email)
+            reject({status: 500, cause: 'undefined username and email'})
+        
+        if (obj.division)
+            division.findOneAsync({_id:obj.division}).then(div => {
+                if (div) {
+                    obj.division = div
+                    resolve(obj)
+                } else
+                    reject(({status: 404, cause: 'division not found'}))
+            })
+        else
+            resolve(obj)
+    })
+    .then(val => {
+        return bluebird.promisify(async.parallel)([
+            cb => cb.bind(this, null, val),
+            cb => division.findOne({username:val.username}, cb),
+            cb => division.findOne({email:val.email}, cb)
+        ])
+    })
+    .then(res => {
+        let cause = []
+        if (res[1])
+            cause.push('username already taken')
+        if (res[2])
+            cause.push('email already taken')
+        
+        if (cause.length > 0)
+            return Promise.reject({status:500, cause})
+        return Promise.resolve(res[0])
+    })
+    .then(val => user.insertAsync(new userSchema(val)))
+    .then(val => {
+        if (val)
+            return res.status(201).json(val.toJSON())
+        else
+            return Promise.reject({status:500, cause:'internal server error'})
+    })
+    .catch(err => {
+        console.log(err)
+        if (!err.status)
+            err = {status: 500, cause: 'internal server error'}
+        res.status(err.status).json({
+            error: {
+                msg: 'cannot insert new user',
+                cause: err.cause
+            }
+        })
+    })
+}
+
+module.exports = { findAllUsers, findSpecificUser, deleteSpecificUser, createNewUser }
