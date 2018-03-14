@@ -2,78 +2,50 @@ var bluebird = require('bluebird')
 var joi = require('joi')
 var passwordHash = require('password-hash')
 var async = require('async')
+var crudUtil = require('../crud/index')
 var user = bluebird.promisifyAll(require('./user'))
 var division = bluebird.promisifyAll(require('../division/division'))
 var ObjectId = require('mongoose').Types.ObjectId
 var schemaUtil = require('../util/schemaUtil')
 
-function filterUserByRole(user, userObject) {
-    const publicAttr = ['id', 'name', 'username', 'division', 'enabled', 'admin']
-
-    if (userObject instanceof Array) {
-        let resultArray = []
-        for (let i = 0; i < userObject.length; i++) {
-            let userFiltered = filterUserByRole(user, userObject[i])
-            if (userFiltered)
-                resultArray.push(userFiltered)
-        }
-        return resultArray
-    }
-    
-    if (userObject && typeof userObject === 'object') {
-        if (userObject.toJSON)
-            userObject = userObject.toJSON()
-        if (user.id != userObject.id && !user.admin)
-            try {
-                currDivId = user.division.id
-                userDivId = userObject.division.id
-                if (currDivId == userDivId)
-                    return schemaUtil.fillObjectFields(publicAttr, userObject)
+function filterUserByRole(req, user, callback) {
+    let curUser = req.user
+    if (curUser.id != user.id && !curUser.admin)
+        try {
+            currDivId = curUser.division.id
+            userDivId = user.division.id
+            if (currDivId == userDivId)
+                callback(null, user)
+            else
                 throw 'different division'
-            } catch (e) {
-                return null
-            }
-        return schemaUtil.fillObjectFields(publicAttr, userObject)
-    }
-
-    return null
-}
-
-function findAllUsers(req, res, next) {
-    return user.find().exec().then(users => {
-        users = users.map(val => val.toJSON())
-        res.json(filterUserByRole(req.user, users))
-    })
+        } catch (e) {
+            callback(null, null)
+        }
+    else
+        callback(null, user)
 }
 
 function getUserObjectId(userId) {
-    return new Promise((resolve, reject) => {
-        try {
-            resolve(new ObjectId(userId))
-        } catch(e) {
-            resolve(new ObjectId('000000000000000000000000'))
-        }
-    })
+    try {
+        return new ObjectId(userId)
+    } catch(e) {
+        return new ObjectId('000000000000000000000000')
+    }
 }
 
-function findSpecificUser(req, res, next) {
-    return userObjectId(req.params.userId)
-    .then(_id => user.findOne({_id}).exec())
-    .then(user => {
-        user = filterUserByRole(req.user, user)
-        if (user)
-            res.json(user)
-        else
-            res.status(404).json({
-                msg: 'cannot retrieve specific user',
-                cause: 'user not found'
-            })
-    })
-    .catch(err => res.status(500).json({
-        msg: 'cannot retrieve specific user',
-        cause: 'internal server error'
-    }))
-}
+let findAllUsers = crudUtil.getFetchConvertFilter(
+    (req, callback) => user.find({}, callback),
+    (req, obj, callback) => callback(null, obj.toJSON()),
+    filterUserByRole,
+    crudUtil.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
+)
+
+let findSpecificUser = crudUtil.getOneFetchConvertFilter(
+    (req, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
+    (req, obj, callback) => callback(null, obj.toJSON()),
+    filterUserByRole,
+    crudUtil.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
+)
 
 function deleteSpecificUser(req, res, next) {
     return getUserObjectId(req.params.userId)
