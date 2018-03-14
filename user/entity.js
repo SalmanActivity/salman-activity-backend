@@ -47,32 +47,13 @@ let findSpecificUser = crudUtil.getOneFetchConvertFilter(
     crudUtil.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
 )
 
-function deleteSpecificUser(req, res, next) {
-    return getUserObjectId(req.params.userId)
-    .then(_id => user.findOne({_id}).exec())
-    .then(user => {
-        if (user) {
-            user.enabled = false
-            return user.save()
-        } else
-            return Promise.reject('USER_NOT_FOUND')
-    })
-    .then(user => {
-        res.status(202).json(user)
-    })
-    .catch(err => {
-        if (err === 'USER_NOT_FOUND')
-            res.status(404).json({
-                msg: 'cannot delete specific user',
-                cause: 'user not found'
-            })
-        else
-            res.status(500).json({
-                msg: 'cannot delete specific user',
-                cause: 'internal server error'
-            })
-    })
-}
+let deleteSpecificUser = crudUtil.deleteFindDelete(
+    (req, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
+    (req, user, callback) => {
+        user.enabled = false
+        user.save(callback)
+    }
+)
 
 function createNewUser(req, res, next) {
     return new Promise((resolve, reject) => {
