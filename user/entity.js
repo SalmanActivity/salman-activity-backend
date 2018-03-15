@@ -8,8 +8,8 @@ var division = bluebird.promisifyAll(require('../division/division'))
 var ObjectId = require('mongoose').Types.ObjectId
 var schemaUtil = require('../util/schemaUtil')
 
-function filterUserByRole(req, user, callback) {
-    let curUser = req.user
+function filterUserByRole(user, context, callback) {
+    let curUser = context.user
     if (curUser.id != user.id && !curUser.admin)
         try {
             currDivId = curUser.division.id
@@ -33,19 +33,27 @@ function getUserObjectId(userId) {
     }
 }
 
-let findAllUsers = crudUtil.getFetchConvertFilter(
-    (req, callback) => user.find({}, callback),
-    (req, obj, callback) => callback(null, obj.toJSON()),
-    filterUserByRole,
-    crudUtil.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
-)
+let findAllUsers = crudUtil.readMany({
+    init: (req, context, callback) => {
+        context.user = req.user
+        callback(null, null)
+    },
+    fetchMany: (req, context, callback) => user.find({}, callback),
+    convertOne: (obj, context, callback) => callback(null, obj.toJSON()),
+    filterOne: filterUserByRole,
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
+})
 
-let findSpecificUser = crudUtil.getOneFetchConvertFilter(
-    (req, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
-    (req, obj, callback) => callback(null, obj.toJSON()),
-    filterUserByRole,
-    crudUtil.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
-)
+let findOneUser = crudUtil.readOne({
+    init: (req, context, callback) => {
+        context.user = req.user
+        callback(null, null)
+    },
+    fetchOne: (req, context, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
+    convertOne: (obj, context, callback) => callback(null, obj.toJSON()),
+    filterOne: filterUserByRole,
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
+})
 
 let deleteSpecificUser = crudUtil.deleteFindDelete(
     (req, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
@@ -172,4 +180,4 @@ function updateUser(req, res, next) {
     })
 }
 
-module.exports = { findAllUsers, findSpecificUser, deleteSpecificUser, createNewUser, updateUser }
+module.exports = { findAllUsers, findOneUser, deleteSpecificUser, createNewUser, updateUser }
