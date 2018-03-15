@@ -55,71 +55,58 @@ let deleteSpecificUser = crudUtil.deleteFindDelete(
     }
 )
 
-function createNewUser(req, res, next) {
-    return new Promise((resolve, reject) => {
+joi = joi.extend({
+    name: 'string',
+    base: joi.string(),
+    rules:[
+        {
+            name: 'passwordHash',
+            validate: (param, value, state, option) => value ? passwordHash.generate(value) : value
+        }
+    ]
+})
+
+let createNewUser = crudUtil.postValidateFindInsertConvert(
+    (req, context, callback) => {
         let schema = joi.object().keys({
             name: joi.string().min(3).max(255).required(),
             username: joi.string().min(3).max(64).required(),
             email: joi.string().email().min(3).max(255).required(),
-            password: joi.string().min(3).max(100).required(),
+            password: joi.string().min(3).max(100).passwordHash().required(),
             division: joi.string().alphanum().length(24),
             enabled: joi.boolean(),
             admin: joi.boolean()
         })
         let validationResult = schema.validate(req.body)
         if (validationResult.error)
-            return reject({status:500, cause: validationResult.error.details[0].message })
-
-        let obj = schemaUtil.fillObjectFields(['name','username','email','password','division','admin'], req.body)
-        if (!obj.username || !obj.email)
-            reject({status: 500, cause: 'undefined username or email'})
-        obj.password = passwordHash.generate(obj.password)
+            return callback(validationResult.error.details[0].message, null)
         
-        if (obj.division)
-            division.findOneAsync({_id:obj.division}).then(div => {
-                if (div) {
-                    obj.division = div
-                    resolve(obj)
-                } else
-                    reject(({status: 404, cause: 'division not found'}))
-            })
-        else
-            resolve(obj)
-    })
-    .then(val => {
-        return bluebird.promisify(async.parallel)([
-            cb => cb(null, val),
-            cb => division.findOne({username:val.username}, cb),
-            cb => division.findOne({email:val.email}, cb)
-        ])
-    })
-    .then(res => {
-        if (res[1])
-            return Promise.reject({status:500, cause:'username already taken'})
-        else if (res[2])
-            return Promise.reject({status:500, cause:'email already taken'})
-        else
-            return Promise.resolve(res[0])
-    })
-    .then(val => user.insertAsync(new userSchema(val)))
-    .then(val => {
-        if (val)
-            return res.status(201).json(val.toJSON())
-        else
-            return Promise.reject({status:500, cause:'internal server error'})
-    })
-    .catch(err => {
-        console.log(err)
-        if (!err.status)
-            err = {status: 500, cause: 'internal server error'}
-        res.status(err.status).json({
-            error: {
-                msg: 'cannot insert new user',
-                cause: err.cause
-            }
+        let validatedValue = validationResult.value
+        async.parallel([
+            callback => validatedValue.division ? division.findOne({_id:validatedValue.division}, callback) : callback(),
+            callback => user.findOne({username:validatedValue.username}, callback),
+            callback => user.findOne({email:validatedValue.email}, callback)
+        ], (err, res) => {
+            if (err)
+                return callback(err, null)
+            
+            if (validatedValue.division && !res[0])
+                return callback('division not found', null)
+            else if (validatedValue.division)
+                validatedValue.division = res[0]
+
+            if (res[1])
+                return callback('username already taken', null)
+            else if (res[2])
+                return callback('email already taken', null)
+            
+            callback(null, validatedValue)
         })
-    })
-}
+    },
+    (validatedData, context, callback) => new user(validatedData, callback).save(callback),
+    (insertedData, context, callback) => callback(null, insertedData.toJSON()),
+    (convertedData, context, callback) => callback(null, convertedData)
+)
 
 function updateUser(req, res, next) {
     return user.findOneAsync({_id:req.params.userId})
