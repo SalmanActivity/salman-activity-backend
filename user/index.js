@@ -1,6 +1,6 @@
 var express = require('express')
 var auth = require('./auth')
-var entity = require('./entity')
+var crud = require('./crud')
 
 var router = express.Router();
 
@@ -12,10 +12,10 @@ router.post('/check_auth', auth.auth, (req, res, next) => {
     })
 })
 
-router.get('/', auth.auth, entity.findAllUsers)
-router.get('/:userId', auth.auth, entity.findOneUser)
-router.post('/', auth.auth, auth.admin, entity.createOneUser)
-router.put('/:userId', auth.auth, auth.admin, entity.updateOneUser)
-router.delete('/:userId', auth.auth, auth.admin, entity.deleteOneUser)
+router.get('/', auth.auth, crud.findAllUsers)
+router.get('/:userId', auth.auth, crud.findOneUser)
+router.post('/', auth.auth, auth.admin, crud.createOneUser)
+router.put('/:userId', auth.auth, auth.admin, crud.updateOneUser)
+router.delete('/:userId', auth.auth, auth.admin, crud.deleteOneUser)
 
 module.exports = router;
