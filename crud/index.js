@@ -6,7 +6,8 @@ let crudUtil = require('./util')
 module.exports = {
     fields: getUtil.fields,
     postValidateFindInsertConvert: postUtil.postValidateFindInsertConvert,
-
+    
+    createOne: postUtil.createOne,
     readOne: getUtil.readOne,
     readMany: getUtil.readMany,
     deleteOne: deleteUtil.deleteOne,

@@ -74,14 +74,14 @@ joi = joi.extend({
     ]
 })
 
-let createNewUser = crudUtil.postValidateFindInsertConvert(
-    (req, context, callback) => {
+let createOneUser = crudUtil.createOne({
+    validateOne: (req, context, callback) => {
         let schema = joi.object().keys({
             name: joi.string().min(3).max(255).required(),
             username: joi.string().min(3).max(64).required(),
             email: joi.string().email().min(3).max(255).required(),
             password: joi.string().min(3).max(100).passwordHash().required(),
-            division: joi.string().alphanum().length(24),
+            division: joi.string().hex().length(24),
             enabled: joi.boolean(),
             admin: joi.boolean()
         })
@@ -111,10 +111,10 @@ let createNewUser = crudUtil.postValidateFindInsertConvert(
             callback(null, validatedValue)
         })
     },
-    (validatedData, context, callback) => new user(validatedData, callback).save(callback),
-    (insertedData, context, callback) => callback(null, insertedData.toJSON()),
-    (convertedData, context, callback) => callback(null, convertedData)
-)
+    insertOne: (validatedData, context, callback) => new user(validatedData, callback).save(callback),
+    convertOne: (insertedData, context, callback) => callback(null, insertedData.toJSON()),
+    filterFieldOne: (convertedData, context, callback) => callback(null, convertedData)
+})
 
 function updateUser(req, res, next) {
     return user.findOneAsync({_id:req.params.userId})
@@ -180,4 +180,4 @@ function updateUser(req, res, next) {
     })
 }
 
-module.exports = { findAllUsers, findOneUser, deleteOneUser, createNewUser, updateUser }
+module.exports = { findAllUsers, findOneUser, deleteOneUser, createOneUser, updateUser }
