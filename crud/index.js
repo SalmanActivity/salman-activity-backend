@@ -5,11 +5,11 @@ let crudUtil = require('./util')
 
 module.exports = {
     fields: getUtil.fields,
-    deleteFindDelete: deleteUtil.deleteFindDelete,
     postValidateFindInsertConvert: postUtil.postValidateFindInsertConvert,
 
     readOne: getUtil.readOne,
     readMany: getUtil.readMany,
+    deleteOne: deleteUtil.deleteOne,
     filterOne: {
         fields: crudUtil.simpleFilterFieldOne
     }

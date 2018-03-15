@@ -55,13 +55,13 @@ let findOneUser = crudUtil.readOne({
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
 })
 
-let deleteSpecificUser = crudUtil.deleteFindDelete(
-    (req, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
-    (req, user, callback) => {
+let deleteOneUser = crudUtil.deleteOne({
+    fetchOne: (req, context, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback), 
+    deleteOne: (user, context, callback) => {
         user.enabled = false
         user.save(callback)
     }
-)
+})
 
 joi = joi.extend({
     name: 'string',
@@ -180,4 +180,4 @@ function updateUser(req, res, next) {
     })
 }
 
-module.exports = { findAllUsers, findOneUser, deleteSpecificUser, createNewUser, updateUser }
+module.exports = { findAllUsers, findOneUser, deleteOneUser, createNewUser, updateUser }
