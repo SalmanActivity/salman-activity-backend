@@ -116,68 +116,119 @@ let createOneUser = crudUtil.createOne({
     filterFieldOne: (convertedData, context, callback) => callback(null, convertedData)
 })
 
-function updateUser(req, res, next) {
-    return user.findOneAsync({_id:req.params.userId})
-    .then(user => {
-        if (user) return user
-        return Promise.reject({status: 404, cause: 'user not found'})
-    })
-    .then(user => {
+let updateOneUser = crudUtil.updateOne({
+    init: (req, context, callback) => {
+        context.request = req
+        callback(null, req)
+    },
+    fetchOne: (req, context, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
+    validateOne: (updatingUser, context, callback) => {
+        context.updatingUser = updatingUser
         let schema = joi.object().keys({
             name: joi.string().min(3).max(255),
             username: joi.string().min(3).max(64),
             email: joi.string().email().min(3).max(255),
-            password: joi.string().min(3).max(100),
+            password: joi.string().min(3).max(100).passwordHash(),
+            division: joi.string().hex().length(24),
             enabled: joi.boolean(),
             admin: joi.boolean()
         })
-        let validationResult = schema.validate(req.body)
+        let validationResult = schema.validate(context.request.body)
         if (validationResult.error)
-            return Promise.reject({status:500, cause: validationResult.error.details[0].message})
-        if (validationResult.value.password)
-            validationResult.value.password = passwordHash.generate(validationResult.value.password)
+            return callback(validationResult.error.details[0].message, null)
         
-        return {user, update: validationResult.value}
-    })
-    .then(val => {
-        return bluebird.promisify(async.parallel)([
-            cb => cb(null, val),
-            cb => val.update.username ? division.findOne({username:val.update.username}, cb) : cb(null, null),
-            cb => val.update.email ? division.findOne({email:val.update.email}, cb) : cb(null, null)
-        ])
-    })
-    .then(res => { 
-        if (res[1])
-            return Promise.reject({status:500, cause:'username already taken'})
-        else if (res[2])
-            return Promise.reject({status:500, cause:'email already taken'})
-        else
-            return Promise.resolve(res[0])
-    })
-    .then(val => {
-        let user = val.user
-        for (let key of ['name','username','email','password','enable','admin'])
-            if (val.update[key])
-                user[key] = val.update[key]
-        return user.save()
-    })
-    .then(val => {
-        if (val)
-            return res.status(201).json(val.toJSON())
-        else
-            return Promise.reject({status:500, cause:'internal server error'})
-    })
-    .catch(err => {
-        console.log(err)
-        if (!err.status)
-            err = {status: 500, cause: 'internal server error'}
-        res.status(err.status).json({
-            error: {
-                msg: 'cannot update the specific user',
-                cause: err.cause
-            }
-        })
-    })
-}
+        let validatedValue = validationResult.value
+        async.parallel([
+            callback => validatedValue.division ? division.findOne({_id:validatedValue.division}, callback) : callback(),
+            callback => user.findOne({username:validatedValue.username}, callback),
+            callback => user.findOne({email:validatedValue.email}, callback)
+        ], (err, res) => {
+            if (err)
+                return callback(err, null)
+            
+            if (validatedValue.division && !res[0])
+                return callback('division not found', null)
+            else if (validatedValue.division)
+                validatedValue.division = res[0]
 
-module.exports = { findAllUsers, findOneUser, deleteOneUser, createOneUser, updateUser }
+            if (res[1] && res[1] != updatingUser.username)
+                return callback('username already taken', null)
+            else if (res[2] && res[2] != updatingUser.email)
+                return callback('email already taken', null)
+            
+            callback(null, validatedValue)
+        })
+    },
+    updateOne: (validatedData, context, callback) => {
+        context.updatingUser.set(validatedData)
+        context.updatingUser.save(callback)
+    },
+    convertOne: (updatedData, context, callback) => callback(null, updatedData.toJSON()),
+    filterFieldOne: (convertedData, context, callback) => callback(null, convertedData)
+})
+
+// function updateUser(req, res, next) {
+//     return user.findOneAsync({_id:req.params.userId})
+//     .then(user => {
+//         if (user) return user
+//         return Promise.reject({status: 404, cause: 'user not found'})
+//     })
+//     .then(user => {
+//         let schema = joi.object().keys({
+//             name: joi.string().min(3).max(255),
+//             username: joi.string().min(3).max(64),
+//             email: joi.string().email().min(3).max(255),
+//             password: joi.string().min(3).max(100),
+//             enabled: joi.boolean(),
+//             admin: joi.boolean()
+//         })
+//         let validationResult = schema.validate(req.body)
+//         if (validationResult.error)
+//             return Promise.reject({status:500, cause: validationResult.error.details[0].message})
+//         if (validationResult.value.password)
+//             validationResult.value.password = passwordHash.generate(validationResult.value.password)
+        
+//         return {user, update: validationResult.value}
+//     })
+//     .then(val => {
+//         return bluebird.promisify(async.parallel)([
+//             cb => cb(null, val),
+//             cb => val.update.username ? division.findOne({username:val.update.username}, cb) : cb(null, null),
+//             cb => val.update.email ? division.findOne({email:val.update.email}, cb) : cb(null, null)
+//         ])
+//     })
+//     .then(res => { 
+//         if (res[1])
+//             return Promise.reject({status:500, cause:'username already taken'})
+//         else if (res[2])
+//             return Promise.reject({status:500, cause:'email already taken'})
+//         else
+//             return Promise.resolve(res[0])
+//     })
+//     .then(val => {
+//         let user = val.user
+//         for (let key of ['name','username','email','password','enable','admin'])
+//             if (val.update[key])
+//                 user[key] = val.update[key]
+//         return user.save()
+//     })
+//     .then(val => {
+//         if (val)
+//             return res.status(201).json(val.toJSON())
+//         else
+//             return Promise.reject({status:500, cause:'internal server error'})
+//     })
+//     .catch(err => {
+//         console.log(err)
+//         if (!err.status)
+//             err = {status: 500, cause: 'internal server error'}
+//         res.status(err.status).json({
+//             error: {
+//                 msg: 'cannot update the specific user',
+//                 cause: err.cause
+//             }
+//         })
+//     })
+// }
+
+module.exports = { findAllUsers, findOneUser, deleteOneUser, createOneUser, updateOneUser }
