@@ -120,7 +120,7 @@ let createOneUser = crudUtil.createOne({
     validateOne: (req, context, callback) => validateUserInput(null, req.body, callback),
     insertOne: (validatedData, context, callback) => new user(validatedData, callback).save(callback),
     convertOne: (insertedData, context, callback) => callback(null, insertedData.toJSON()),
-    filterFieldOne: (convertedData, context, callback) => callback(null, convertedData)
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
 })
 
 let updateOneUser = crudUtil.updateOne({
@@ -143,7 +143,7 @@ let updateOneUser = crudUtil.updateOne({
         context.updatingUser.save(callback)
     },
     convertOne: (updatedData, context, callback) => callback(null, updatedData.toJSON()),
-    filterFieldOne: (convertedData, context, callback) => callback(null, convertedData)
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
 })
 
 module.exports = { findAllUsers, findOneUser, deleteOneUser, createOneUser, updateOneUser }
