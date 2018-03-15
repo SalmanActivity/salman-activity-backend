@@ -36,7 +36,7 @@ function getUserObjectId(userId) {
 let findAllUsers = crudUtil.readMany({
     init: (req, context, callback) => {
         context.user = req.user
-        callback(null, null)
+        callback(null, req)
     },
     fetchMany: (req, context, callback) => user.find({}, callback),
     convertOne: (obj, context, callback) => callback(null, obj.toJSON()),
@@ -47,7 +47,7 @@ let findAllUsers = crudUtil.readMany({
 let findOneUser = crudUtil.readOne({
     init: (req, context, callback) => {
         context.user = req.user
-        callback(null, null)
+        callback(null, req)
     },
     fetchOne: (req, context, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
     convertOne: (obj, context, callback) => callback(null, obj.toJSON()),

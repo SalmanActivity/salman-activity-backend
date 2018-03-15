@@ -14,11 +14,12 @@ function readMany(option) {
         option.filterFieldMany = crudUtil.oneToManyFunction(option.filterFieldOne)
 
     if (!option.init)
-        option.init = (req, context, callback) => callback(null,null)
+        option.init = (req, context, callback) => callback(null,req)
     
     return (req, res, next) => {
         let context = {}
-        return bluebird.promisify(option.fetchMany)(req, context)
+        return bluebird.promisify(option.init)(req, context)
+        .then(valInit => bluebird.promisify(option.fetchMany)(valInit, context))
         .then(valArr => bluebird.promisify(option.convertMany)(valArr, context))
         .then(valArr => bluebird.promisify(option.filterFieldMany)(valArr, context))
         .then(valArr => res.status(200).json(valArr))
@@ -37,12 +38,12 @@ function readOne(option) {
         option.filterFieldOne = crudUtil.manyToOneFunction(option.filterFieldMany)
     
     if (!option.init)
-        option.init = (req, context, callback) => callback(null,null)
+        option.init = (req, context, callback) => callback(null,req)
 
     return (req, res, next) => {
         let context = {}
         return bluebird.promisify(option.init)(req, context)
-        .then(res => bluebird.promisify(option.fetchOne)(req, context))
+        .then(valInit => bluebird.promisify(option.fetchOne)(valInit, context))
         .then(result => {
             if (result)
                 return bluebird.promisify(option.convertOne)(result, context)
