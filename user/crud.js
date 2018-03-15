@@ -3,10 +3,9 @@ var joi = require('joi')
 var passwordHash = require('password-hash')
 var async = require('async')
 var crudUtil = require('../crud/index')
-var user = bluebird.promisifyAll(require('./user'))
-var division = bluebird.promisifyAll(require('../division/division'))
+var user = require('./user')
+var division = require('../division/division')
 var ObjectId = require('mongoose').Types.ObjectId
-var schemaUtil = require('../util/schemaUtil')
 
 function filterUserByRole(user, context, callback) {
     let curUser = context.user
