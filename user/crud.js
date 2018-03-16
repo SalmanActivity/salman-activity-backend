@@ -54,6 +54,13 @@ let findOneUser = crudUtil.readOne({
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
 })
 
+let findCurrentUser = crudUtil.readOne({
+    fetchOne: (req, context, callback) => callback(null, req.user),
+    convertOne: (obj, context, callback) => callback(null, obj),
+    filterOne: (obj, context, callback) => callback(null, obj),
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
+})
+
 let deleteOneUser = crudUtil.deleteOne({
     fetchOne: (req, context, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback), 
     deleteOne: (user, context, callback) => {
@@ -145,4 +152,4 @@ let updateOneUser = crudUtil.updateOne({
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
 })
 
-module.exports = { findAllUsers, findOneUser, deleteOneUser, createOneUser, updateOneUser }
+module.exports = { findAllUsers, findOneUser, findCurrentUser, deleteOneUser, createOneUser, updateOneUser }
