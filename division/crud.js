@@ -15,14 +15,14 @@ function getObjectId(userId) {
 
 let findAllDivisions = crudUtil.readMany({
     fetchMany: (req, context, callback) => division.find({}, callback),
-    convertOne: (obj, context, callback) => callback(null, obj.toJSON()),
+    convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj),
     filterOne: (obj, context, callback) => callback(null, obj),
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
 
 let findOneDivision = crudUtil.readOne({
     fetchOne: (req, context, callback) => division.findOne({_id:getObjectId(req.params.divisionId)}, callback),
-    convertOne: (obj, context, callback) => callback(null, obj.toJSON()),
+    convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj),
     filterOne: (obj, context, callback) => callback(null, obj),
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
@@ -50,7 +50,7 @@ let validate = (updating, userInput, callback) => {
 let createOneDivision = crudUtil.createOne({
     validateOne: (req, context, callback) => validate(null, req.body, callback),
     insertOne: (validatedData, context, callback) => new division(validatedData, callback).save(callback),
-    convertOne: (insertedData, context, callback) => callback(null, insertedData.toJSON()),
+    convertOne: (insertedData, context, callback) => callback(null, insertedData.toJSON ? insertedData.toJSON() : insertedData),
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
 
@@ -73,7 +73,7 @@ let updateOneDivision = crudUtil.updateOne({
         context.updating.set(validatedData)
         context.updating.save(callback)
     },
-    convertOne: (updatedData, context, callback) => callback(null, updatedData.toJSON()),
+    convertOne: (updatedData, context, callback) => callback(null, updatedData.toJSON ? updatedData.toJSON() : updatedData),
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
 
