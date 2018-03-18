@@ -144,4 +144,49 @@ describe('division crud endpoint test', () => {
 
   })
 
+  describe('DELETE specific division endpoint', () => {
+
+    it('should change division enabled to false', (done) => {
+      done()
+    })
+    it('should keep deleted division enabled to false', (done) => {
+      done()
+    })
+    it('should return 404 error status when division not found', (done) => {
+      done()
+    })
+
+  })
+
+  describe('POST specific division endpoint', () => {
+
+    it('should add new division', (done) => {
+      done()
+    })
+    it('should return 400 and send validation error when name is invalid', (done) => {
+      done()
+    })
+    it('should return 400 and send validation error when name is missing', (done) => {
+      done()
+    })
+
+  })
+
+  describe('PUT specific division endpoint', () => {
+
+    it('should change new division name', (done) => {
+      done()
+    })
+    it('should return 404 when division id not found', (done) => {
+      done()
+    })
+    it('should return 400 and send validation error when name is invalid', (done) => {
+      done()
+    })
+    it('should return 400 and send validation error when name is missing', (done) => {
+      done()
+    })
+
+  })
+
 })
