@@ -38,7 +38,7 @@ let findAllUsers = crudUtil.readMany({
         callback(null, req)
     },
     fetchMany: (req, context, callback) => user.find({}, callback),
-    convertOne: (obj, context, callback) => callback(null, obj.toJSON()),
+    convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj),
     filterOne: filterUserByRole,
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
 })
@@ -49,7 +49,7 @@ let findOneUser = crudUtil.readOne({
         callback(null, req)
     },
     fetchOne: (req, context, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
-    convertOne: (obj, context, callback) => callback(null, obj.toJSON()),
+    convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj),
     filterOne: filterUserByRole,
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
 })
@@ -125,7 +125,7 @@ let validateUserInput = (updatingUser, userInput, callback) => {
 let createOneUser = crudUtil.createOne({
     validateOne: (req, context, callback) => validateUserInput(null, req.body, callback),
     insertOne: (validatedData, context, callback) => new user(validatedData, callback).save(callback),
-    convertOne: (insertedData, context, callback) => callback(null, insertedData.toJSON()),
+    convertOne: (insertedData, context, callback) => callback(null, insertedData.toJSON ? insertedData.toJSON() : insertedData),
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
 })
 
@@ -148,7 +148,7 @@ let updateOneUser = crudUtil.updateOne({
         context.updatingUser.set(validatedData)
         context.updatingUser.save(callback)
     },
-    convertOne: (updatedData, context, callback) => callback(null, updatedData.toJSON()),
+    convertOne: (updatedData, context, callback) => callback(null, updatedData.toJSON ? updatedData.toJSON() : updatedData),
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
 })
 
