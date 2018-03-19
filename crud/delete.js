@@ -9,7 +9,7 @@ function deleteOne(option) {
 
         if (!option.deleteOne && option.deleteMany)
             option.deleteMany = crudUtil.manyToOneFunction(option.deleteMany)
-        
+
         let context = {}
         let fetchedObject = {}
 
@@ -23,7 +23,9 @@ function deleteOne(option) {
             return Promise.reject({status:404, cause: 'object not found'})
         })
         .then(object => bluebird.promisify(option.deleteOne)(object, context))
-        .then(object => res.status(202).json(fetchedObject))
+        .then(object => option.filterFieldOne ?
+            bluebird.promisify(option.filterFieldOne)(fetchedObject, context) : fetchedObject)
+        .then(object => res.status(202).json(object))
         .catch(error.displayError(res, 'cannot delete object'))
     }
 }

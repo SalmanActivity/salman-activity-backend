@@ -32,7 +32,8 @@ let deleteOneDivision = crudUtil.deleteOne({
     deleteOne: (division, context, callback) => {
         division.enabled = false
         division.save(callback)
-    }
+    },
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
 
 let validate = (updating, userInput, callback) => {
