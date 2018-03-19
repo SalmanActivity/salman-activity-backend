@@ -32,7 +32,8 @@ let deleteOneLocation = crudUtil.deleteOne({
     deleteOne: (location, context, callback) => {
         location.enabled = false
         location.save(callback)
-    }
+    },
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
 
 let validate = (updating, userInput, callback) => {
