@@ -5,8 +5,13 @@ var division = require('./division')
 
 describe('division crud endpoint test', () => {
 
-  let documents = []
-  before(() => {
+  let documents = [], findStub, findOneStub, req = {}, res, next
+  beforeEach(() => {
+    next = sinon.stub()
+    res = {status:sinon.stub(), json:sinon.stub(), header:sinon.stub()}
+    res.status.returnsThis()
+    res.json.returnsThis()
+
     documents = [
       {'id':'5aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true},
       {'id':'5aa9359a2b21732a73d5406b', 'name': 'div 2', 'enabled': false},
@@ -19,33 +24,27 @@ describe('division crud endpoint test', () => {
       }
     ]
 
-    sinon.stub(division, 'find').callsFake((filter, callback) => {callback(null, documents)})
-    sinon.stub(division, 'findOne').callsFake((filter, callback) => {
+    findStub = sinon.stub(division, 'find').callsFake((filter, callback) => {callback(null, documents)})
+    findOneStub = sinon.stub(division, 'findOne').callsFake((filter, callback) => {
       for (doc of documents)
         if (doc.id == filter._id)
           return callback(null, doc)
       return callback(null, null)
     })
+    for (doc of documents)
+      doc.save = sinon.stub().callsFake(callback => callback(null, doc))
+  })
 
+  afterEach(() => {
+    res.status.reset()
+    res.json.reset()
+    res.header.reset()
+    next.reset()
+    findStub.restore()
+    findOneStub.restore()
   })
 
   describe('GET all division endpoint', () => {
-    var req, res, next;
-    beforeEach(() => {
-      [req, next]  = [sinon.stub(), sinon.stub()]
-      res = {status:sinon.stub(), json:sinon.stub(), header:sinon.stub()}
-      res.status.returnsThis()
-      res.json.returnsThis()
-    })
-
-    afterEach(function() {
-      res.status.reset()
-      res.json.reset()
-      res.header.reset()
-      req.reset()
-      next.reset()
-    })
-
     it('should return all division including deleted one', (done) => {
       crud.findAllDivisions(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200)
@@ -85,21 +84,6 @@ describe('division crud endpoint test', () => {
   })
 
   describe('GET specific division endpoint', () => {
-    var req = {}, res, next;
-    beforeEach(() => {
-      next = sinon.stub()
-      res = {status:sinon.stub(), json:sinon.stub(), header:sinon.stub()}
-      res.status.returnsThis()
-      res.json.returnsThis()
-    })
-
-    afterEach(function() {
-      res.status.reset()
-      res.json.reset()
-      res.header.reset()
-      next.reset()
-    })
-
     it('should return specific division', (done) => {
       let req = {params: {divisionId: '5aa9359a2b21732a73d5406a'}}
       crud.findOneDivision(req, res, next).then(() => {
@@ -140,16 +124,29 @@ describe('division crud endpoint test', () => {
 
   describe('DELETE specific division endpoint', () => {
 
-
-
     it('should change division enabled to false', (done) => {
-      done()
+      let req = {params: {divisionId: '5aa9359a2b21732a73d5406a'}}
+      crud.deleteOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 202)
+        sinon.assert.calledWith(res.json, {'id':'5aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': false})
+        done()
+      }).catch(err => done(err))
     })
     it('should keep deleted division enabled to false', (done) => {
-      done()
+      let req = {params: {divisionId: '5aa9359a2b21732a73d5406b'}}
+      crud.deleteOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 202)
+        sinon.assert.calledWith(res.json, {'id':'5aa9359a2b21732a73d5406b', 'name': 'div 2', 'enabled': false})
+        done()
+      }).catch(err => done(err))
     })
     it('should return 404 error status when division not found', (done) => {
-      done()
+      let req = {params: {divisionId: '5aa9359a2b21732a73d5406f'}}
+      crud.deleteOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
     })
 
   })
