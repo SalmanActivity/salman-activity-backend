@@ -32,8 +32,13 @@ describe('division crud endpoint test', () => {
           return callback(null, doc)
       return callback(null, null)
     })
-    for (doc of documents)
+    for (doc of documents) {
       doc.save = sinon.stub().callsFake(callback => callback(null, doc))
+      doc.set = sinon.stub().callsFake(data => {
+        if (data.name) doc.name = data.name
+        if (data.enabled) doc.enabled = data.enabled
+      })
+    }
   })
 
   afterEach(() => {
@@ -201,16 +206,56 @@ describe('division crud endpoint test', () => {
   describe('PUT specific division endpoint', () => {
 
     it('should change new division name', (done) => {
-      done()
+      let req = {
+        params: {divisionId: '5aa9359a2b21732a73d5406a'},
+        body: {name: 'update division name'}
+      }
+      crud.updateOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        sinon.assert.calledWith(res.json, {'id':'5aa9359a2b21732a73d5406a', 'name': 'update division name', 'enabled': true})
+        done()
+      }).catch(err => done(err))
     })
     it('should return 404 when division id not found', (done) => {
-      done()
+      let req = {params: {divisionId: '5aa9359a2b21732a73d5406f'}}
+      crud.updateOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
     })
-    it('should return 400 and send validation error when name is invalid', (done) => {
-      done()
+    it('should return 400 and send validation error when name too short', (done) => {
+      let req = {
+        params: {divisionId: '5aa9359a2b21732a73d5406a'},
+        body: {name: 'x'}
+      }
+      crud.updateOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    })
+    it('should return 400 and send validation error when name too long', (done) => {
+      let req = {
+        params: {divisionId: '5aa9359a2b21732a73d5406a'},
+        body: {name: new Array(256+1).join('x')}
+      }
+      crud.updateOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
     })
     it('should return 400 and send validation error when name is missing', (done) => {
-      done()
+      let req = {
+        params: {divisionId: '5aa9359a2b21732a73d5406a'},
+        body: {}
+      }
+      crud.updateOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
     })
 
   })
