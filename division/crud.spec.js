@@ -2,6 +2,7 @@ var sinon = require('sinon')
 var assert = require('chai').assert
 var crud = require('./crud')
 var division = require('./division')
+var ObjectId = require('mongoose').Types.ObjectId
 
 describe('division crud endpoint test', () => {
 
@@ -154,13 +155,45 @@ describe('division crud endpoint test', () => {
   describe('POST specific division endpoint', () => {
 
     it('should add new division', (done) => {
-      done()
+      let req = {body: {name: 'new division'}}
+      let saveStub = sinon.stub(division.prototype, 'save').callsFake(cb => {
+        documents.push({
+          id: new ObjectId(),
+          name: 'new division',
+          enabled: true
+        })
+        cb(null, documents[documents.length-1])
+      })
+      crud.createOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let response = res.json.getCall(0).args[0]
+        sinon.assert.match(response.name, 'new division')
+        done()
+      }).catch(err => done(err))
     })
-    it('should return 400 and send validation error when name is invalid', (done) => {
-      done()
+    it('should return 400 and send validation error when name is too short', (done) => {
+      let req = {body: {name: 'ab'}}
+      crud.createOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    })
+    it('should return 400 and send validation error when name is too short', (done) => {
+      let req = {body: {name: new Array(256+1).join('x')}}
+      crud.createOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
     })
     it('should return 400 and send validation error when name is missing', (done) => {
-      done()
+      let req = {body: {}}
+      crud.createOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
     })
 
   })
