@@ -68,7 +68,7 @@ function auth(req, res, next) {
         req.user = user.toJSON ? user.toJSON() : user
         return req.user
     })
-    .then(next)
+    .then(() => next())
     .catch((err) => {
         res.status(403).json({
             error: {
@@ -86,7 +86,7 @@ function admin(req, res, next) {
         else
             rejet()
     })
-    .then(next)
+    .then(() => next())
     .catch(() => {
         res.status(403).json({
             error: {
