@@ -184,7 +184,7 @@ describe('division crud endpoint test', () => {
         done()
       }).catch(err => done(err))
     })
-    it('should return 400 and send validation error when name is too short', (done) => {
+    it('should return 400 and send validation error when name is too long', (done) => {
       let req = {body: {name: new Array(256+1).join('x')}}
       crud.createOneDivision(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 400)
