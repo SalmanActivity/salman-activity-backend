@@ -58,7 +58,9 @@ describe('user crud endpoint test', () => {
     findStub = sinon.stub(user, 'find').callsFake((filter, callback) => {callback(null, documents)})
     findOneStub = sinon.stub(user, 'findOne').callsFake((filter, callback) => {
       for (doc of documents)
-        if (doc.id == filter._id || doc.username == filter.username || doc.email == filter.email)
+        if ((!filter._id || doc.id == filter._id) &&
+            (!filter.username || doc.username == filter.username) &&
+            (!filter.email || doc.email == filter.email))
           return callback(null, doc)
       return callback(null, null)
     })
@@ -66,7 +68,12 @@ describe('user crud endpoint test', () => {
       doc.save = sinon.stub().callsFake(callback => callback(null, doc))
       doc.set = sinon.stub().callsFake(data => {
         if (data.name) doc.name = data.name
+        if (data.username) doc.username = data.username
+        if (data.email) doc.email = data.email
+        if (data.password) doc.password = data.password
+        if (data.division) doc.division = data.division
         if (data.enabled) doc.enabled = data.enabled
+        if (data.admin) doc.admin = data.admin
       })
     }
   })
@@ -273,9 +280,7 @@ describe('user crud endpoint test', () => {
 
   })
 
-  describe('POST specific user endpoint', () => {
-
-    let divDocuments, divFindStub, divFindOneStub
+  let prepareDivision = (divDocuments, divFindStub, divFindOneStub) => {
     beforeEach(() => {
       divDocuments = [
         {'id':'6aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true},
@@ -302,6 +307,12 @@ describe('user crud endpoint test', () => {
       divFindStub.restore()
       divFindOneStub.restore()
     })
+  }
+
+  describe('POST specific user endpoint', () => {
+
+    let divDocuments, divFindStub, divFindOneStub
+    prepareDivision(divDocuments, divFindStub, divFindOneStub)
 
     it('should add new user', (done) => {
       let req = {body: {
@@ -566,4 +577,94 @@ describe('user crud endpoint test', () => {
 
   })
 
+  describe('PUT specific user endpoint', () => {
+
+    let divDocuments, divFindStub, divFindOneStub
+    prepareDivision(divDocuments, divFindStub, divFindOneStub)
+
+    it('should change new user', (done) => {
+      let req = {
+        params: {userId: '5aa9359a2b21732a73d5406a'},
+        body: {
+          name: 'Jauhar Arifin',
+          username: 'jauhararifin',
+          email: 'jauhararifin10@gmail.com',
+          password: 'jauhararifin_pass',
+          division: '6aa9359a2b21732a73d5406b',
+          enabled: false,
+          admin: true
+        }
+      }
+      crud.updateOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let response = res.json.getCall(0).args[0]
+        sinon.assert.match(response.name, 'Jauhar Arifin')
+        sinon.assert.match(response.username, 'jauhararifin')
+        sinon.assert.match(response.email, 'jauhararifin10@gmail.com')
+        sinon.assert.match(response.division.id, '6aa9359a2b21732a73d5406b')
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should change new user with some field', (done) => {
+      let req = {
+        params: {userId: '5aa9359a2b21732a73d5406a'},
+        body: { name: 'Jauhar Arifin' }
+      }
+      crud.updateOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let response = res.json.getCall(0).args[0]
+        sinon.assert.match(response.name, 'Jauhar Arifin')
+        sinon.assert.match(response.username, 'test_user_1')
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should keep username', (done) => {
+      let req = {
+        params: {userId: '5aa9359a2b21732a73d5406a'},
+        body: { username: 'test_user_1' }
+      }
+      crud.updateOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let response = res.json.getCall(0).args[0]
+        sinon.assert.match(response.username, 'test_user_1')
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should return 400 when username is taken', (done) => {
+      let req = {
+        params: {userId: '5aa9359a2b21732a73d5406a'},
+        body: { username: 'test_user_2' }
+      }
+      crud.updateOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should return 400 when email is taken', (done) => {
+      let req = {
+        params: {userId: '5aa9359a2b21732a73d5406a'},
+        body: { email: 'test_user_admin_1@test.com' }
+      }
+      crud.updateOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should return 404 when user id not found', (done) => {
+      let req = {params: {userId: '6aa9359a2b21732a73d5406a'}}
+      crud.updateOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    })
+
+  })
 })
