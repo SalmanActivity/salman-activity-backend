@@ -113,9 +113,9 @@ let validateUserInput = (updatingUser, userInput, callback) => {
         let updatingUsername = updatingUser ? updatingUser.username : null
         let updatingEmail = updatingUser ? updatingUser.email : null
 
-        if (res[1] && res[1] != updatingUsername)
+        if (res[1] && res[1].username && res[1].username != updatingUsername)
             return callback('username already taken', null)
-        else if (res[2] && res[2] != updatingEmail)
+        else if (res[2] && res[2].email && res[2].email != updatingEmail)
             return callback('email already taken', null)
 
         callback(null, validatedValue)
