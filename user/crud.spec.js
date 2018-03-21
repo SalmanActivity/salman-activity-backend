@@ -239,4 +239,37 @@ describe('user crud endpoint test', () => {
 
   })
 
+  describe('DELETE specific user endpoint', () => {
+
+    it('should change user enabled to false', (done) => {
+      let req = {params: {userId: '5aa9359a2b21732a73d5406a'}}
+      crud.deleteOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 202)
+        let ret = res.json.getCall(0).args[0]
+        sinon.assert.match(ret.enabled, false)
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should keep deleted user enabled to false', (done) => {
+      let req = {params: {userId: '5aa9359a2b21732a73d5406b'}}
+      crud.deleteOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 202)
+        let ret = res.json.getCall(0).args[0]
+        sinon.assert.match(ret.enabled, false)
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should return 404 error status when user not found', (done) => {
+      let req = {params: {userId: '5aa9359a2b21732a73d540ff'}}
+      crud.deleteOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    })
+
+  })
+
 })
