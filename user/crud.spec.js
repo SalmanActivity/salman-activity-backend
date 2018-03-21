@@ -49,7 +49,8 @@ describe('user crud endpoint test', () => {
         username: 'test_user_3',
         email: 'test_user_3@test.com',
         password: passwordHash.generate('test_user_3_pass'),
-        division: {'id':'6aa9359a2b21732a73d5406b', 'name': 'div 2', 'enabled': false}
+        division: {'id':'6aa9359a2b21732a73d5406b', 'name': 'div 2', 'enabled': false},
+        enabled: false,
       },
     ]
 
@@ -152,9 +153,86 @@ describe('user crud endpoint test', () => {
             name: 'Test User 3',
             username: 'test_user_3',
             email: 'test_user_3@test.com',
-            division: {'id':'6aa9359a2b21732a73d5406b', 'name': 'div 2', 'enabled': false}
+            division: {'id':'6aa9359a2b21732a73d5406b', 'name': 'div 2', 'enabled': false},
+            enabled:false
           }
         ])
+        done()
+      }).catch(err => done(err))
+    })
+
+  })
+
+  describe('Get specific user endpoint', () => {
+
+    it('should return specific user if admin', (done) => {
+      let req = {params: {userId: '5aa9359a2b21732a73d5406a'}, user: {admin:true}}
+      crud.findOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        sinon.assert.calledWith(res.json, {
+          id: '5aa9359a2b21732a73d5406a',
+          name: 'Test User 1',
+          username: 'test_user_1',
+          email: 'test_user_1@test.com',
+          division: {'id':'6aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true},
+          enabled: true,
+          admin: false
+        })
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should return specific user if user same division', (done) => {
+      let req = {params: {userId: '5aa9359a2b21732a73d5406a'}, user:{
+        admin:false, division: {'id':'6aa9359a2b21732a73d5406a', 'name': 'div 2', 'enabled': false}
+      }}
+      crud.findOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        sinon.assert.calledWith(res.json, {
+          id: '5aa9359a2b21732a73d5406a',
+          name: 'Test User 1',
+          username: 'test_user_1',
+          email: 'test_user_1@test.com',
+          division: {'id':'6aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true},
+          enabled: true,
+          admin: false
+        })
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should return specific user even if it has been deleted', (done) => {
+      let req = {params: {userId: '5aa9359a2b21732a73d5406d'}, user: {admin:true}}
+      crud.findOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        sinon.assert.calledWith(res.json, {
+          id: '5aa9359a2b21732a73d5406d',
+          name: 'Test User 3',
+          username: 'test_user_3',
+          email: 'test_user_3@test.com',
+          division: {'id':'6aa9359a2b21732a73d5406b', 'name': 'div 2', 'enabled': false},
+          enabled:false
+        })
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should return 404 not found if user doesnt exists', (done) => {
+      let req = {params: {divisionId: '5aa9359a2b21732a73d540ff'}}
+      crud.findOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should return 404 not found if user is not in current user division, and current user is not admin', (done) => {
+      let req = {params: {divisionId: '5aa9359a2b21732a73d5406d'}, user:{
+        admin:false, division:{'id':'6aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true}
+      }}
+      crud.findOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
         done()
       }).catch(err => done(err))
     })
