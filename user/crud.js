@@ -40,7 +40,7 @@ let findAllUsers = crudUtil.readMany({
     fetchMany: (req, context, callback) => user.find({}, callback),
     convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj),
     filterOne: filterUserByRole,
-    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'email', 'division', 'enabled', 'admin'])
 })
 
 let findOneUser = crudUtil.readOne({
@@ -51,18 +51,18 @@ let findOneUser = crudUtil.readOne({
     fetchOne: (req, context, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
     convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj),
     filterOne: filterUserByRole,
-    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'email', 'division', 'enabled', 'admin'])
 })
 
 let findCurrentUser = crudUtil.readOne({
     fetchOne: (req, context, callback) => callback(null, req.user),
     convertOne: (obj, context, callback) => callback(null, obj),
     filterOne: (obj, context, callback) => callback(null, obj),
-    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'email', 'division', 'enabled', 'admin'])
 })
 
 let deleteOneUser = crudUtil.deleteOne({
-    fetchOne: (req, context, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback), 
+    fetchOne: (req, context, callback) => user.findOne({_id:getUserObjectId(req.params.userId)}, callback),
     deleteOne: (user, context, callback) => {
         user.enabled = false
         user.save(callback)
@@ -95,7 +95,7 @@ let validateUserInput = (updatingUser, userInput, callback) => {
     let validationResult = schema.validate(userInput)
     if (validationResult.error)
         return callback(validationResult.error.details[0].message, null)
-    
+
     let validatedValue = validationResult.value
     async.parallel([
         callback => validatedValue.division ? division.findOne({_id:validatedValue.division}, callback) : callback(),
@@ -104,7 +104,7 @@ let validateUserInput = (updatingUser, userInput, callback) => {
     ], (err, res) => {
         if (err)
             return callback(err, null)
-        
+
         if (validatedValue.division && !res[0])
             return callback('division not found', null)
         else if (validatedValue.division)
@@ -113,11 +113,11 @@ let validateUserInput = (updatingUser, userInput, callback) => {
         let updatingUsername = updatingUser ? updatingUser.username : null
         let updatingEmail = updatingUser ? updatingUser.email : null
 
-        if (res[1] && res[1] != updatingUsername)
+        if (res[1] && res[1].username && res[1].username != updatingUsername)
             return callback('username already taken', null)
-        else if (res[2] && res[2] != updatingEmail)
+        else if (res[2] && res[2].email && res[2].email != updatingEmail)
             return callback('email already taken', null)
-        
+
         callback(null, validatedValue)
     })
 }
@@ -126,7 +126,7 @@ let createOneUser = crudUtil.createOne({
     validateOne: (req, context, callback) => validateUserInput(null, req.body, callback),
     insertOne: (validatedData, context, callback) => new user(validatedData, callback).save(callback),
     convertOne: (insertedData, context, callback) => callback(null, insertedData.toJSON ? insertedData.toJSON() : insertedData),
-    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'email', 'division', 'enabled', 'admin'])
 })
 
 let updateOneUser = crudUtil.updateOne({
@@ -149,7 +149,7 @@ let updateOneUser = crudUtil.updateOne({
         context.updatingUser.save(callback)
     },
     convertOne: (updatedData, context, callback) => callback(null, updatedData.toJSON ? updatedData.toJSON() : updatedData),
-    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'division', 'enabled', 'admin'])
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'username', 'email', 'division', 'enabled', 'admin'])
 })
 
 module.exports = { findAllUsers, findOneUser, findCurrentUser, deleteOneUser, createOneUser, updateOneUser }

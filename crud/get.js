@@ -15,12 +15,13 @@ function readMany(option) {
 
     if (!option.init)
         option.init = (req, context, callback) => callback(null,req)
-    
+
     return (req, res, next) => {
         let context = {}
         return bluebird.promisify(option.init)(req, context)
         .then(valInit => bluebird.promisify(option.fetchMany)(valInit, context))
         .then(valArr => bluebird.promisify(option.convertMany)(valArr, context))
+        .then(valArr => bluebird.promisify(option.filterMany)(valArr, context))
         .then(valArr => bluebird.promisify(option.filterFieldMany)(valArr, context))
         .then(valArr => res.status(200).json(valArr))
         .catch(error.displayError(res, 'cannot fetch specific object'))
@@ -36,7 +37,7 @@ function readOne(option) {
 
     if (!option.filterFieldOne && option.filterFieldMany)
         option.filterFieldOne = crudUtil.manyToOneFunction(option.filterFieldMany)
-    
+
     if (!option.init)
         option.init = (req, context, callback) => callback(null,req)
 
