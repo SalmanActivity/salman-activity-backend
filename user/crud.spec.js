@@ -2,6 +2,7 @@ var sinon = require('sinon')
 var assert = require('chai').assert
 var crud = require('./crud')
 var user = require('./user')
+var division = require('../division/division')
 var passwordHash = require('password-hash')
 var ObjectId = require('mongoose').Types.ObjectId
 
@@ -57,7 +58,7 @@ describe('user crud endpoint test', () => {
     findStub = sinon.stub(user, 'find').callsFake((filter, callback) => {callback(null, documents)})
     findOneStub = sinon.stub(user, 'findOne').callsFake((filter, callback) => {
       for (doc of documents)
-        if (doc.id == filter._id)
+        if (doc.id == filter._id || doc.username == filter.username || doc.email == filter.email)
           return callback(null, doc)
       return callback(null, null)
     })
@@ -79,7 +80,7 @@ describe('user crud endpoint test', () => {
     findOneStub.restore()
   })
 
-  describe('Get all users endpoint', () => {
+  describe('GET all users endpoint', () => {
 
   	it('should return all users including deleted one', (done) => {
       let req = {user: documents[2]}
@@ -163,7 +164,7 @@ describe('user crud endpoint test', () => {
 
   })
 
-  describe('Get specific user endpoint', () => {
+  describe('GET specific user endpoint', () => {
 
     it('should return specific user if admin', (done) => {
       let req = {params: {userId: '5aa9359a2b21732a73d5406a'}, user: {admin:true}}
@@ -268,6 +269,299 @@ describe('user crud endpoint test', () => {
         assert.notEqual(res.json.getCall(0).args[0].error, null)
         done()
       }).catch(err => done(err))
+    })
+
+  })
+
+  describe('POST specific user endpoint', () => {
+
+    let divDocuments, divFindStub, divFindOneStub
+    beforeEach(() => {
+      divDocuments = [
+        {'id':'6aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true},
+        {'id':'6aa9359a2b21732a73d5406b', 'name': 'div 2', 'enabled': false}
+      ]
+
+      divFindStub = sinon.stub(division, 'find').callsFake((filter, callback) => {callback(null, divDocuments)})
+      divFindOneStub = sinon.stub(division, 'findOne').callsFake((filter, callback) => {
+        for (doc of divDocuments)
+          if (doc.id == filter._id)
+            return callback(null, doc)
+        return callback(null, null)
+      })
+      for (doc of divDocuments) {
+        doc.save = sinon.stub().callsFake(callback => callback(null, doc))
+        doc.set = sinon.stub().callsFake(data => {
+          if (data.name) doc.name = data.name
+          if (data.enabled) doc.enabled = data.enabled
+        })
+      }
+    })
+
+    afterEach(() => {
+      divFindStub.restore()
+      divFindOneStub.restore()
+    })
+
+    it('should add new user', (done) => {
+      let req = {body: {
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }}
+      let saveStub = sinon.stub(user.prototype, 'save').callsFake(cb => cb(null, {
+        id: new ObjectId(),
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: passwordHash.generate('test_user_7_pass'),
+        division: {'id':'6aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true},
+        enabled: true,
+        admin: false
+      }))
+      crud.createOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let response = res.json.getCall(0).args[0]
+        sinon.assert.match(response.username, 'test_user_7')
+        sinon.assert.match(response.division, {'id':'6aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true})
+        done()
+        saveStub.restore()
+      }).catch(err => { done(err); saveStub.restore() })
+    })
+
+    let validationTest = (body, done) => {
+      crud.createOneUser({body}, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    }
+
+    it('should return 400 and send validation error when name is too short', (done) => {
+      validationTest({
+        name: 'ab',
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when name is too long', (done) => {
+      validationTest({
+        name: new Array(256+1).join('x'),
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when name is missing', (done) => {
+      validationTest({
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+    it('should return 400 and send validation error when username is too short', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'aa',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when username is too long', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: new Array(256+1).join('x'),
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when username is missing', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when username is used', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_1',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when email is invalid', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_7_test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when email is too short', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'a@',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when email is too long', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'a@' + new Array(250+1).join('x') + '.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when email is missing', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when email is used', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_1@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when password is too short', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: 'aa',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when password is too long', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: new Array(101+1).join('x'),
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when password is missing', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when division is invalid', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: 'xxxxxxxxxxxxxxxxxx',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when division is not found', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d540ff',
+        enabled: true,
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when enabled is invalid', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: 'jauhar',
+        admin: false
+      }, done)
+    })
+
+    it('should return 400 and send validation error when admin is invalid', (done) => {
+      validationTest({
+        name: 'Test User 7',
+        username: 'test_user_7',
+        email: 'test_user_7@test.com',
+        password: 'test_user_7_pass',
+        division: '6aa9359a2b21732a73d5406a',
+        enabled: true,
+        admin: 'arifin'
+      }, done)
     })
 
   })
