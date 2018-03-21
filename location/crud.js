@@ -15,14 +15,14 @@ function getObjectId(userId) {
 
 let findAllLocations = crudUtil.readMany({
     fetchMany: (req, context, callback) => location.find({}, callback),
-    convertOne: (obj, context, callback) => callback(null, obj.toJSON()),
+    convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj),
     filterOne: (obj, context, callback) => callback(null, obj),
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
 
 let findOneLocation = crudUtil.readOne({
     fetchOne: (req, context, callback) => location.findOne({_id:getObjectId(req.params.locationId)}, callback),
-    convertOne: (obj, context, callback) => callback(null, obj.toJSON()),
+    convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj),
     filterOne: (obj, context, callback) => callback(null, obj),
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
@@ -32,7 +32,8 @@ let deleteOneLocation = crudUtil.deleteOne({
     deleteOne: (location, context, callback) => {
         location.enabled = false
         location.save(callback)
-    }
+    },
+    filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
 
 let validate = (updating, userInput, callback) => {
@@ -50,7 +51,7 @@ let validate = (updating, userInput, callback) => {
 let createOneLocation = crudUtil.createOne({
     validateOne: (req, context, callback) => validate(null, req.body, callback),
     insertOne: (validatedData, context, callback) => new location(validatedData, callback).save(callback),
-    convertOne: (insertedData, context, callback) => callback(null, insertedData.toJSON()),
+    convertOne: (insertedData, context, callback) => callback(null, insertedData.toJSON ? insertedData.toJSON() : insertedData),
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
 
@@ -73,7 +74,7 @@ let updateOneLocation = crudUtil.updateOne({
         context.updating.set(validatedData)
         context.updating.save(callback)
     },
-    convertOne: (updatedData, context, callback) => callback(null, updatedData.toJSON()),
+    convertOne: (updatedData, context, callback) => callback(null, updatedData.toJSON ? updatedData.toJSON() : updatedData),
     filterFieldOne: crudUtil.filterOne.fields(['id', 'name', 'enabled'])
 })
 
