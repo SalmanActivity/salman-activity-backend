@@ -1,5 +1,5 @@
 var mongoose = require('mongoose')
-var debug = require('debug')('salman-activity-backend:server')
+var debug = require('debug')('seed')
 var config = require('../config')
 var documents = require('../seed')
 
