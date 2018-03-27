@@ -219,8 +219,6 @@ describe('auth middleware test', function() {
             sinon.assert.match(requestMocked.user, user)
             done()
         })
-
-        responseSpy.returnsThis
     })
 
     it('should process next middleware when token in body and valid', (done) => {
