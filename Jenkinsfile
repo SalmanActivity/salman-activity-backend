@@ -23,10 +23,15 @@ pipeline {
                 sh 'npm test'
             }
         }
-        stage('Deploy Staging') {
+        stage('Build Docker Image') {
         	agent any
         	steps {
         		sh 'docker build -t $DOCKER_IMAGE:latest --build-arg http_proxy=$HTTP_PROXY --build-arg https_proxy=$HTTPS_PROXY .'
+        	}
+        }
+        stage('Deploy Staging') {
+        	agent any
+        	steps {
         		withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
           			sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
           			sh 'docker push ${DOCKER_IMAGE}:latest'
