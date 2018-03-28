@@ -26,7 +26,7 @@ pipeline {
         stage('Deploy Staging') {
         	agent { label 'master' }
         	steps {
-        		sh 'docker build -t $DOCKER_IMAGE:latest .'
+        		sh 'docker build -t $DOCKER_IMAGE:latest --build-arg http_proxy=$HTTP_PROXY https_proxy=$HTTPS_PROXT .'
         		withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
           			sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
           			sh 'docker push ${DOCKER_IMAGE}:latest'
