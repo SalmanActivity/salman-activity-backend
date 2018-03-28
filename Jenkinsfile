@@ -35,5 +35,3 @@ pipeline {
         }
     }
 }
-
-http://jauhararifin:41207132@cache.itb.ac.id:8080/
