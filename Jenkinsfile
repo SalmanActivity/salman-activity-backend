@@ -24,7 +24,7 @@ pipeline {
             }
         }
         stage('Deploy Staging') {
-        	agent { label 'master' }
+        	agent any
         	steps {
         		sh 'docker build -t $DOCKER_IMAGE:latest --build-arg http_proxy=$HTTP_PROXY --build-arg https_proxy=$HTTPS_PROXY .'
         		withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
