@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'node:8-alpine' 
+            image 'jauhararifin/salman-activity-backend' 
             args '-p 3000:3000 -u root:root'
         }
     }
