@@ -24,7 +24,7 @@ pipeline {
             }
         }
         stage('Deploy Staging') {
-        	agent none
+        	agent { label 'master' }
         	steps {
         		sh 'docker build -t $DOCKER_IMAGE:latest .'
         		withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
