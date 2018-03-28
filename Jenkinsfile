@@ -1,7 +1,8 @@
 pipeline {
 	environment {
-		HOST_HTTP_PROXY_URL = credentials('host-http-proxy-url')
-		HOST_HTTPS_PROXY_URL = credentials('host-https-proxy-url')
+		HTTP_PROXY = credentials('host-http-proxy-url')
+		HTTPS_PROXY = credentials('host-https-proxy-url')
+		DOCKER_IMAGE = credentials('docker-image-name')
 	}
     agent {
         docker {
@@ -12,8 +13,8 @@ pipeline {
     stages {
         stage('Build') { 
             steps {
-            	sh 'npm config set proxy $HOST_HTTP_PROXY_URL'
-				sh 'npm config set https-proxy $HOST_HTTPS_PROXY_URL'
+            	sh 'npm config set proxy $HTTP_PROXY'
+				sh 'npm config set https-proxy $HTTPS_PROXY'
                 sh 'npm install' 
             }
         }
@@ -22,6 +23,17 @@ pipeline {
                 sh 'npm test'
             }
         }
+        stage('Deploy Staging') {
+        	agent any
+        	steps {
+        		sh 'docker build -t $DOCKER_IMAGE:latest .'
+        		withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+          			sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
+          			sh 'docker push ${DOCKER_IMAGE}:latest'
+        		}
+        	}
+        }
     }
 }
 
+http://jauhararifin:41207132@cache.itb.ac.id:8080/
