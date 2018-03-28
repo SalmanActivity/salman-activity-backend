@@ -1,7 +1,7 @@
 pipeline {
 	environment {
-		HOST_HTTP_PROXY_URL = credentials('host-http-proxy-url)
-		HOST_HTTPS_PROXY_URL = credentials('host-https-proxy-url)
+		HOST_HTTP_PROXY_URL = credentials('host-http-proxy-url')
+		HOST_HTTPS_PROXY_URL = credentials('host-https-proxy-url')
 	}
     agent {
         docker {
