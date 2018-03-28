@@ -26,7 +26,7 @@ pipeline {
         stage('Build Docker Image') {
         	agent any
         	steps {
-        		sh 'docker build -t $DOCKER_IMAGE:latest --build-arg http_proxy=$HTTP_PROXY --build-arg https_proxy=$HTTPS_PROXY .'
+        		sh 'docker build -t jauhararifin/salman-activity-backend:latest .'
         	}
         }
         stage('Deploy Staging') {
