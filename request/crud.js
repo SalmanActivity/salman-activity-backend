@@ -21,6 +21,7 @@ let filterRequestMonthYear = (req, callback) => {
   }
 
   return requestModel.find(condition, callback)
+    .populate('issuer').populate('division').populate('location')
 }
 
 let filterRequestByUser = (currentUser, request, callback) => {
@@ -38,7 +39,7 @@ let findRequestInMonth = crudUtil.readMany({
     context.user = req.user
     return callback(null, req)
   },
-  fetchMany: (req, context, callback) => filterRequestMonthYear(req,callback).populate('issuer', 'division', 'location'),
+  fetchMany: (req, context, callback) => filterRequestMonthYear(req,callback),
   convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj),
   filterOne: (obj, context, callback) => filterRequestByUser(context.user, obj, callback),
 })
