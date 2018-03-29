@@ -1,5 +1,5 @@
 var async = require('async')
-var bluebird = require('bluebird')
+var util = require('util')
 
 function oneToManyFunction(oneFunction) {
   return (valArr, context, callback) => {
@@ -93,7 +93,7 @@ function fetchOptionFunctions(option, functionNeeded, promisify = true) {
   if (promisify)
     for (let func in result)
       if (result[func] instanceof Function)
-        result[func] = bluebird.promisify(result[func])
+        result[func] = util.promisify(result[func])
 
   return result
 }
