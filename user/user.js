@@ -1,5 +1,6 @@
 var mongoose = require('mongoose')
-var divisionSchema = require('../division/division').schema
+var divisionModel = require('../division/division')
+var divisionSchema = divisionModel.schema
 
 var userSchema = mongoose.Schema({
     name: {
@@ -20,7 +21,10 @@ var userSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    division: divisionSchema,
+    division: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: divisionModel.modelName
+    },
     enabled: {
         type: Boolean,
         required: true,
