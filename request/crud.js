@@ -1,7 +1,7 @@
 var requestModel = require('./request')
 var crudUtil = require('../crud/index')
 
-let filterRequestMonthYear = (req, callback) => {
+let filterRequestMonthYear = (req) => {
   let monthFilter = new Date().getMonth()
   let yearFilter = new Date().getFullYear()
 
@@ -25,28 +25,20 @@ let filterRequestMonthYear = (req, callback) => {
     }
   }
 
-  return requestModel.find(condition, callback)
-    .populate('issuer').populate('division').populate('location')
-}
-
-let filterRequestByUser = (currentUser, request, callback) => {
-  if (request && request.status === 'accepted')
-    return callback(null, request)
-  if (currentUser && currentUser.admin)
-    return callback(null, request)
-  if (currentUser && currentUser.division && currentUser.division.id == request.division.id)
-    return callback(null, request)
-  return callback(null, null)
+  return requestModel.find(condition).populate('issuer')
+    .populate('division').populate('location')
 }
 
 let findRequestInMonth = crudUtil.readMany({
-  init: (req, context, callback) => {
-    context.user = req.user
-    return callback(null, req)
+  fetchMany: (req, context, callback) => {
+    let mongoRequest = filterRequestMonthYear(req)
+    if (req.user && !req.user.admin)
+      mongoRequest.where('division._id', req.user.division.id)
+    if (!req.user)
+      mongoRequest.where('status', 'accepted')
+    mongoRequest.exec(callback)
   },
-  fetchMany: (req, context, callback) => filterRequestMonthYear(req,callback),
-  convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj),
-  filterOne: (obj, context, callback) => filterRequestByUser(context.user, obj, callback),
+  convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj)
 })
 
 module.exports = {
