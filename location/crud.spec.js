@@ -108,6 +108,15 @@ describe('location crud endpoint test', () => {
       }).catch(err => done(err))
     })
 
+    it('should return 404 not found if id is invalid', (done) => {
+      let req = {params: {locationId: 'ab*1'}}
+      crud.findOneLocation(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    })
+
     it('should return 404 not found if division doesnt exists', (done) => {
       let req = {params: {locationId: '5aa9359a2b21732a73d5406e'}}
       crud.findOneLocation(req, res, next).then(() => {
