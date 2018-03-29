@@ -1,6 +1,7 @@
 var userModel = require('./user/user')
 var divisionModel = require('./division/division')
 var locationModel = require('./location/location')
+var requestModel = require('./request/request')
 var passwordHash = require('password-hash')
 
 let division1 = new divisionModel({
@@ -49,6 +50,22 @@ let location2 = new locationModel({
     enabled: true
 })
 
+let request1 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84da',
+    name: 'request 1',
+    description: 'description of request 1',
+    issuer: user1,
+    division: division1,
+    location: location1,
+    startTime: new Date(2018,2, 15, 9),
+    endTime: new Date(2018, 2, 15, 12),
+    participantNumber: 3,
+    participantDescription: 'participant description',
+    speaker: 'speaker',
+    status: 'pending',
+    enabled: true
+})
+
 module.exports = [
-    division1, division2, user1, admin1, location1, location2
+    division1, division2, user1, admin1, location1, location2, request1
 ]
