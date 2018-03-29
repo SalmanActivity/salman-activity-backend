@@ -10,7 +10,7 @@ function createOne(option) {
 
     return init(req, context)
     .then(valInit => validateOne(valInit, context))
-    .catch(err => Promise.reject({status: 400, cause: err.message}))
+    .catch(err => Promise.reject({status: 400, cause: err}))
     .then(object => insertOne(object, context))
     .then(object => convertOne(object, context))
     .then(object => filterFieldOne(object, context))
