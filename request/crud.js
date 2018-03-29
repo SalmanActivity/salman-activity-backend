@@ -54,7 +54,17 @@ let findOneRequest = crudUtil.readOne({
   convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj)
 })
 
+let deleteOneRequest = crudUtil.deleteOne({
+  fetchOne: (req, context, callback) => 
+    filterMongoByUser(req.user, filterRequestId(req), callback),
+  deleteOne: (request, context, callback) => {
+    request.enabled = false
+    request.save(callback)
+  },
+})
+
 module.exports = {
   findAllRequests: findRequestInMonth,
   findOneRequest,
+  deleteOneRequest
 }
