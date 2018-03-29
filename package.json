@@ -6,7 +6,7 @@
     "start": "node ./scripts/web.js",
     "seed-dev": "DEBUG=seed node ./scripts/seed_db.js",
     "dev": "DEBUG=salman-activity-backend:server ENV=dev nodemon ./scripts/devServer.js",
-    "test": "DEBUG=* node node_modules/.bin/mocha -t 10000 ./**/*.spec.js"
+    "test": "node node_modules/.bin/mocha -t 2000 ./**/*.spec.js"
   },
   "engineStrict": true,
   "engines": {
