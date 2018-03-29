@@ -108,6 +108,15 @@ describe('division crud endpoint test', () => {
       }).catch(err => done(err))
     })
 
+    it('should return 404 not found if division id invalid', (done) => {
+      let req = {params: {divisionId: '5aa93'}}
+      crud.findOneDivision(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    })
+
     it('should return 404 not found if division doesnt exists', (done) => {
       let req = {params: {divisionId: '5aa9359a2b21732a73d5406e'}}
       crud.findOneDivision(req, res, next).then(() => {
