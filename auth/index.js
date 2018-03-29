@@ -4,7 +4,7 @@ var login = require('./login')
 var auth = require('./auth')
 
 router.post('/login', login)
-router.post('/check_auth', auth, (req, res, next) => {
+router.post('/check_auth', auth.auth, (req, res, next) => {
     res.json({
         login: true,
         token: req.token
