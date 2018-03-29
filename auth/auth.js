@@ -1,9 +1,9 @@
 var util = require('util')
 var jwt = require('jsonwebtoken')
 var config = require('../config')
-var user = require('../user/user')
+var userModel = require('../user/user')
 
-function auth(req, res, next) {
+function user(req, res, next) {
   let token = undefined
   if (req.body.token)
     token = req.body.token
@@ -16,19 +16,26 @@ function auth(req, res, next) {
   req.token = token
 
   return util.promisify(jwt.verify)(token, config.secretKey)
-  .then(data => user.findOne({username: data.username}).exec())
+  .then(data => userModel.findOne({username: data.username}).exec())
   .then(user => {
     req.user = user.toJSON ? user.toJSON() : user
     return next()
   })
-  .catch((err) => {
-    res.status(403).json({
-      error: {
-        msg: 'cannot perform action',
-        cause: 'unauthorized access'
-      }
-    })
+  .catch(err => next())
+}
+
+function auth(req, res, next) {
+  return user(req, res, (err) => {
+    if (!err && req.user)
+      return next()
+    else
+      return res.status(403).json({
+        error: {
+          msg: 'cannot perform action',
+          cause: 'unauthorized access'
+        }
+      })
   })
 }
 
-module.exports = auth
+module.exports = { user, auth }
