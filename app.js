@@ -14,6 +14,7 @@ app.use(cookieParser())
 
 app.get('/', (req,res) => res.redirect('/api/v1/status/healthcheck'))
 
+app.use('/api/v1/auth', require('./auth/index').router)
 app.use('/api/v1/status', require('./status/index'))
 app.use('/api/v1/users', require('./user/index'))
 app.use('/api/v1/divisions', require('./division/index'))

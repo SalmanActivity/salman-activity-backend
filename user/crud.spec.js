@@ -7,7 +7,7 @@ var passwordHash = require('password-hash')
 var ObjectId = require('mongoose').Types.ObjectId
 
 describe('user crud endpoint test', () => {
-  let documents = [], findStub, findOneStub, req = {}, res, next
+  let documents = [], findStub, findOneStub, populateStub, req = {}, res, next
 
   beforeEach(() => {
     next = sinon.stub()
@@ -56,6 +56,7 @@ describe('user crud endpoint test', () => {
     ]
 
     findStub = sinon.stub(user, 'find').callsFake((filter, callback) => {callback(null, documents)})
+    populateStub = sinon.stub(user, 'populate').returnsThis()
     findOneStub = sinon.stub(user, 'findOne').callsFake((filter, callback) => {
       for (doc of documents)
         if ((!filter._id || doc.id == filter._id) &&
@@ -85,6 +86,7 @@ describe('user crud endpoint test', () => {
     next.reset()
     findStub.restore()
     findOneStub.restore()
+    populateStub.restore()
   })
 
   describe('GET all users endpoint', () => {
