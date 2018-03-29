@@ -5,10 +5,15 @@ let filterRequestMonthYear = (req, callback) => {
   let monthFilter = new Date().getMonth()
   let yearFilter = new Date().getFullYear()
 
-  if (req.params.month)
-    monthFilter = Number(req.params.month) - 1
-  if (req.params.year)
-    yearFilter = Number(req.params.year) - 1
+  if (req.query.month)
+    monthFilter = Number(req.query.month) - 1
+  if (req.query.year)
+    yearFilter = Number(req.query.year)
+
+  if (isNaN(monthFilter) || isNaN(yearFilter) || monthFilter < 0 || monthFilter >= 12) {
+    monthFilter = 0
+    yearFilter = 9999
+  }
 
   let startFilter = new Date(yearFilter, monthFilter, 1)
   let endFilter = new Date(yearFilter, monthFilter + 1, 1)
