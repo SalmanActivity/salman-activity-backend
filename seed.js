@@ -128,7 +128,7 @@ let request6 = new requestModel({
     startTime: new Date(2018, 1, 1, 13),
     endTime: new Date(2018, 1, 1, 17),
     status: 'rejected',
-    enabled: true
+    enabled: false
 })
 
 let request7 = new requestModel({
@@ -193,7 +193,7 @@ let request11 = new requestModel({
     startTime: new Date(2018, 1, 28, 13),
     endTime: new Date(2018, 1, 28, 17),
     status: 'accepted',
-    enabled: true
+    enabled: false
 })
 
 let request12 = new requestModel({
