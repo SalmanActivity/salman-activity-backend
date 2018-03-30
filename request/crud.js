@@ -3,6 +3,7 @@ var divisionModel = require('../division/division')
 var locationModel = require('../location/location')
 var requestModel = require('./request')
 var crudUtil = require('../crud/index')
+var ObjectId = require('mongoose').Types.ObjectId
 
 let filterRequestMonthYear = (req) => {
   let monthFilter = new Date().getMonth()
@@ -33,7 +34,13 @@ let filterRequestMonthYear = (req) => {
 }
 
 let filterRequestId = (req) => {
-  return requestModel.findOne({_id:req.params.requestId}).populate('issuer')
+  try {
+    var id = new ObjectId(req.params.requestId)
+  } catch(e) {
+    var id =  new ObjectId('000000000000000000000000')
+  }
+
+  return requestModel.findOne({_id:id}).populate('issuer')
     .populate('division').populate('location')
 }
 
@@ -41,7 +48,7 @@ let filterMongoByUser = (currentUser, mongoRequest, callback) => {
   if (currentUser && !currentUser.admin)
     return mongoRequest.where('division', currentUser.division).exec(callback)
   if (!currentUser)
-    return mongoRequest.where('status', 'accepted').exec(callback)
+    return mongoRequest.where('status', 'accepted').where('enabled',true).exec(callback)
   return mongoRequest.exec(callback)
 }
 
