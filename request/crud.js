@@ -38,11 +38,11 @@ let filterRequestId = (req) => {
 }
 
 let filterMongoByUser = (currentUser, mongoRequest, callback) => {
-  if (currentUser && !currentUser)
-    mongoRequest.where('division._id', currentUser.division.id)
+  if (currentUser && !currentUser.admin)
+    return mongoRequest.where('division', currentUser.division).exec(callback)
   if (!currentUser)
-    mongoRequest.where('status', 'accepted')
-  mongoRequest.exec(callback)
+    return mongoRequest.where('status', 'accepted').exec(callback)
+  return mongoRequest.exec(callback)
 }
 
 let findRequestInMonth = crudUtil.readMany({
