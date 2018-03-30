@@ -81,74 +81,88 @@ describe('request crud endpoint test', () => {
 
   })
 
+  let checkSpecificRequest = (document) => {
+    return res => {
+      assert.equal(res.status, 200)
+      assert.equal(res.body.id, document._id)
+      assert.equal(res.body.status, document.status)
+      assert.equal(new Date(res.body.startTime).getTime(), document.startTime.getTime())
+      assert.equal(new Date(res.body.endTime).getTime(), document.endTime.getTime())
+      assert.equal(res.body.enabled, document.enabled)
+      assert.equal(res.body.description, document.description)
+    }
+  }
+
   describe('GET specific request endpoint', () => {
 
     it('should return specific request if admin', (done) => {
       server.get('/api/v1/requests/5aaa89e2a892471e3cdc84de')
       .set({'Authorization': 'JWT ' + adminAuth})
-      .expect(200)
-      .then(res => {
-        assert.equal(res.body.id, '5aaa89e2a892471e3cdc84de')
-        assert.equal(res.body.status, 'accepted')
-        assert.equal(new Date(res.body.startTime).getTime(), new Date(2018, 1, 1, 13).getTime())
-        assert.equal(new Date(res.body.endTime).getTime(), new Date(2018, 1, 1, 17).getTime())
-        done()
-      }).catch(err => done(err))
+      .then(checkSpecificRequest({
+        _id: '5aaa89e2a892471e3cdc84de',
+        name: 'request 5',
+        description: 'description of request 5',
+        startTime: new Date(2018, 1, 1, 13),
+        endTime: new Date(2018, 1, 1, 17),
+        status: 'accepted',
+        enabled: true
+      })).then(() => done()).catch(err => done(err))
     })
 
     it('should return specific request if current user is same division', (done) => {
       server.get('/api/v1/requests/5aaa89e2a892471e3cdc84de')
       .set({'Authorization': 'JWT ' + userAuth})
-      .expect(200)
-      .then(res => {
-        assert.equal(res.body.id, '5aaa89e2a892471e3cdc84de')
-        assert.equal(res.body.status, 'accepted')
-        assert.equal(new Date(res.body.startTime).getTime(), new Date(2018, 1, 1, 13).getTime())
-        assert.equal(new Date(res.body.endTime).getTime(), new Date(2018, 1, 1, 17).getTime())
-        done()
-      }).catch(err => done(err))
+      .then(checkSpecificRequest({
+        _id: '5aaa89e2a892471e3cdc84de',
+        name: 'request 5',
+        description: 'description of request 5',
+        startTime: new Date(2018, 1, 1, 13),
+        endTime: new Date(2018, 1, 1, 17),
+        status: 'accepted',
+        enabled: true
+      })).then(() => done()).catch(err => done(err))
     })
 
     it('should return specific request even if it has been deleted', (done) => {
       server.get('/api/v1/requests/5aaa89e2a892471e3cdc84df')
       .set({'Authorization': 'JWT ' + userAuth})
-      .expect(200)
-      .then(res => {
-        assert.equal(res.body.id, '5aaa89e2a892471e3cdc84df')
-        assert.equal(res.body.status, 'rejected')
-        assert.equal(new Date(res.body.startTime).getTime(), new Date(2018, 1, 1, 13).getTime())
-        assert.equal(new Date(res.body.endTime).getTime(), new Date(2018, 1, 1, 17).getTime())
-        assert.isFalse(res.body.enabled)
-        done()
-      }).catch(err => done(err))
+      .then(checkSpecificRequest({
+        _id: '5aaa89e2a892471e3cdc84df',
+        name: 'request 6',
+        description: 'description of request 6',
+        startTime: new Date(2018, 1, 1, 13),
+        endTime: new Date(2018, 1, 1, 17),
+        status: 'rejected',
+        enabled: false
+      })).then(() => done()).catch(err => done(err))
     })
 
     it('should return specific request if current user is public and request is accepted and enabled', (done) => {
       server.get('/api/v1/requests/5aaa89e2a892471e3cdc84e1')
       .set({'Authorization': 'JWT ' + userAuth})
-      .expect(200)
-      .then(res => {
-        assert.equal(res.body.id, '5aaa89e2a892471e3cdc84e1')
-        assert.equal(res.body.status, 'accepted')
-        assert.equal(new Date(res.body.startTime).getTime(), new Date(2018, 1, 23, 13).getTime())
-        assert.equal(new Date(res.body.endTime).getTime(), new Date(2018, 1, 23, 17).getTime())
-        assert.isTrue(res.body.enabled)
-        done()
-      }).catch(err => done(err))
+      .then(checkSpecificRequest({
+        _id: '5aaa89e2a892471e3cdc84e1',
+        name: 'request 8',
+        description: 'description of request 8',
+        startTime: new Date(2018, 1, 23, 13),
+        endTime: new Date(2018, 1, 23, 17),
+        status: 'accepted',
+        enabled: true
+      })).then(() => done()).catch(err => done(err))
     })
 
     it('should return specific request even if it has been deleted', (done) => {
       server.get('/api/v1/requests/5aaa89e2a892471e3cdc84df')
       .set({'Authorization': 'JWT ' + userAuth})
-      .expect(200)
-      .then(res => {
-        assert.equal(res.body.id, '5aaa89e2a892471e3cdc84df')
-        assert.equal(res.body.status, 'rejected')
-        assert.equal(new Date(res.body.startTime).getTime(), new Date(2018, 1, 1, 13).getTime())
-        assert.equal(new Date(res.body.endTime).getTime(), new Date(2018, 1, 1, 17).getTime())
-        assert.isFalse(res.body.enabled)
-        done()
-      }).catch(err => done(err))
+      .then(checkSpecificRequest({
+        _id: '5aaa89e2a892471e3cdc84df',
+        name: 'request 6',
+        description: 'description of request 6',
+        startTime: new Date(2018, 1, 1, 13),
+        endTime: new Date(2018, 1, 1, 17),
+        status: 'rejected',
+        enabled: false
+      })).then(() => done()).catch(err => done(err))
     })
 
     let check404Error = res => {
