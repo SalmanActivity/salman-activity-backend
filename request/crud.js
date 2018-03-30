@@ -60,6 +60,7 @@ let findOneRequest = crudUtil.readOne({
 let validateUserInput = (currentUser, userInput, callback) => {
   let rules = {
     name: joi.string().min(3).max(255).required(),
+    issuer: joi.string().hex().length(24).required(),
     description: joi.string().max(1024),
     division: joi.string().hex().length(24).required(),
     location: joi.string().hex().length(24).required(),
@@ -78,12 +79,11 @@ let validateUserInput = (currentUser, userInput, callback) => {
     return callback(validationResult.error.details[0].message, null)
   
   let validatedValue = validationResult.value
-  validatedValue.issuer = currentUser.id
   validatedValue.startTime = new Date(validatedValue.startTime)
   validatedValue.endTime = new Date(validatedValue.endTime)
   if (!currentUser.admin)
     validatedValue.division = currentUser.division
-
+  
   Promise.all([
     divisionModel.findOne({_id:validatedValue.division}).exec(),
     locationModel.findOne({_id:validatedValue.location}).exec(),
@@ -103,11 +103,38 @@ let validateUserInput = (currentUser, userInput, callback) => {
 }
 
 let createOneRequest = crudUtil.createOne({
-  validateOne: (req, context, callback) => validateUserInput(req.user, req.body, callback),
+  validateOne: (req, context, callback) =>
+    validateUserInput(req.user, Object.assign({issuer: req.user.id}, req.body), callback),
   insertOne: (validatedData, context, callback) => new requestModel(validatedData).save(callback),
   convertOne: (insertedData, context, callback) => 
     insertedData.populate('issuer').populate('division').populate('location').execPopulate()
     .then(insertedData => callback(null, insertedData.toJSON ? insertedData.toJSON() : insertedData)),
+})
+
+let updateOneRequest = crudUtil.updateOne({
+  fetchOne: (req, context, callback) => {
+    context.request = req
+    filterMongoByUser(req.user, filterRequestId(req), callback)
+  },
+  validateOne: (item, context, callback) => {
+    context.updatingItem = item
+    let inputData = Object.assign({
+      name: item.name,
+      issuer: item.issuer.id,
+      division: item.division.id,
+      location: item.location.id,
+      startTime: item.startTime.getTime(),
+      endTime: item.endTime.getTime()
+    }, context.request.body)
+    validateUserInput(context.request.user, inputData, callback)
+  },
+  updateOne: (validatedData, context, callback) => {
+    context.updatingItem.set(validatedData)
+    context.updatingItem.save(callback)
+  },
+  convertOne: (updatedData, context, callback) =>
+    updatedData.populate('issuer').populate('division').populate('location').execPopulate()
+    .then(updatedData => callback(null, updatedData.toJSON ? updatedData.toJSON() : updatedData)),
 })
 
 let deleteOneRequest = crudUtil.deleteOne({
@@ -123,5 +150,6 @@ module.exports = {
   findAllRequests: findRequestInMonth,
   findOneRequest,
   createOneRequest,
+  updateOneRequest,
   deleteOneRequest
 }

@@ -14,7 +14,7 @@ function updateOne(option) {
       if (!object)
         return Promise.reject({status: 404, cause: 'object not found'})
       return validateOne(object, context)
-      .catch(err => Promise.reject({status: 400, cause: err.message}))
+      .catch(err => Promise.reject({status: 400, cause: err}))
     })
     .then(object => updateOne(object, context))
     .then(object => convertOne(object, context))
