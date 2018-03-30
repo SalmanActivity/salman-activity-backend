@@ -9,7 +9,7 @@ function user(req, res, next) {
     token = req.body.token
   if (req.header('Authorization')) {
     let tokenHeader = req.header('Authorization')
-    let tokenArr = tokenHeader.split(' ')
+    let tokenArr = tokenHeader.split(/\s+/)
     if (tokenArr.length == 2 && tokenArr[0].toLowerCase() == 'jwt')
       token = tokenArr[1]
   }
