@@ -6,6 +6,7 @@ var locationModel = require('../location/location')
 var requestSchema = mongoose.Schema({
   name: {
     type: String,
+    maxlength: 256,
     required: true
   },
   description: {
@@ -46,7 +47,9 @@ var requestSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'accepted', 'rejected']
+    enum: ['pending', 'accepted', 'rejected'],
+    required: true,
+    default: 'pending'
   },
   enabled: {
     type: Boolean,
