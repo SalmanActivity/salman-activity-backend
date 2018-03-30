@@ -41,6 +41,8 @@ mongoose.connect(config.mongoConnection).then(resp => {
 })
 .then(() => {
   debug('success seeding database')
+  if (!module.parent)
+    process.exit()
 })
 .catch(error => {
   debug('error occured', error)
