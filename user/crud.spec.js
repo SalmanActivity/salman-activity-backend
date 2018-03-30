@@ -228,7 +228,16 @@ describe('user crud endpoint test', () => {
     })
 
     it('should return 404 not found if user doesnt exists', (done) => {
-      let req = {params: {divisionId: '5aa9359a2b21732a73d540ff'}}
+      let req = {params: {userId: '5aa9359a2b21732a73d540ff'}}
+      crud.findOneUser(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        assert.notEqual(res.json.getCall(0).args[0].error, null)
+        done()
+      }).catch(err => done(err))
+    })
+
+    it('should return 404 not found if user id not 24 hex string', (done) => {
+      let req = {params: {userId: 'jauhararifin'}}
       crud.findOneUser(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 404)
         assert.notEqual(res.json.getCall(0).args[0].error, null)
@@ -237,7 +246,7 @@ describe('user crud endpoint test', () => {
     })
 
     it('should return 404 not found if user is not in current user division, and current user is not admin', (done) => {
-      let req = {params: {divisionId: '5aa9359a2b21732a73d5406d'}, user:{
+      let req = {params: {userId: '5aa9359a2b21732a73d5406d'}, user:{
         admin:false, division:{'id':'6aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true}
       }}
       crud.findOneUser(req, res, next).then(() => {
