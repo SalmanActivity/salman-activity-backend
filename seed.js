@@ -1,6 +1,7 @@
 var userModel = require('./user/user')
 var divisionModel = require('./division/division')
 var locationModel = require('./location/location')
+var requestModel = require('./request/request')
 var passwordHash = require('password-hash')
 
 let division1 = new divisionModel({
@@ -49,6 +50,166 @@ let location2 = new locationModel({
     enabled: true
 })
 
+let request1 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84da',
+    name: 'request 1',
+    description: 'description of request 1',
+    issuer: user1,
+    division: division1,
+    location: location1,
+    startTime: new Date(2018,2, 15, 9),
+    endTime: new Date(2018, 2, 15, 12),
+    participantNumber: 3,
+    participantDescription: 'participant description',
+    speaker: 'speaker',
+    status: 'pending',
+    enabled: true
+})
+
+let request2 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84db',
+    name: 'request 2',
+    description: 'description of request 2',
+    issuer: admin1,
+    division: division2,
+    location: location1,
+    startTime: new Date(2018, 2, 2, 13),
+    endTime: new Date(2018, 2, 2, 17),
+    status: 'accepted',
+    enabled: true
+})
+
+let request3 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84dc',
+    name: 'request 3',
+    description: 'description of request 3',
+    issuer: admin1,
+    division: division2,
+    location: location2,
+    startTime: new Date(2018, 2, 19, 13),
+    endTime: new Date(2018, 2, 10, 17),
+    status: 'rejected',
+    enabled: true
+})
+
+let request4 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84dd',
+    name: 'request 4',
+    description: 'description of request 4',
+    issuer: admin1,
+    division: division2,
+    location: location2,
+    startTime: new Date(2018, 1, 1, 13),
+    endTime: new Date(2018, 1, 1, 17),
+    status: 'pending',
+    enabled: true
+})
+
+let request5 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84de',
+    name: 'request 5',
+    description: 'description of request 5',
+    issuer: admin1,
+    division: division2,
+    location: location2,
+    startTime: new Date(2018, 1, 1, 13),
+    endTime: new Date(2018, 1, 1, 17),
+    status: 'accepted',
+    enabled: true
+})
+
+let request6 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84df',
+    name: 'request 6',
+    description: 'description of request 6',
+    issuer: admin1,
+    division: division2,
+    location: location2,
+    startTime: new Date(2018, 1, 1, 13),
+    endTime: new Date(2018, 1, 1, 17),
+    status: 'rejected',
+    enabled: true
+})
+
+let request7 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84e0',
+    name: 'request 7',
+    description: 'description of request 7',
+    issuer: admin1,
+    division: division2,
+    location: location2,
+    startTime: new Date(2018, 1, 23, 13),
+    endTime: new Date(2018, 1, 23, 17),
+    status: 'pending',
+    enabled: true
+})
+
+let request8 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84e1',
+    name: 'request 8',
+    description: 'description of request 8',
+    issuer: admin1,
+    division: division2,
+    location: location2,
+    startTime: new Date(2018, 1, 23, 13),
+    endTime: new Date(2018, 1, 23, 17),
+    status: 'accepted',
+    enabled: true
+})
+
+let request9 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84e2',
+    name: 'request 9',
+    description: 'description of request 9',
+    issuer: admin1,
+    division: division2,
+    location: location2,
+    startTime: new Date(2018, 1, 23, 13),
+    endTime: new Date(2018, 1, 23, 17),
+    status: 'rejected',
+    enabled: true
+})
+
+let request10 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84e3',
+    name: 'request 10',
+    description: 'description of request 10',
+    issuer: admin1,
+    division: division2,
+    location: location2,
+    startTime: new Date(2018, 1, 28, 13),
+    endTime: new Date(2018, 1, 28, 17),
+    status: 'pending',
+    enabled: true
+})
+
+let request11 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84e4',
+    name: 'request 11',
+    description: 'description of request 11',
+    issuer: admin1,
+    division: division2,
+    location: location2,
+    startTime: new Date(2018, 1, 28, 13),
+    endTime: new Date(2018, 1, 28, 17),
+    status: 'accepted',
+    enabled: true
+})
+
+let request12 = new requestModel({
+    _id: '5aaa89e2a892471e3cdc84e5',
+    name: 'request 12',
+    description: 'description of request 12',
+    issuer: admin1,
+    division: division2,
+    location: location2,
+    startTime: new Date(2018, 1, 28, 13),
+    endTime: new Date(2018, 1, 28, 17),
+    status: 'rejected',
+    enabled: true
+})
+
 module.exports = [
-    division1, division2, user1, admin1, location1, location2
+    division1, division2, user1, admin1, location1, location2, request1, request2, request3, request4,
+    request5, request6, request7, request8, request9, request10, request11, request12
 ]

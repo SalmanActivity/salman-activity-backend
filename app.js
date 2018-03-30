@@ -19,6 +19,7 @@ app.use('/api/v1/status', require('./status/index'))
 app.use('/api/v1/users', require('./user/index'))
 app.use('/api/v1/divisions', require('./division/index'))
 app.use('/api/v1/locations', require('./location/index'))
+app.use('/api/v1/requests', require('./request/index'))
 
 mongoose.connect(config.mongoConnection).then(resp => {
     debug('connected to mongo server')
