@@ -206,18 +206,23 @@ describe('request crud endpoint test', () => {
 
   })
 
-  describe('DELETE specific user endpoint', () => {
+  describe('DELETE specific request endpoint', () => {
 
-    it('should change user enabled to false', (done) => {
-      done()
+    let checkEnabledFalse = res => {
+      assert.equal(res.status, 202)
+      assert.isFalse(res.body.enabled)
+    }
+
+    it('should change request enabled to false', (done) => {
+      server.delete('/api/v1/requests/5aaa89e2a892471e3cdc84e1')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .then(checkEnabledFalse).then(() => done()).catch(err => done(err))
     })
 
-    it('should keep deleted user enabled to false', (done) => {
-      done()
-    })
-
-    it('should return 404 error status when user not found', (done) => {
-      done()
+    it('should keep deleted request enabled to false', (done) => {
+      server.delete('/api/v1/requests/5aaa89e2a892471e3cdc84df')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .then(checkEnabledFalse).then(() => done()).catch(err => done(err))
     })
 
   })
