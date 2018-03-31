@@ -355,30 +355,149 @@ describe('request crud endpoint test', () => {
 
   })
 
-  describe('PUT specific user endpoint', () => {
+  describe('PUT specific request endpoint', () => {
 
-    it('should change new user', (done) => {
-      done()
+    it('should change new request', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84da')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({
+        name: 'request edit 1',
+        description: 'description of request edit 1',
+        startTime: new Date(2018,2, 15, 9).getTime(),
+        endTime: new Date(2018, 2, 15, 12).getTime(),
+        participantNumber: 3,
+        participantDescription: 'participant description edit',
+        speaker: 'speaker edit',
+        status: 'pending',
+        enabled: false
+      })
+      .then(res => {
+        assert.equal(res.status, 200)
+        assert.equal(res.body.name, 'request edit 1')
+        assert.equal(res.body.description, 'description of request edit 1')
+        assert.equal(res.body.participantDescription, 'participant description edit')
+        assert.equal(res.body.speaker, 'speaker edit')
+        assert.equal(res.body.status, 'pending')
+        assert.equal(res.body.enabled, false)
+      }).then(() => done()).catch(done)
     })
 
-    it('should change new user with some field', (done) => {
-      done()
+    it('should return 403 when division want to update accepted request', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84de')
+      .set({'Authorization': 'JWT ' + userAuth})
+      .send({'name': 'changing name'})
+      .then(res => {
+        assert.equal(res.status, 403)
+        assert.hasAllKeys(res.body, 'error')
+        assert.hasAllKeys(res.body.error, ['cause', 'msg'])
+        assert.isNotEmpty(res.body.error.msg)
+        assert.isNotEmpty(res.body.error.cause)
+      }).then(() => done()).catch(done)
     })
 
-    it('should keep username', (done) => {
-      done()
+    it('should return 200 when admin want to update accepted request', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84da')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({name: 'request edit 1',})
+      .then(res => {
+        assert.equal(res.status, 200)
+        assert.equal(res.body.name, 'request edit 1')
+      }).then(() => done()).catch(done)
     })
 
-    it('should return 400 when username is taken', (done) => {
-      done()
+    it('should keep issuedTime', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84dc')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({description: 'description of request edit 1'})
+      .then(res => {
+        assert.equal(res.status, 200)
+        assert.equal(new Date(res.body.issuedTime).getTime(),  new Date(2018, 1, 1, 10).getTime())
+      }).then(() => done()).catch(done)
     })
 
-    it('should return 400 when email is taken', (done) => {
-      done()
+    let check400Error = res => {
+      assert.equal(res.status, 400)
+      assert.hasAllKeys(res.body, 'error')
+      assert.hasAllKeys(res.body.error, ['cause', 'msg'])
+      assert.isNotEmpty(res.body.error.msg)
+      assert.isNotEmpty(res.body.error.cause)
+    }
+
+    it('should return 400 when status field found but current user is division', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + userAuth})
+      .send({status:'accepted'})
+      .then(check400Error).then(() => done()).catch(done)
     })
 
-    it('should return 404 when user id not found', (done) => {
-      done()
+    it('should return 200 when status field found but current user is admin', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({status:'pending'})
+      .expect(200).then(() => done()).catch(done)
+    })
+
+    it('should return 400 when enabled field found but current user is division', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + userAuth})
+      .send({enabled:false})
+      .then(check400Error).then(() => done()).catch(done)
+    })
+
+    it('should return 200 when enabled field found but current user is admin', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({enabled:false})
+      .expect(200).then(() => done()).catch(done)
+    })
+
+    it('should return 400 when issuer field found', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({issuer:'5aa9359a2b21732a73d5406a'})
+      .then(check400Error).then(() => done()).catch(done)
+    })
+
+    it('should return 400 when issuedTime field found', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({issuedTime: 10})
+      .then(check400Error).then(() => done()).catch(done)
+    })
+
+    it('should return 400 when division want to change division', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + userAuth})
+      .send({division:'5aaa860001e1901b03651171'}) // division 2
+      .then(check400Error).then(() => done()).catch(done)
+    })
+
+    it('should return 200 when admin want to change division', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({division:'5aaa860001e1901b03651171'}) // division 2
+      .expect(200).then(() => done()).catch(done)
+    })
+
+    it('should return 400 when division not found', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({division:'9999990001e1901b03651171'})
+      .then(check400Error).then(() => done()).catch(done)
+    })
+
+    it('should return 400 when location not found', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({location:'9999990001e1901b03651171'})
+      .then(check400Error).then(() => done()).catch(done)
+    })
+
+    it('should return 400 when end time less than start time', (done) => {
+      server.put('/api/v1/requests/5aaa89e2a892471e3cdc84e0')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({startTime: 100, endTime: 99})
+      .then(check400Error).then(() => done()).catch(done)
     })
 
   })
