@@ -46,7 +46,7 @@ let filterRequestId = (req) => {
 
 let filterMongoByUser = (currentUser, mongoRequest, callback) => {
   if (currentUser && !currentUser.admin)
-    return mongoRequest.where('division', currentUser.division).exec(callback)
+    return mongoRequest.where('division', currentUser.division.id).exec(callback)
   if (!currentUser)
     return mongoRequest.where('status', 'accepted').where('enabled',true).exec(callback)
   return mongoRequest.exec(callback)
@@ -64,7 +64,7 @@ let findOneRequest = crudUtil.readOne({
   convertOne: (obj, context, callback) => callback(null, obj.toJSON ? obj.toJSON() : obj)
 })
 
-let validateUserInput = (currentUser, userInput, callback) => {
+let validateUserInput = (userInput, callback) => {
   let rules = {
     name: joi.string().min(3).max(255).required(),
     issuer: joi.string().hex().length(24).required(),
@@ -76,10 +76,9 @@ let validateUserInput = (currentUser, userInput, callback) => {
     participantNumber: joi.number().integer().positive(),
     participantDescription: joi.string().max(1024),
     speaker: joi.string().max(512),
+    status: joi.string().allow(['pending','accepted','rejected']).required(),
     enabled: joi.boolean().default(true),
   }
-  if (!currentUser.admin)
-    delete rules['division']
   let schema = joi.object().keys(rules)
   let validationResult = schema.validate(userInput)
   if (validationResult.error)
@@ -88,8 +87,6 @@ let validateUserInput = (currentUser, userInput, callback) => {
   let validatedValue = validationResult.value
   validatedValue.startTime = new Date(validatedValue.startTime)
   validatedValue.endTime = new Date(validatedValue.endTime)
-  if (!currentUser.admin)
-    validatedValue.division = currentUser.division
   
   Promise.all([
     divisionModel.findOne({_id:validatedValue.division}).exec(),
@@ -103,7 +100,6 @@ let validateUserInput = (currentUser, userInput, callback) => {
 
     validatedValue.division = res[0]
     validatedValue.location = res[1]
-    validatedValue.issuedTime = Date.now()
 
     callback(null, validatedValue)
   })
@@ -111,9 +107,27 @@ let validateUserInput = (currentUser, userInput, callback) => {
 }
 
 let createOneRequest = crudUtil.createOne({
-  validateOne: (req, context, callback) =>
-    validateUserInput(req.user, Object.assign({issuer: req.user.id}, req.body), callback),
-  insertOne: (validatedData, context, callback) => new requestModel(validatedData).save(callback),
+  validateOne: (req, context, callback) => {
+    if ('issuer' in req.body)
+      return callback({status:400, cause:'"issuer" is not allowed'})
+    if (req.user && !req.user.admin) {
+      if (req.body.division)
+        return callback({status:400, cause:'"division" is not allowed'})
+      if (req.body.status)
+        return callback({status:400, cause:'"status" is not allowed'})
+      if (req.body.enabled)
+        return callback({status:400, cause:'"enabled" is not allowed'})
+    }
+    let inputData = Object.assign({issuer: req.user.id, status:'pending'}, req.body)
+    if (req.user && !req.user.admin)
+      inputData.division = req.user.division.id
+
+    validateUserInput(inputData, callback)
+  },
+  insertOne: (validatedData, context, callback) => {
+    validatedData.issuedTime = Date.now()
+    new requestModel(validatedData).save(callback)
+  },
   convertOne: (insertedData, context, callback) => 
     insertedData.populate('issuer').populate('division').populate('location').execPopulate()
     .then(insertedData => callback(null, insertedData.toJSON ? insertedData.toJSON() : insertedData)),
@@ -125,6 +139,19 @@ let updateOneRequest = crudUtil.updateOne({
     filterMongoByUser(req.user, filterRequestId(req), callback)
   },
   validateOne: (item, context, callback) => {
+    if (item.status === 'accepted')
+      return callback({status:403, cause:'trying to update accepted request'})
+    if ('issuer' in context.request.body)
+      return callback({status:400, cause:'"issuer" is not allowed'})
+    if (context.request.user && !context.request.user.admin) {
+      if ('division' in context.request.body)
+        return callback({status:400, cause:'"division" is not allowed'})
+      if ('status' in context.request.body)
+        return callback({status:400, cause:'"status" is not allowed'})
+      if ('enabled' in context.request.body)
+        return callback({status:400, cause:'"enabled" is not allowed'})
+    }
+
     context.updatingItem = item
     let inputData = Object.assign({
       name: item.name,
@@ -132,9 +159,14 @@ let updateOneRequest = crudUtil.updateOne({
       division: item.division.id,
       location: item.location.id,
       startTime: item.startTime.getTime(),
-      endTime: item.endTime.getTime()
+      endTime: item.endTime.getTime(),
+      status: item.status
     }, context.request.body)
-    validateUserInput(context.request.user, inputData, callback)
+    validateUserInput(inputData, (err, res) => {
+      if (err) return callback(err, null)
+      if (res.endTime <= res.startTime) return callback({status:400, cause:'"endTime" must greater than "startTime"'})
+      return callback(err, res)
+    })
   },
   updateOne: (validatedData, context, callback) => {
     context.updatingItem.set(validatedData)
