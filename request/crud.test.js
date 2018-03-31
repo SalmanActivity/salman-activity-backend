@@ -86,6 +86,7 @@ describe('request crud endpoint test', () => {
       assert.equal(res.status, 200)
       assert.equal(res.body.id, document._id)
       assert.equal(res.body.status, document.status)
+      assert.equal(new Date(res.body.issuedTime).getTime(), document.issuedTime.getTime())
       assert.equal(new Date(res.body.startTime).getTime(), document.startTime.getTime())
       assert.equal(new Date(res.body.endTime).getTime(), document.endTime.getTime())
       assert.equal(res.body.enabled, document.enabled)
@@ -102,6 +103,7 @@ describe('request crud endpoint test', () => {
         _id: '5aaa89e2a892471e3cdc84de',
         name: 'request 5',
         description: 'description of request 5',
+        issuedTime: new Date(2018, 1, 1, 10),
         startTime: new Date(2018, 1, 1, 13),
         endTime: new Date(2018, 1, 1, 17),
         status: 'accepted',
@@ -116,6 +118,7 @@ describe('request crud endpoint test', () => {
         _id: '5aaa89e2a892471e3cdc84de',
         name: 'request 5',
         description: 'description of request 5',
+        issuedTime: new Date(2018, 1, 1, 10),
         startTime: new Date(2018, 1, 1, 13),
         endTime: new Date(2018, 1, 1, 17),
         status: 'accepted',
@@ -130,6 +133,7 @@ describe('request crud endpoint test', () => {
         _id: '5aaa89e2a892471e3cdc84df',
         name: 'request 6',
         description: 'description of request 6',
+        issuedTime: new Date(2018, 1, 1, 10),
         startTime: new Date(2018, 1, 1, 13),
         endTime: new Date(2018, 1, 1, 17),
         status: 'rejected',
@@ -144,6 +148,7 @@ describe('request crud endpoint test', () => {
         _id: '5aaa89e2a892471e3cdc84e1',
         name: 'request 8',
         description: 'description of request 8',
+        issuedTime: new Date(2018, 1, 1, 10),
         startTime: new Date(2018, 1, 23, 13),
         endTime: new Date(2018, 1, 23, 17),
         status: 'accepted',
@@ -158,6 +163,7 @@ describe('request crud endpoint test', () => {
         _id: '5aaa89e2a892471e3cdc84df',
         name: 'request 6',
         description: 'description of request 6',
+        issuedTime: new Date(2018, 1, 1, 10),
         startTime: new Date(2018, 1, 1, 13),
         endTime: new Date(2018, 1, 1, 17),
         status: 'rejected',
@@ -229,84 +235,122 @@ describe('request crud endpoint test', () => {
 
   describe('POST specific user endpoint', () => {
 
-    it('should add new user', (done) => {
-      done()
+    it('should add new request with current user as issuer and division', (done) => {
+      server.post('/api/v1/requests/')
+      .set({'Authorization': 'JWT ' + userAuth})
+      .send({
+        name: 'request test 1',
+        description: 'description of request test 1',
+        location: '5aaa89e2a892471e3cdc84d8', // location 1
+        startTime: new Date(2018, 5, 28, 13).getTime(),
+        endTime: new Date(2018, 5, 28, 17).getTime(),
+      }).then(res => {
+        assert.equal(res.status, 200)
+        assert.isNotEmpty(res.body.id)
+        assert.equal(res.body.description, 'description of request test 1')
+        assert.equal(res.body.name, 'request test 1')
+        assert.equal(res.body.issuer.id, '5aa9359a2b21732a73d5406a')
+        assert.equal(res.body.division.id, '5aa9359a2b21732a73d54068') // division 1
+        assert.equal(res.body.status, 'pending')
+        done()
+      }).catch(done)
     })
 
+    it('should add new request with current user as issuer and division is specific', (done) => {
+      server.post('/api/v1/requests/')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send({
+        name: 'request test 2',
+        description: 'description of request test 2',
+        division: '5aaa860001e1901b03651171', // divisi 2
+        location: '5aaa89e2a892471e3cdc84d8', // location 1
+        startTime: new Date(2018, 5, 28, 13).getTime(),
+        endTime: new Date(2018, 5, 28, 17).getTime(),
+      }).then(res => {
+        assert.equal(res.status, 200)
+        assert.isNotEmpty(res.body.id)
+        assert.equal(res.body.name, 'request test 2')
+        assert.equal(res.body.description, 'description of request test 2')
+        assert.equal(res.body.issuer.id, '5aa9359a2b21732a73d54069')
+        assert.equal(res.body.division.id, '5aaa860001e1901b03651171') // division 2
+        assert.equal(res.body.status, 'pending')
+        done()
+      }).catch(done)
+    })
+
+    let templateObject = {
+      name: 'template request name',
+      description: 'template description',
+      location: '5aaa89e2a892471e3cdc84d9', // location 2
+      startTime: new Date(2018, 7, 13, 10).getTime(),
+      endTime: new Date(2018, 7, 13, 15).getTime(),
+      participantNumber: 10,
+      participantDescription: 'template participant description',
+      speaker: 'template speakder description'
+    }
+
+    let check400Error = res => {
+      assert.equal(res.status, 400)
+      assert.hasAllKeys(res.body, 'error')
+      assert.hasAllKeys(res.body.error, ['cause', 'msg'])
+      assert.isNotEmpty(res.body.error.msg)
+      assert.isNotEmpty(res.body.error.cause)
+    }
+
     it('should return 400 and send validation error when name is too short', (done) => {
-      done()
+      server.post('/api/v1/requests/')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send(Object.assign(templateObject, {name:'j'}))
+      .then(check400Error).then(() => done()).catch(done)
     })
 
     it('should return 400 and send validation error when name is too long', (done) => {
-      done()
+      server.post('/api/v1/requests/')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send(Object.assign(templateObject, {name:new Array(256+1).join('x')}))
+      .then(check400Error).then(() => done()).catch(done)
     })
 
     it('should return 400 and send validation error when name is missing', (done) => {
-      done()
+      server.post('/api/v1/requests/')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send(Object.assign(templateObject, {name:null}))
+      .then(check400Error).then(() => done()).catch(done)
     })
 
-    it('should return 400 and send validation error when username is too short', (done) => {
-      done()
+    it('should return 400 and send validation error when description is too long', (done) => {
+      server.post('/api/v1/requests/')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send(Object.assign(templateObject, {description:new Array(256+1).join('x')}))
+      .then(check400Error).then(() => done()).catch(done)
     })
 
-    it('should return 400 and send validation error when username is too long', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when username is missing', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when username is used', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when email is invalid', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when email is too short', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when email is too long', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when email is missing', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when email is used', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when password is too short', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when password is too long', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when password is missing', (done) => {
-      done()
-    })
-
-    it('should return 400 and send validation error when division is invalid', (done) => {
-      done()
+    it('should return 400 and send validation error when division is not 24 hex', (done) => {
+      server.post('/api/v1/requests/')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send(Object.assign(templateObject, {division:'jauhararifin'}))
+      .then(check400Error).then(() => done()).catch(done)
     })
 
     it('should return 400 and send validation error when division is not found', (done) => {
-      done()
+      server.post('/api/v1/requests/')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send(Object.assign(templateObject, {division:'000000000000000000000000'}))
+      .then(check400Error).then(() => done()).catch(done)
     })
 
-    it('should return 400 and send validation error when enabled is invalid', (done) => {
-      done()
+    it('should return 400 and send validation error when location is not 24 hex', (done) => {
+      server.post('/api/v1/requests/')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send(Object.assign(templateObject, {location:'jauhararifin'}))
+      .then(check400Error).then(() => done()).catch(done)
     })
 
-    it('should return 400 and send validation error when admin is invalid', (done) => {
-      done()
+    it('should return 400 and send validation error when location is not found', (done) => {
+      server.post('/api/v1/requests/')
+      .set({'Authorization': 'JWT ' + adminAuth})
+      .send(Object.assign(templateObject, {location:'000000000000000000000000'}))
+      .then(check400Error).then(() => done()).catch(done)
     })
 
   })
