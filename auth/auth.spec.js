@@ -185,6 +185,11 @@ describe('auth middleware test', function() {
     userModelMocked = sinon.stub(userModel, 'findOne')
     for (let user of userDocuments)
       userModelMocked.withArgs({username: user.username}).returns({
+        populate: () => {
+          return {
+            exec: () => Promise.resolve(user)
+          }
+        },
         exec: () => Promise.resolve(user)
       })
     
@@ -219,7 +224,7 @@ describe('auth middleware test', function() {
     auth.auth(requestMocked, responseSpy, function() {
       sinon.assert.match(requestMocked.user, user)
       done()
-    })
+    }).catch(done)
   })
 
   it('should process next middleware when token in body and valid', (done) => {

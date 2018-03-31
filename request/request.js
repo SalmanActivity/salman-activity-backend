@@ -18,6 +18,10 @@ var requestSchema = mongoose.Schema({
     ref: userModel.modelName,
     required: true
   },
+  issuedTime: {
+    type: Date,
+    required: true,
+  },
   division: {
     type: mongoose.Schema.Types.ObjectId,
     ref: divisionModel.modelName,
