@@ -90,7 +90,7 @@ let request3 = new requestModel({
     division: division2,
     location: location2,
     startTime: new Date(2018, 2, 19, 13),
-    endTime: new Date(2018, 2, 10, 17),
+    endTime: new Date(2018, 2, 19, 17),
     status: 'rejected',
     enabled: true
 })
@@ -143,7 +143,7 @@ let request7 = new requestModel({
     description: 'description of request 7',
     issuer: admin1,
     issuedTime: new Date(2018, 1, 1, 10),
-    division: division2,
+    division: division1,
     location: location2,
     startTime: new Date(2018, 1, 23, 13),
     endTime: new Date(2018, 1, 23, 17),
