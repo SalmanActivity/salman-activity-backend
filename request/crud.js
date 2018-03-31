@@ -103,6 +103,7 @@ let validateUserInput = (currentUser, userInput, callback) => {
 
     validatedValue.division = res[0]
     validatedValue.location = res[1]
+    validatedValue.issuedTime = Date.now()
 
     callback(null, validatedValue)
   })
