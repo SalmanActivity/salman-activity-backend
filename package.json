@@ -7,6 +7,7 @@
     "seed-dev": "DEBUG=seed node ./scripts/seed_db.js",
     "dev": "DEBUG=salman-activity-backend:server ENV=dev nodemon ./scripts/devServer.js",
     "test": "node node_modules/.bin/mocha -t 2000 ./**/*.spec.js",
+    "pretest-integration": "npm run seed-dev",
     "test-integration": "node node_modules/.bin/mocha -t 2000 ./**/*.test.js",
     "encrypt-config": "node ./scripts/configEncrypt.js"
   },
