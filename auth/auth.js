@@ -16,7 +16,7 @@ function user(req, res, next) {
   req.token = token
 
   return util.promisify(jwt.verify)(token, config.secretKey)
-  .then(data => userModel.findOne({username: data.username}).exec())
+  .then(data => userModel.findOne({username: data.username}).populate('division').exec())
   .then(user => {
     req.user = user.toJSON ? user.toJSON() : user
     return next()
