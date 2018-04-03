@@ -1,4 +1,4 @@
-import { Accessor } from "../accessor"
+import Accessor from "../accessor"
 import { Model, Document, Types } from "mongoose"
 import MongoDocumentSerializer from "./mongoDocumentSerializer"
 import Item from '../item'

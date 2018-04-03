@@ -1,4 +1,4 @@
-import { Accessor } from './accessor'
+import Accessor from './accessor'
 import Item from './item'
 
 export default class InMemoryAccessor<T extends Item> implements Accessor<T> {
