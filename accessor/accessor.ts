@@ -1,6 +1,6 @@
 import Item from './item'
 
-export interface Accessor<T extends Item> {
+export default interface Accessor<T extends Item> {
 
   getAll(): Promise<T[]>
 
