@@ -1,8 +1,7 @@
-var mongoose = require('mongoose')
-var divisionModel = require('../division/division')
-var divisionSchema = divisionModel.schema
+import { Schema, Model, Document, model } from 'mongoose'
+import DivisionModel from '../division/divisionMongoModel'
 
-var userSchema = mongoose.Schema({
+let userSchema:Schema = new Schema({
   name: {
     type: String,
     required: true
@@ -22,8 +21,8 @@ var userSchema = mongoose.Schema({
     required: true
   },
   division: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: divisionModel.modelName
+    type: Schema.Types.ObjectId,
+    ref: DivisionModel
   },
   enabled: {
     type: Boolean,
@@ -35,6 +34,7 @@ var userSchema = mongoose.Schema({
     default: false
   }
 })
-userSchema.plugin(require('meanie-mongoose-to-json'))
 
-module.exports = mongoose.model('user', userSchema)
+let userModel: Model<Document> = model('user', userSchema)
+
+export default userModel
