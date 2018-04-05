@@ -7,9 +7,12 @@ class DefaultMongoDocumentSerializer<T> implements MongoDocumentSerializer<T> {
 
   async serialize(mongoDocument: Document): Promise<T> {
     let result:T
-    for (let key in mongoDocument)
+    for (let key in mongoDocument) {
+      if (result[key] instanceof Types.ObjectId)
+        mongoDocument.populate(key)
       if (key != '_id')
         result[key] = mongoDocument[key]
+    }
     result['id'] = mongoDocument._id
     return result
   }
@@ -18,8 +21,8 @@ class DefaultMongoDocumentSerializer<T> implements MongoDocumentSerializer<T> {
 
 export default class MongoAccessor<T extends Item> implements Accessor<T> {
 
-  constructor(private mongoModel: Model<Document>,
-              private docSerializer: MongoDocumentSerializer<T> = new DefaultMongoDocumentSerializer<T>()) {
+  constructor(public mongoModel: Model<Document>,
+              protected docSerializer: MongoDocumentSerializer<T> = new DefaultMongoDocumentSerializer<T>()) {
   }
 
   async getAll(): Promise<T[]> {
