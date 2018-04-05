@@ -3,7 +3,7 @@ import Item from './item'
 
 export default class InMemoryAccessor<T extends Item> implements Accessor<T> {
 
-  constructor(private documents: T[]) {
+  constructor(protected documents: T[]) {
   }
 
   async getAll(): Promise<T[]> {
