@@ -16,4 +16,12 @@ export default class UserMongoAccessor extends MongoAccessor<User> implements Us
     let item:User = await this.docSerializer.serialize(result)
     return item
   }
+
+  async getByEmail(email:string):Promise<User> {
+    let result:Document = await this.mongoModel.findOne({email}).exec()
+    if (!result)
+      return undefined
+    let item:User = await this.docSerializer.serialize(result)
+    return item
+  }
 }
