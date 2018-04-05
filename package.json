@@ -4,12 +4,10 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && node ./scripts/web.js",
+    "start": "npm run build && node ./dist/app.js",
     "seed-dev": "DEBUG=seed node ./scripts/seed_db.js",
-    "dev": "DEBUG=salman-activity-backend:server ENV=dev nodemon ./scripts/devServer.js",
-    "test": "node node_modules/.bin/mocha -t 2000 ./**/*.spec.js",
-    "pretest-integration": "npm run seed-dev",
-    "test-integration": "node node_modules/.bin/mocha --exit -t 2000 ./**/*.test.js",
+    "dev": "DEBUG=salman-activity-backend:server ENV=dev nodemon node_modules/.bin/ts-node app.ts",
+    "test": "node node_modules/.bin/mocha -r ts-node/register -t 2000 ./**/*.spec.js",
     "encrypt-config": "node ./scripts/configEncrypt.js"
   },
   "engineStrict": true,
@@ -30,8 +28,10 @@
   },
   "devDependencies": {
     "@types/body-parser": "^1.16.8",
+    "@types/chai": "^4.1.2",
     "@types/mocha": "^5.0.0",
     "@types/mongoose": "^5.0.7",
+    "@types/sinon": "^4.3.1",
     "chai": "^4.1.2",
     "mocha": "^5.0.5",
     "nodemon": "^1.15.1",
