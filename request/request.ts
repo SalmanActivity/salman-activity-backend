@@ -6,14 +6,14 @@ import { Item } from '../accessor'
 export enum RequestStatus {
   pending = 'pending',
   accepted = 'accepted',
-  rejeced = 'rejeced'
+  rejected = 'rejected'
 }
 
 export default interface Request extends Item {
   
   name: string
 
-  description: string
+  description?: string
 
   issuer: User
   
@@ -27,11 +27,11 @@ export default interface Request extends Item {
   
   endTime: Date
 
-  participantNumber: number
+  participantNumber?: number
   
-  participantDescription: string
+  participantDescription?: string
 
-  speaker: string
+  speaker?: string
 
   status: RequestStatus
 

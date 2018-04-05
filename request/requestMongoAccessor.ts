@@ -5,6 +5,10 @@ import RequestMongoModel from './requestMongoModel'
 import Request from './request'
 
 export default class RequestMongoAccessor extends MongoAccessor<Request> implements RequestAccessor {
+  constructor() {
+    super(RequestMongoModel)
+  }
+  
   async getAllBetween(start:Date, end:Date):Promise<Request[]> {
 
     let condition = {
@@ -18,9 +22,5 @@ export default class RequestMongoAccessor extends MongoAccessor<Request> impleme
     let promiseList:Promise<Request>[] = result.map<Promise<Request>>((val, idx) => this.docSerializer.serialize(val))
     let itemArray:Request[] = await Promise.all(promiseList)
     return itemArray
-  }
-  
-  constructor() {
-    super(RequestMongoModel)
   }
 }
