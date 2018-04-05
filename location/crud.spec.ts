@@ -64,7 +64,7 @@ describe('location crud endpoint test', () => {
         sinon.assert.calledWith(res.status, 200)
         sinon.assert.calledWith(res.json, [])
         done()
-      }).catch(err => done(err)).then(() => documents = temp)
+      }).catch(err => done(err))
     })
 
     it('should return only id,name,enabled field', (done) => {
