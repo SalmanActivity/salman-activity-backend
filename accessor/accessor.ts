@@ -8,6 +8,8 @@ export default interface Accessor<T extends Item> {
 
   insert(object: T): Promise<T>
 
+  deleteAll(): Promise<void>
+
   delete(object: T): Promise<T>
 
   update(object: T): Promise<T>

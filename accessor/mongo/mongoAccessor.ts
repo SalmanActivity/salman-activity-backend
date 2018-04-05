@@ -50,6 +50,10 @@ export default class MongoAccessor<T extends Item> implements Accessor<T> {
     return this.docSerializer.serialize(doc)
   }
 
+  async deleteAll(): Promise<void> {
+    await this.mongoModel.deleteMany({}).exec()
+  }
+
   async delete(object: T): Promise<T> {
     return await this.mongoModel.deleteOne({_id:object.id}).exec()
   }

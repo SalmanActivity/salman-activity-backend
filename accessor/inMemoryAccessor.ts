@@ -34,6 +34,11 @@ export default class InMemoryAccessor<T extends Item> implements Accessor<T> {
     return obj
   }
 
+  async deleteAll(): Promise<void> {
+    while (this.documents.length > 0)
+      this.documents.pop()
+  }
+
   async delete(object: T): Promise<T> {
     for (let i = 0; i < this.documents.length; i++) {
       let item = this.documents[i]
