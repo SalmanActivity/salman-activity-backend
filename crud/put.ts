@@ -10,20 +10,20 @@ export function updateOne(option) {
 
     try {
       let object:any = init(req, context)
-      object = fetchOne(object, context)
+      object = await fetchOne(object, context)
       if (!object)
         throw {status:404, cause: 'object not found'}
       try {
-        object = validateOne(object, context)
+        object = await validateOne(object, context)
       } catch (err) {
         if (err.status)
           throw err
         else
           throw {status:400, cause: err}
       }
-      object = updateOne(object, context)
-      object = convertOne(object, context)
-      object = filterFieldOne(object, context)
+      object = await updateOne(object, context)
+      object = await convertOne(object, context)
+      object = await filterFieldOne(object, context)
       res.status(200).json(object)
     } catch (err) {
       displayError(res, 'cannot update object')(err)

@@ -3,7 +3,7 @@ import * as util from 'util'
 
 export function oneToManyFunction(oneFunction) {
   return async function(valArr, context):Promise<any[]> {
-    let parallelArr = valArr.map(val => oneFunction.bind(this, val, context))
+    let parallelArr = valArr.map(val => oneFunction(val, context))
     let results = await Promise.all(parallelArr)
     let resultArr = []
     for (let i = 0; i < valArr.length; i++)
@@ -43,15 +43,15 @@ export function defaultFunction(func) {
 
   let filterFieldOne = async (item, context) => item
 
-  let deleteMany = manyToOneFunction(deleteOne) 
+  let deleteMany = oneToManyFunction(deleteOne) 
 
-  let fetchMany = manyToOneFunction(fetchOne)
+  let fetchMany = oneToManyFunction(fetchOne)
 
-  let filterMany = manyToOneFunction(filterOne)
+  let filterMany = oneToManyFunction(filterOne)
 
-  let convertMany = manyToOneFunction(convertOne)
+  let convertMany = oneToManyFunction(convertOne)
 
-  let filterFieldMany = manyToOneFunction(filterFieldOne)
+  let filterFieldMany = oneToManyFunction(filterFieldOne)
 
   let defaultFunctions = {
     init, deleteOne, fetchOne, filterOne, convertOne, filterFieldOne,
