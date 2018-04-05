@@ -1,9 +1,9 @@
-var mongoose = require('mongoose')
-var userModel = require('../user/user')
-var divisionModel = require('../division/division')
-var locationModel = require('../location/location')
+import { Schema, Model, Document, model } from 'mongoose'
+import { UserMongoModel } from '../user'
+import { LocationMongoModel } from '../location'
+import { DivisionMongoModel } from '../division'
 
-var requestSchema = mongoose.Schema({
+let requestSchema:Schema = new Schema({
   name: {
     type: String,
     maxlength: 256,
@@ -14,8 +14,8 @@ var requestSchema = mongoose.Schema({
     maxlength: 1024,
   },
   issuer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: userModel.modelName,
+    type: Schema.Types.ObjectId,
+    ref: UserMongoModel.modelName,
     required: true
   },
   issuedTime: {
@@ -23,13 +23,13 @@ var requestSchema = mongoose.Schema({
     required: true,
   },
   division: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: divisionModel.modelName,
+    type: Schema.Types.ObjectId,
+    ref: DivisionMongoModel.modelName,
     required: true
   },
   location: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: locationModel.modelName,
+    type: Schema.Types.ObjectId,
+    ref: LocationMongoModel.modelName,
     required: true
   },
   startTime: {
@@ -61,6 +61,7 @@ var requestSchema = mongoose.Schema({
     default: true
   },
 })
-requestSchema.plugin(require('meanie-mongoose-to-json'))
 
-module.exports = mongoose.model('request', requestSchema)
+let requestModel: Model<Document> = model('request', requestSchema)
+
+export default requestModel
