@@ -1,4 +1,4 @@
-import { Division } from '../division/division'
+import { Division } from '../division'
 import { Item } from '../accessor'
 
 export default interface User extends Item {
