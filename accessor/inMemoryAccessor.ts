@@ -19,11 +19,16 @@ export default class InMemoryAccessor<T extends Item> implements Accessor<T> {
 
   async insert(object: T): Promise<T> {
     let obj = Object.assign({}, object)
-    if (this.getById(obj.id))
+    let otherObject = await this.getById(obj.id)
+    if (otherObject)
       throw new Error('object id taken')
-    while (!obj.id || this.getById(obj.id)) {
+    otherObject = await this.getById(obj.id)
+    while (!obj.id || otherObject) {
       let hex = '0123456789abcdef'
-      obj.id = new Array(24 + 1).map(() => hex[Math.floor(Math.random()*hex.length)]).join('')
+      obj.id = ''
+      for (let i = 0; i < 24; i++)
+        obj.id += hex[Math.floor(Math.random() * hex.length)]
+      otherObject = await this.getById(obj.id)
     }
     this.documents.push(obj)
     return obj
@@ -40,11 +45,13 @@ export default class InMemoryAccessor<T extends Item> implements Accessor<T> {
     throw new Error('document not found')
   }
 
-  update(object: T): Promise<T> {
+  async update(object: T): Promise<T> {
     for (let i = 0; i < this.documents.length; i++) {
       let item = this.documents[i]
-      if (item.id === object.id)
+      if (item.id === object.id) {
         this.documents[i] = object
+        return this.documents[i]
+      }
     }
     throw new Error('document not found')  
   }
