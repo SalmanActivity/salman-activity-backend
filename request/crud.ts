@@ -36,7 +36,7 @@ async function filterResultByUser (currentUser, request: Request) {
   }
 }
 
-export function findRequestInMonth(requestAccessor:RequestAccessor = new RequestMongoAccessor()) {
+export function findRequestInMonth(requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
   return crudUtil.readMany({
     init: async (req, context) => { 
       context.user = req.user

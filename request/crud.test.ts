@@ -1,7 +1,9 @@
-var sinon = require('sinon')
-var assert = require('chai').assert
-var crud = require('./crud')
-var server = require('supertest')(require('../app'))
+import * as sinon from 'sinon'
+import { assert } from 'chai'
+import * as crud from './crud'
+import supertest from 'supertest'
+import app from '../app'
+let server = supertest(app)
 
 describe('request crud endpoint test', () => {
 
@@ -40,8 +42,8 @@ describe('request crud endpoint test', () => {
         assert.isAbove(res.body.length, 0, 'should return requests more than 0')
         for (let item of res.body) {
           let startTime = new Date(item.startTime)
-          assert.isAtLeast(startTime, new Date(2018, 1))
-          assert.isAtMost(startTime, new Date(2018, 2))
+          assert.isAtLeast(startTime.getTime(), new Date(2018, 1).getTime())
+          assert.isAtMost(startTime.getTime(), new Date(2018, 2).getTime())
           assert.equal(item.status, 'accepted')
         }
         done()
@@ -72,8 +74,8 @@ describe('request crud endpoint test', () => {
         assert.isAbove(res.body.length, 0, 'should return requests more than 0')
         for (let item of res.body) {
           let startTime = new Date(item.startTime)
-          assert.isAtLeast(startTime, new Date(2018, 1))
-          assert.isAtMost(startTime, new Date(2018, 2))
+          assert.isAtLeast(startTime.getTime(), new Date(2018, 1).getTime())
+          assert.isAtMost(startTime.getTime(), new Date(2018, 2).getTime())
         }
         done()
       }).catch(err => done(err))
@@ -291,7 +293,7 @@ describe('request crud endpoint test', () => {
 
     let check400Error = res => {
       assert.equal(res.status, 400)
-      assert.hasAllKeys(res.body, 'error')
+      assert.hasAllKeys(res.body, ['error'])
       assert.hasAllKeys(res.body.error, ['cause', 'msg'])
       assert.isNotEmpty(res.body.error.msg)
       assert.isNotEmpty(res.body.error.cause)
@@ -388,7 +390,7 @@ describe('request crud endpoint test', () => {
       .send({'name': 'changing name'})
       .then(res => {
         assert.equal(res.status, 403)
-        assert.hasAllKeys(res.body, 'error')
+        assert.hasAllKeys(res.body, ['error'])
         assert.hasAllKeys(res.body.error, ['cause', 'msg'])
         assert.isNotEmpty(res.body.error.msg)
         assert.isNotEmpty(res.body.error.cause)
@@ -417,7 +419,7 @@ describe('request crud endpoint test', () => {
 
     let check400Error = res => {
       assert.equal(res.status, 400)
-      assert.hasAllKeys(res.body, 'error')
+      assert.hasAllKeys(res.body, ['error'])
       assert.hasAllKeys(res.body.error, ['cause', 'msg'])
       assert.isNotEmpty(res.body.error.msg)
       assert.isNotEmpty(res.body.error.cause)
