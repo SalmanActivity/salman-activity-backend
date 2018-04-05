@@ -8,7 +8,7 @@ export default function auth(userAccessor: UserAccessor = new UserMongoAccessor(
     return new Promise((resolve, reject) => {
       user(userAccessor, config)(req, res, () => {
         if (req.user)
-          resolve(next())
+          next()
         else {
           let error = {
             error: {
@@ -17,8 +17,8 @@ export default function auth(userAccessor: UserAccessor = new UserMongoAccessor(
             }
           }
           res.status(403).json(error)
-          resolve(error)
         }
+        resolve()
       })
     })
   }

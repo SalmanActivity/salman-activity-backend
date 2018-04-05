@@ -3,16 +3,18 @@ import * as jwt from 'jsonwebtoken'
 import defaultConfig, { Config } from '../config'
 import { UserAccessor, UserMongoAccessor } from '../user'
 
-export async function admin(req, res, next) {
-  if (req.user && req.user.admin)
-    return next()
-  
-  return res.status(403).json({
-    error: {
-      msg: 'only admin can perform this action',
-      cause: 'unauthorized access'
-    }
-  })
+export function admin() {
+  return async (req, res, next) => {
+    if (req.user && req.user.admin)
+      return next()
+    
+    return res.status(403).json({
+      error: {
+        msg: 'only admin can perform this action',
+        cause: 'unauthorized access'
+      }
+    })
+  }
 }
 
 export function user(userAccessor: UserAccessor = new UserMongoAccessor(), config:Config = defaultConfig) {
