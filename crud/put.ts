@@ -9,7 +9,7 @@ export function updateOne(option) {
     let context = {}
 
     try {
-      let object:any = init(req, context)
+      let object:any = await init(req, context)
       object = await fetchOne(object, context)
       if (!object)
         throw {status:404, cause: 'object not found'}

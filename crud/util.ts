@@ -23,9 +23,30 @@ export function manyToOneFunction(manyFunction) {
 export function simpleFilterFieldOne(fieldArr) {
   return async function(obj, context):Promise<any> {
     let newObj = {}
-    for (let key in obj)
-      if (fieldArr.includes(key))
-        newObj[key] = obj[key]
+
+    for (let key of fieldArr) {
+      let paths = key.split('.')
+      let newObjRecurse = newObj
+      let objRecurse = obj
+      let exists = true
+      for (let idx of paths.slice(0,-1)) {
+        if (!objRecurse || !(idx in objRecurse)) {
+          exists = false
+          break
+        }
+        objRecurse = objRecurse[idx]
+
+        if (!(idx in newObjRecurse))
+          newObjRecurse[idx] = {}
+        newObjRecurse = newObjRecurse[idx]
+      }
+      if (!exists)
+        continue
+      let localKey = paths[paths.length - 1]
+      if (objRecurse && localKey in objRecurse)
+        newObjRecurse[localKey] = objRecurse[localKey]
+    }
+
     return newObj
   }
 }
