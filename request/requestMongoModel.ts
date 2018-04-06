@@ -40,14 +40,19 @@ let requestSchema:Schema = new Schema({
     type: Date,
     required: true
   },
-  participantNumber: Number,
+  participantNumber: {
+    type: Number,
+    required: false
+  },
   participantDescription: {
     type: String,
-    maxlength: 1024
+    maxlength: 1024,
+    required: false
   },
   speaker: {
     type: String,
-    maxlength: 512
+    maxlength: 512,
+    required: false
   },
   status: {
     type: String,
