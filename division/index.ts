@@ -12,5 +12,5 @@ router.delete('/:divisionId', auth(), admin, crud.deleteOneDivision())
 
 export { default as Division } from './division'
 export { default as DivisionAccessor } from './divisionAccessor'
-export { default as DivisionMongoAccessor } from './divisionMongoAccessor'
+export { default as DivisionMongoAccessor, DivisionMongoDocumentSerializer } from './divisionMongoAccessor'
 export { default as DivisionMongoModel } from './divisionMongoModel'

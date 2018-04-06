@@ -24,7 +24,7 @@ export function deleteOneDivision (divisionAccessor:DivisionAccessor = new Divis
     fetchOne: (req, context) => divisionAccessor.getById(req.params.divisionId),
     deleteOne: (division, context) => {
       division.enabled = false
-      divisionAccessor.delete(division)
+      divisionAccessor.update(division)
     },
     filterFieldOne
   })
