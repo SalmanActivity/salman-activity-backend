@@ -5,13 +5,25 @@ import Item from '../item'
 
 class DefaultMongoDocumentSerializer<T> implements MongoDocumentSerializer<T> {
 
+  constructor(protected mongoModel: Model<Document>) {
+  }
+
   async serialize(mongoDocument: Document): Promise<T> {
     let result:any = {}
-    for (let key in mongoDocument) {
-      if (mongoDocument[key] instanceof Types.ObjectId)
+    for (let key in mongoDocument)
+      if (key !== '_id' && mongoDocument[key] instanceof Types.ObjectId)
         mongoDocument.populate(key)
+    try {
+      mongoDocument = await mongoDocument.execPopulate()
+    } catch(e) {}
+    for (let key in mongoDocument) {
       if (key != '_id')
         result[key] = mongoDocument[key]
+      if (mongoDocument[key] && typeof mongoDocument[key] === 'object' && mongoDocument[key]['_id']) {
+        if (!result[key])
+          result[key] = {}
+        result[key]['id'] = mongoDocument[key]['_id'].toString()
+      }
     }
     result['id'] = mongoDocument._id
     return result
@@ -35,7 +47,7 @@ class DefaultMongoDocumentSerializer<T> implements MongoDocumentSerializer<T> {
 export default class MongoAccessor<T extends Item> implements Accessor<T> {
 
   constructor(public mongoModel: Model<Document>,
-              protected docSerializer: MongoDocumentSerializer<T> = new DefaultMongoDocumentSerializer<T>()) {
+              protected docSerializer: MongoDocumentSerializer<T> = new DefaultMongoDocumentSerializer<T>(mongoModel)) {
   }
 
   async getAll(): Promise<T[]> {
@@ -58,7 +70,7 @@ export default class MongoAccessor<T extends Item> implements Accessor<T> {
   async insert(object: T): Promise<T> {
     let deserializedObject = await this.docSerializer.deserialize(object)
     let itemModel = new this.mongoModel(deserializedObject)
-    if (object.id)
+    if (!itemModel._id && object.id)
       itemModel._id = object.id
     let doc = await itemModel.save()
     return this.docSerializer.serialize(doc)
@@ -75,7 +87,8 @@ export default class MongoAccessor<T extends Item> implements Accessor<T> {
   async update(object: T): Promise<T> {
     let document: Document = await this.mongoModel.findById(object.id).exec()
     if (document) {
-      document = await document.set(object).save()
+      let newDocument = await this.docSerializer.deserialize(object)
+      document = await document.set(newDocument).save()
       return this.docSerializer.serialize(document)
     } else
       throw new Error('Document not found')
