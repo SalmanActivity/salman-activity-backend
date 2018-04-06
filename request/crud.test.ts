@@ -1,9 +1,9 @@
 import * as sinon from 'sinon'
 import { assert } from 'chai'
 import * as crud from './crud'
-import supertest from 'supertest'
+import * as supertest from 'supertest'
 import app from '../app'
-let server = supertest(app)
+let server = supertest.agent(app)
 
 describe('request crud endpoint test', () => {
 
@@ -12,6 +12,7 @@ describe('request crud endpoint test', () => {
   before((done) => {
     let promiseAdmin = server.post('/api/v1/auth/login')
     .send({
+      'id': '5aa9359a2b21732a73d54069',
       'username': 'test_admin_1',
       'password': 'test_admin_1_pass'
     })
@@ -20,6 +21,7 @@ describe('request crud endpoint test', () => {
 
     let promiseUser = server.post('/api/v1/auth/login')
     .send({
+      'id': '5aa9359a2b21732a73d5406a',
       'username': 'test_user_1',
       'password': 'test_user_1_pass'
     })
@@ -86,7 +88,7 @@ describe('request crud endpoint test', () => {
   let checkSpecificRequest = (document) => {
     return res => {
       assert.equal(res.status, 200)
-      assert.equal(res.body.id, document._id)
+      assert.equal(res.body.id, document.id)
       assert.equal(res.body.status, document.status)
       assert.equal(new Date(res.body.issuedTime).getTime(), document.issuedTime.getTime())
       assert.equal(new Date(res.body.startTime).getTime(), document.startTime.getTime())
@@ -102,7 +104,7 @@ describe('request crud endpoint test', () => {
       server.get('/api/v1/requests/5aaa89e2a892471e3cdc84de')
       .set({'Authorization': 'JWT ' + adminAuth})
       .then(checkSpecificRequest({
-        _id: '5aaa89e2a892471e3cdc84de',
+        id: '5aaa89e2a892471e3cdc84de',
         name: 'request 5',
         description: 'description of request 5',
         issuedTime: new Date(2018, 1, 1, 10),
@@ -117,7 +119,7 @@ describe('request crud endpoint test', () => {
       server.get('/api/v1/requests/5aaa89e2a892471e3cdc84de')
       .set({'Authorization': 'JWT ' + userAuth})
       .then(checkSpecificRequest({
-        _id: '5aaa89e2a892471e3cdc84de',
+        id: '5aaa89e2a892471e3cdc84de',
         name: 'request 5',
         description: 'description of request 5',
         issuedTime: new Date(2018, 1, 1, 10),
@@ -132,7 +134,7 @@ describe('request crud endpoint test', () => {
       server.get('/api/v1/requests/5aaa89e2a892471e3cdc84df')
       .set({'Authorization': 'JWT ' + userAuth})
       .then(checkSpecificRequest({
-        _id: '5aaa89e2a892471e3cdc84df',
+        id: '5aaa89e2a892471e3cdc84df',
         name: 'request 6',
         description: 'description of request 6',
         issuedTime: new Date(2018, 1, 1, 10),
@@ -147,7 +149,7 @@ describe('request crud endpoint test', () => {
       server.get('/api/v1/requests/5aaa89e2a892471e3cdc84e1')
       .set({'Authorization': 'JWT ' + userAuth})
       .then(checkSpecificRequest({
-        _id: '5aaa89e2a892471e3cdc84e1',
+        id: '5aaa89e2a892471e3cdc84e1',
         name: 'request 8',
         description: 'description of request 8',
         issuedTime: new Date(2018, 1, 1, 10),
@@ -162,7 +164,7 @@ describe('request crud endpoint test', () => {
       server.get('/api/v1/requests/5aaa89e2a892471e3cdc84df')
       .set({'Authorization': 'JWT ' + userAuth})
       .then(checkSpecificRequest({
-        _id: '5aaa89e2a892471e3cdc84df',
+        id: '5aaa89e2a892471e3cdc84df',
         name: 'request 6',
         description: 'description of request 6',
         issuedTime: new Date(2018, 1, 1, 10),
