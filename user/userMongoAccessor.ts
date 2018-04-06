@@ -13,7 +13,7 @@ export class UserMongoDocumentSerializer implements MongoDocumentSerializer<User
     await mongoDocument.populate('division').execPopulate()
     let division:any = mongoDocument.get('division')
     if (division)
-      division = this.divisionSerializer.serialize(division)
+      division = await this.divisionSerializer.serialize(division)
 
     return {
       id: mongoDocument._id ? mongoDocument._id.toString() : undefined,
@@ -33,7 +33,7 @@ export class UserMongoDocumentSerializer implements MongoDocumentSerializer<User
       username: document.username ? document.username : undefined,
       email: document.email ? document.email : undefined,
       password: document.password ? document.password : undefined,
-      division: document.division ? this.divisionSerializer.deserialize(document.division) : undefined,
+      division: document.division ? await this.divisionSerializer.deserialize(document.division) : undefined,
       enabled: document.enabled ? document.enabled : undefined,
       admin: document.admin ? document.admin : undefined
     }
