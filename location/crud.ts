@@ -24,7 +24,7 @@ export function deleteOneLocation(locationAccessor:LocationAccessor = new Locati
     fetchOne: (req, context) => locationAccessor.getById(req.params.locationId),
     deleteOne: (location, context) => {
       location.enabled = false
-      locationAccessor.delete(location)
+      locationAccessor.update(location)
     },
     filterFieldOne
   })
