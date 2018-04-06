@@ -22,7 +22,7 @@ let userSchema:Schema = new Schema({
   },
   division: {
     type: Schema.Types.ObjectId,
-    ref: DivisionModel
+    ref: DivisionModel.modelName
   },
   enabled: {
     type: Boolean,

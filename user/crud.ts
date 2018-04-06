@@ -57,7 +57,7 @@ export function deleteOneUser(userAccessor:UserAccessor = new UserMongoAccessor(
     fetchOne: (req, context) => userAccessor.getById(req.params.userId),
     deleteOne: (user, context) => {
       user.enabled = false
-      userAccessor.delete(user)
+      userAccessor.update(user)
     }
   })
 }
