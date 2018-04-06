@@ -12,5 +12,5 @@ router.delete('/:locationId', auth(), admin, crud.deleteOneLocation())
 
 export { default as Location } from './location'
 export { default as LocationAccessor } from './locationAccessor'
-export { default as LocationMongoAccessor } from './locationMongoAccessor'
+export { default as LocationMongoAccessor, LocationMongoDocumentSerializer } from './locationMongoAccessor'
 export { default as LocationMongoModel } from './locationMongoModel'
