@@ -12,5 +12,5 @@ router.delete('/:requestId', auth(), crud.deleteOneRequest())
 
 export { default as Request, RequestStatus } from './request'
 export { default as RequestAccessor } from './requestAccessor'
-export { default as RequestMongoAccessor } from './requestMongoAccessor'
+export { default as RequestMongoAccessor, RequestMongoDocumentSerializer } from './requestMongoAccessor'
 export { default as RequestMongoModel } from './requestMongoModel'
