@@ -5,7 +5,7 @@ import { User, UserAccessor } from '../user'
 import UserMongoAccessor from '../user/userMongoAccessor'
 
 export default function login(userAccessor: UserAccessor = new UserMongoAccessor(),
-                                    config:Config = defaultConfig) {
+                              config:Config = defaultConfig) {
   return async (req, res) => {
     let username = undefined
     let password = undefined

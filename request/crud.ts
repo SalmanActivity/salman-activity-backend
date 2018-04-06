@@ -1,4 +1,5 @@
-import { Request, RequestAccessor } from '.'
+import RequestAccessor from './requestAccessor'
+import Request from './request'
 import RequestMongoAccessor from './requestMongoAccessor'
 import { DivisionAccessor, DivisionMongoAccessor } from '../division'
 import { LocationAccessor, LocationMongoAccessor } from '../location'

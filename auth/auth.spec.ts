@@ -1,12 +1,18 @@
 import 'mocha'
 import * as sinon from 'sinon'
 import * as jwt from 'jsonwebtoken'
-import * as auth from '.'
 import { InMemoryAccessor } from '../accessor'
 import { User, UserAccessor } from '../user'
-import { Config } from '../config';
+import auth from './auth'
+import { Config } from '../config'
 
 class FakeUserAccessor extends InMemoryAccessor<User> implements UserAccessor {
+  async getByEmail(email: string): Promise<User> {
+    for (let item of this.documents)
+      if (item.email === email)
+        return item
+    return null
+  }
   async getByUsername(username: string): Promise<User> {
     for (let item of this.documents)
       if (item.username === username)
@@ -30,7 +36,7 @@ describe('auth middleware test', function() {
       }
     ]
     config = {'secretKey': 'test_secret', 'mongoConnection':''}
-    authEndpoint = auth.auth(new FakeUserAccessor(userDocuments), config)
+    authEndpoint = auth(new FakeUserAccessor(userDocuments), config)
     
     responseSpy = {
       status: sinon.stub().returnsThis(),

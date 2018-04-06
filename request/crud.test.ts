@@ -1,3 +1,4 @@
+import 'mocha'
 import * as sinon from 'sinon'
 import { assert } from 'chai'
 import * as crud from './crud'
