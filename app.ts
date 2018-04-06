@@ -1,5 +1,6 @@
 import { Server } from './server'
 import * as bodyParser from 'body-parser'
+import * as morgan from 'morgan'
 import { Application } from 'express'
 import config from './config'
 import * as mongoose from 'mongoose'
@@ -39,6 +40,7 @@ mongoose.connect(config.mongoConnection).then(resp => {
 
 // routing server
 
+app.use(morgan('combined'))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 
