@@ -1,7 +1,8 @@
 import * as util from 'util'
 import * as jwt from 'jsonwebtoken'
 import defaultConfig, { Config } from '../config'
-import { UserAccessor, UserMongoAccessor } from '../user'
+import UserAccessor from '../user/userAccessor'
+import UserMongoAccessor from '../user/userMongoAccessor'
 
 export function admin() {
   return async (req, res, next) => {

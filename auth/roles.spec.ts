@@ -1,6 +1,6 @@
 import 'mocha'
 import * as sinon from 'sinon'
-import { admin } from '.'
+import { admin } from './roles'
 
 describe('admin middleware test', function() {
 

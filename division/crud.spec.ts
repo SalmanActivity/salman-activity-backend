@@ -1,7 +1,7 @@
 import * as sinon from 'sinon'
 import { assert } from 'chai'
 import * as crud from './crud'
-import { DivisionAccessor } from '.'
+import DivisionAccessor from './divisionAccessor'
 import { InMemoryAccessor } from '../accessor'
 
 describe('division crud endpoint test', () => {

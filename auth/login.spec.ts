@@ -6,6 +6,12 @@ import { InMemoryAccessor } from '../accessor'
 import { User, UserAccessor } from '../user'
 
 class FakeUserAccessor extends InMemoryAccessor<User> implements UserAccessor {
+  async getByEmail(email: string): Promise<User> {
+    for (let item of this.documents)
+      if (item.email === email)
+        return item
+    return null
+  }
   async getByUsername(username: string): Promise<User> {
     for (let item of this.documents)
       if (item.username === username)
