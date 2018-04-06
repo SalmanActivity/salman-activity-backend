@@ -1,5 +1,5 @@
-var fs = require('fs')
-var crypto = require('crypto')
+import * as fs from 'fs'
+import * as crypto from 'crypto'
 
 let env = process.argv[2]
 let password = process.argv[3]
