@@ -1,4 +1,5 @@
-import { Request, RequestMongoAccessor, RequestAccessor } from '.'
+import { Request, RequestAccessor } from '.'
+import RequestMongoAccessor from './requestMongoAccessor'
 import { DivisionAccessor, DivisionMongoAccessor } from '../division'
 import { LocationAccessor, LocationMongoAccessor } from '../location'
 import * as crudUtil from '../crud'
