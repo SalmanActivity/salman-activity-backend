@@ -30,12 +30,20 @@ async function filterResultByUser (currentUser, request: Request) {
     if (currentUser.admin) {
       return request
     } else {
-      return request.division == currentUser.division.id ? request : null
+      return request.division.id === currentUser.division.id ? request : null
     }
   } else {
-    return request.status === 'accepted' ? request : null
+    return request.status === 'accepted' && request.enabled ? request : null
   }
 }
+
+let filterField = crudUtil.filterOne.fields(['id','name','description',
+  'issuer.id','issuer.name','issuer.username','issuer.email',
+  'issuedTime',
+  'division.id', 'division.name', 'division.enabled',
+  'location.id', 'location.name', 'location.enabled',
+  'startTime', 'endTime', 'participantNumber',
+  'participantDescription', 'speaker', 'status', 'enabled'])
 
 export function findRequestInMonth(requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
   return crudUtil.readMany({
@@ -44,7 +52,8 @@ export function findRequestInMonth(requestAccessor: RequestAccessor = new Reques
       return req
     },
     fetchMany: (req, context) => fetchRequestByMonth(req, requestAccessor),
-    filterOne: (reqObject, context) => filterResultByUser(context.user, reqObject)
+    filterOne: (reqObject, context) => filterResultByUser(context.user, reqObject),
+    filterFieldOne: filterField
   })
 }
 
@@ -55,49 +64,33 @@ export function findOneRequest(requestAccessor: RequestAccessor = new RequestMon
       return req
     },
     fetchOne: (req, context) => requestAccessor.getById(req.params.requestId),
-    filterOne: (reqObject, context) => filterResultByUser(context.user, reqObject)
+    filterOne: (reqObject, context) => filterResultByUser(context.user, reqObject),
+    filterFieldOne: filterField
   })
 }
 
-async function validateUserInput (userInput: any,
-                                  divisionAccessor: DivisionAccessor,
-                                  locationAccessor: LocationAccessor) {
+async function validatePostUserInput(userInput: any) {
   let rules = {
     name: joi.string().min(3).max(255).required(),
-    issuer: joi.string().hex().length(24).required(),
     description: joi.string().max(1024),
-    division: joi.string().hex().length(24).required(),
+    division: joi.string().hex().length(24),
     location: joi.string().hex().length(24).required(),
     startTime: joi.number().integer().positive().required(),
     endTime: joi.number().integer().positive().required(),
     participantNumber: joi.number().integer().positive(),
     participantDescription: joi.string().max(1024),
     speaker: joi.string().max(512),
-    status: joi.string().allow(['pending','accepted','rejected']).required(),
+    status: joi.string().allow(['pending','accepted','rejected']),
     enabled: joi.boolean().default(true),
   }
   let schema = joi.object().keys(rules)
   let validationResult = schema.validate(userInput)
   if (validationResult.error)
     throw validationResult.error.details[0].message
-  
+
   let validatedValue = validationResult.value
   validatedValue.startTime = new Date(validatedValue.startTime)
   validatedValue.endTime = new Date(validatedValue.endTime)
-  
-  let res = await Promise.all([
-    divisionAccessor.getById(validatedValue.division),
-    locationAccessor.getById(validatedValue.location),
-  ])
-  
-  if (!res[0])
-    throw 'division not found'
-  if (!res[1])
-    throw 'location not found'
-
-  validatedValue.division = res[0]
-  validatedValue.location = res[1]
-
   return validatedValue
 }
 
@@ -106,8 +99,8 @@ export function createOneRequest(requestAccessor: RequestAccessor = new RequestM
                                  locationAccessor: LocationAccessor = new LocationMongoAccessor()) {
   return crudUtil.createOne({
     validateOne: async (req, context) => {
-      if ('issuer' in req.body)
-        throw {status:400, cause:'"issuer" is not allowed'}
+      let data = await validatePostUserInput(req.body)
+
       if (req.user && !req.user.admin) {
         if (req.body.division)
           throw {status:400, cause:'"division" is not allowed'}
@@ -115,17 +108,60 @@ export function createOneRequest(requestAccessor: RequestAccessor = new RequestM
           throw {status:400, cause:'"status" is not allowed'}
         if (req.body.enabled)
           throw {status:400, cause:'"enabled" is not allowed'}
+        data.division = req.user.division.id
+        data.status = 'pending'
       }
-      let inputData = Object.assign({issuer: req.user.id, status:'pending'}, req.body)
-      if (req.user && !req.user.admin)
-        inputData.division = req.user.division.id
-      return validateUserInput(inputData, divisionAccessor, locationAccessor)
+      data.issuer = req.user
+
+      let res = await Promise.all([
+        divisionAccessor.getById(data.division),
+        locationAccessor.getById(data.location),
+      ])
+      
+      if (!res[0])
+        throw 'division not found'
+      if (!res[1])
+        throw 'location not found'
+    
+      data.division = res[0]
+      data.location = res[1]
+      data.issuedTime = new Date()
+      return data
     },
-    insertOne: (object, context) => {
-      object.issuedTime = new Date()
-      requestAccessor.insert(object)
-    }
+    insertOne: (object, context) => requestAccessor.insert(object),
+    filterFieldOne: filterField
   })
+}
+
+async function validatePutUserInput(userInput: any) {
+  let rules = {
+    name: joi.string().min(3).max(255),
+    description: joi.string().max(1024),
+    division: joi.string().hex().length(24),
+    location: joi.string().hex().length(24),
+    startTime: joi.number().integer().positive(),
+    endTime: joi.number().integer().positive(),
+    participantNumber: joi.number().integer().positive(),
+    participantDescription: joi.string().max(1024),
+    speaker: joi.string().max(512),
+    status: joi.string().allow(['pending','accepted','rejected']),
+    enabled: joi.boolean().default(true),
+  }
+  let schema = joi.object().keys(rules)
+  let validationResult = schema.validate(userInput)
+  if (validationResult.error)
+    throw validationResult.error.details[0].message
+
+  let validatedValue = validationResult.value
+  if ('startTime' in validatedValue)
+    validatedValue.startTime = new Date(validatedValue.startTime)
+  if ('endTime' in validatedValue)
+    validatedValue.endTime = new Date(validatedValue.endTime)
+
+  if (validatedValue.startTime && validatedValue.endTime && validatedValue.startTime >= validatedValue.endTime)
+    throw '"endTime" should greater than "startTime"'
+
+  return validatedValue
 }
 
 export function updateOneRequest(requestAccessor: RequestAccessor = new RequestMongoAccessor(),
@@ -133,40 +169,47 @@ export function updateOneRequest(requestAccessor: RequestAccessor = new RequestM
                                  locationAccessor: LocationAccessor = new LocationMongoAccessor()) {
   return crudUtil.updateOne({
     fetchOne: (req, context) => {
-      context.request = req
+      context.body = req.body
+      context.user = req.user
       return requestAccessor.getById(req.params.requestId)
     },
     validateOne: async (item, context) => {
-      if (item.status === 'accepted')
+      let data = await validatePutUserInput(context.body)
+
+      if (!context.user.admin && item.status === 'accepted')
         throw {status:403, cause:'trying to update accepted request'}
-      if ('issuer' in context.request.body)
-        throw {status:400, cause:'"issuer" is not allowed'}
-      if (context.request.user && !context.request.user.admin) {
-        if ('division' in context.request.body)
+      
+      if (!context.user.admin) {
+        if ('division' in context.body)
           throw {status:400, cause:'"division" is not allowed'}
-        if ('status' in context.request.body)
+        if ('status' in context.body)
           throw {status:400, cause:'"status" is not allowed'}
-        if ('enabled' in context.request.body)
+        if ('enabled' in context.body)
           throw {status:400, cause:'"enabled" is not allowed'}
       }
 
+      if (data.division) {
+        data.division = await divisionAccessor.getById(data.division)
+        if (!data.division)
+          throw 'division not found'
+      }
+
+      if (data.location) {
+        data.location = await locationAccessor.getById(data.location)
+        if (!data.location) 
+          throw 'location not found'
+      }
+
       context.updatingItem = item
-      let inputData = Object.assign({
-        name: item.name,
-        issuer: item.issuer.id,
-        division: item.division.id,
-        location: item.location.id,
-        startTime: item.startTime.getTime(),
-        endTime: item.endTime.getTime(),
-        status: item.status
-      }, context.request.body)
-      let res = await validateUserInput(inputData, divisionAccessor, locationAccessor)
-      if (res.endTime <= res.startTime) 
-        throw {status:400, cause:'"endTime" must greater than "startTime"'}
-      return res
+      let result = Object.assign(item, data)
+
+      if (result.startTime && result.endTime && result.startTime >= result.endTime)
+        throw '"endTime" should greater than "startTime"'
+
+      return result
     },
-    updateOne: (reqObject, context) =>
-      requestAccessor.update(Object.assign(context.updatingItem, reqObject))
+    updateOne: (reqObject, context) => requestAccessor.update(reqObject),
+    filterFieldOne: filterField
   })
 }
 
@@ -176,6 +219,7 @@ export function deleteOneRequest(requestAccessor: RequestAccessor = new RequestM
     deleteOne: (reqObject, context) => {
       reqObject.enabled = false
       return requestAccessor.update(reqObject)
-    }
+    },
+    filterFieldOne: filterField
   })
 }
