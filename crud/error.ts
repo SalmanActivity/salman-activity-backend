@@ -1,4 +1,4 @@
-let debug = require('debug')('crud-debug')
+let debug = require('debug')('salman-activity-backend:debug')
 
 export function displayError(res:any, errorMessage:any):any {
   return (err) => {
