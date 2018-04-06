@@ -22,10 +22,14 @@ function normalizePort(val: string): number {
 }
 let port: number = normalizePort(process.env.PORT || '3000')
 
-let server:Server = new Server(port)
+export let server:Server = new Server(port)
 let app:Application = server.app
 
 server.bootstrap()
+
+export function stop() {
+  return server.stop().then(() => mongoose.disconnect())
+}
 
 mongoose.connect(config.mongoConnection).then(resp => {
     debug('connected to mongo server')
