@@ -1,5 +1,6 @@
 import { user } from './roles'
-import { UserAccessor, UserMongoAccessor } from '../user'
+import { UserAccessor } from '../user'
+import UserMongoAccessor from '../user/userMongoAccessor'
 import defaultConfig, { Config } from '../config'
 
 export default function auth(userAccessor: UserAccessor = new UserMongoAccessor(),

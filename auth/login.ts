@@ -1,7 +1,8 @@
 import { verify } from 'password-hash'
 import { sign } from 'jsonwebtoken'
 import defaultConfig, { Config } from '../config'
-import { User, UserAccessor, UserMongoAccessor } from '../user'
+import { User, UserAccessor } from '../user'
+import UserMongoAccessor from '../user/userMongoAccessor'
 
 export default function login(userAccessor: UserAccessor = new UserMongoAccessor(),
                                     config:Config = defaultConfig) {
