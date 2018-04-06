@@ -6,6 +6,8 @@ import LocationModel from './locationMongoModel'
 
 export class LocationMongoDocumentSerializer implements MongoDocumentSerializer<Location> {
   async serialize(mongoDocument: Document): Promise<Location> {
+    if (!mongoDocument)
+      return null
     return {
       id: mongoDocument._id ? mongoDocument._id.toString() : undefined,
       name: mongoDocument.get('name'),
@@ -13,6 +15,8 @@ export class LocationMongoDocumentSerializer implements MongoDocumentSerializer<
     }
   }
   async deserialize(document: Location): Promise<any> {
+    if (!document)
+      return null
     return {
       _id: document.id,
       name: document.name,
