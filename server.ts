@@ -1,5 +1,6 @@
 import * as express from 'express'
 import * as http from 'http'
+import * as util from 'util'
 
 let debug = require('debug')('salman-activity-backend:server')
 
@@ -17,9 +18,21 @@ export class Server {
     this.app.set('port', this.port)
     
     this.server = http.createServer(this.app)
-    this.server.listen(this.port)
+    this.server = this.server.listen(this.port)
     this.server.on('error', this.onError.bind(this))
     this.server.on('listening', this.onListening.bind(this))
+  }
+
+  async stop() {
+    return new Promise((resolve, reject) => {
+      this.server.removeAllListeners()
+      .close(err => {
+        if (err)
+          reject(err)
+        else
+          resolve()
+      })
+    })
   }
 
   private onError(error) {

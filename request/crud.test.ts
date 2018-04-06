@@ -2,7 +2,7 @@ import * as sinon from 'sinon'
 import { assert } from 'chai'
 import * as crud from './crud'
 import * as supertest from 'supertest'
-import app from '../app'
+import app, { stop } from '../app'
 let server = supertest.agent(app)
 
 describe('request crud endpoint test', () => {
@@ -30,6 +30,14 @@ describe('request crud endpoint test', () => {
 
     Promise.all([promiseAdmin, promiseUser])
     .then(res => done())
+    .catch(err => done(err))
+  })
+
+  after((done) => {
+    stop().then(() => {
+      console.log('server closed')
+      done()
+    })
     .catch(err => done(err))
   })
 

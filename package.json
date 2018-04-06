@@ -9,7 +9,7 @@
     "dev": "DEBUG=salman-activity-backend:* ENV=dev nodemon node_modules/.bin/ts-node scripts/devServer.ts",
     "test": "node node_modules/.bin/mocha -r ts-node/register ./**/*.spec.ts",
     "preintegration-test": "DEBUG=salman-activity-backend:* npm run seed-dev",
-    "integration-test": "DEBUG=salman-activity-backend:* node node_modules/.bin/mocha -r ts-node/register -t 2000 ./**/*.test.ts",
+    "integration-test": "DEBUG=salman-activity-backend:* node node_modules/.bin/mocha -r ts-node/register --quit -t 2000 ./**/*.test.ts",
     "encrypt-config": "node ./scripts/configEncrypt.ts"
   },
   "engineStrict": true,
