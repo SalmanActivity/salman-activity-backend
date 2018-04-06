@@ -3,7 +3,8 @@ import { MongoAccessor, MongoDocumentSerializer } from '../accessor/mongo'
 import UserModel from './userMongoModel'
 import User from './user'
 import { Document } from 'mongoose'
-import { Division, DivisionMongoDocumentSerializer } from '../division'
+import { Division } from '../division'
+import { DivisionMongoDocumentSerializer } from '../division/divisionMongoAccessor'
 
 export class UserMongoDocumentSerializer implements MongoDocumentSerializer<User> {
   constructor(protected divisionSerializer:MongoDocumentSerializer<Division> = new DivisionMongoDocumentSerializer()) {
