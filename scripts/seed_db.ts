@@ -3,7 +3,7 @@ import config from '../config'
 import * as models from '../seed'
 import { Item, Accessor } from '../accessor'
 
-let debug = require('debug')('salman-activity-server:seed')
+let debug = require('debug')('salman-activity-backend:seed')
 
 async function runSeeder() {
   await mongoose.connect(config.mongoConnection)
@@ -33,4 +33,5 @@ runSeeder()
 })
 .catch(err => {
   debug('some error occured', err)
+  process.exit()
 })
