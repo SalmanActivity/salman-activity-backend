@@ -8,13 +8,13 @@
     "seed-dev": "DEBUG=salman-activity-backend:seed node_modules/.bin/ts-node ./scripts/seed_db.ts",
     "dev": "DEBUG=salman-activity-backend:* ENV=dev nodemon node_modules/.bin/ts-node scripts/devServer.ts",
     "test": "node node_modules/.bin/mocha -r ts-node/register ./**/*.spec.ts",
-    "pretest-integration": "npm run seed-dev",
-    "test-integration": "node node_modules/.bin/mocha --exit -r ts-node/register -t 2000 ./**/*.test.ts",
+    "preintegration-test": "DEBUG=salman-activity-backend:* npm run seed-dev",
+    "integration-test": "DEBUG=salman-activity-backend:* node node_modules/.bin/mocha -r ts-node/register -t 2000 ./**/*.test.ts",
     "encrypt-config": "node ./scripts/configEncrypt.ts"
   },
   "engineStrict": true,
   "engines": {
-    "node": ">= 6.0.0"
+    "node": ">= 8.0.0"
   },
   "dependencies": {
     "async": "^2.6.0",
@@ -34,6 +34,7 @@
     "@types/mocha": "^5.0.0",
     "@types/mongoose": "^5.0.7",
     "@types/sinon": "^4.3.1",
+    "@types/supertest": "^2.0.4",
     "chai": "^4.1.2",
     "mocha": "^5.0.5",
     "nodemon": "^1.15.1",
