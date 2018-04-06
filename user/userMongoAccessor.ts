@@ -10,6 +10,9 @@ export class UserMongoDocumentSerializer implements MongoDocumentSerializer<User
   constructor(protected divisionSerializer:MongoDocumentSerializer<Division> = new DivisionMongoDocumentSerializer()) {
   }
   async serialize(mongoDocument: Document): Promise<User> {
+    if (!mongoDocument)
+      return null
+    
     await mongoDocument.populate('division').execPopulate()
     let division:any = mongoDocument.get('division')
     if (division)
@@ -17,25 +20,28 @@ export class UserMongoDocumentSerializer implements MongoDocumentSerializer<User
 
     return {
       id: mongoDocument._id ? mongoDocument._id.toString() : undefined,
-      name: mongoDocument['name'] ? mongoDocument.get('name') : undefined,
-      username: mongoDocument['username'] ? mongoDocument.get('username') : undefined,
-      email: mongoDocument['email'] ? mongoDocument.get('email') : undefined,
-      password: mongoDocument['password'] ? mongoDocument.get('password') : undefined,
+      name: mongoDocument.get('name'),
+      username: mongoDocument.get('username'),
+      email: mongoDocument.get('email'),
+      password: mongoDocument.get('password'),
       division,
-      enabled: mongoDocument['enabled'] ? mongoDocument.get('enabled') : undefined,
-      admin: mongoDocument['admin'] ? mongoDocument.get('admin') : undefined,
+      enabled: mongoDocument.get('enabled'),
+      admin: mongoDocument.get('admin'),
     }
   }
   async deserialize(document: User): Promise<any> {
+    if (!document)
+      return null
+    
     return {
       _id: document.id,
-      name: document.name ? document.name : undefined,
-      username: document.username ? document.username : undefined,
-      email: document.email ? document.email : undefined,
-      password: document.password ? document.password : undefined,
-      division: document.division ? await this.divisionSerializer.deserialize(document.division) : undefined,
-      enabled: document.enabled ? document.enabled : undefined,
-      admin: document.admin ? document.admin : undefined
+      name: 'name' in document ? document.name : undefined,
+      username: 'username' in document ? document.username : undefined,
+      email: 'email' in document ? document.email : undefined,
+      password: 'password' in document ? document.password : undefined,
+      division: 'division' in document ? await this.divisionSerializer.deserialize(document.division) : undefined,
+      enabled: 'enabled' in document ? document.enabled : undefined,
+      admin: 'admin' in document ? document.admin : undefined
     }
   }
 }

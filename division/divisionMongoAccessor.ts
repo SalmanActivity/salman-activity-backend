@@ -6,6 +6,8 @@ import DivisionModel from './divisionMongoModel'
 
 export class DivisionMongoDocumentSerializer implements MongoDocumentSerializer<Division> {
   async serialize(mongoDocument: Document): Promise<Division> {
+    if (!mongoDocument)
+      return null
     return {
       id: mongoDocument._id ? mongoDocument._id.toString() : undefined,
       name: mongoDocument.get('name'),
@@ -13,6 +15,8 @@ export class DivisionMongoDocumentSerializer implements MongoDocumentSerializer<
     }
   }
   async deserialize(document: Division): Promise<any> {
+    if (!document)
+      return null
     return {
       _id: document.id,
       name: document.name,
