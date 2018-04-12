@@ -13,6 +13,16 @@ let requestSchema:Schema = new Schema({
     type: String,
     maxlength: 1024,
   },
+  personInCharge: {
+    type: String,
+    maxlength: 256,
+    required: true
+  },
+  phoneNumber: {
+    type: String,
+    maxlength: 50,
+    required: true
+  },
   issuer: {
     type: Schema.Types.ObjectId,
     ref: UserMongoModel.modelName,
@@ -52,6 +62,11 @@ let requestSchema:Schema = new Schema({
   speaker: {
     type: String,
     maxlength: 512,
+    required: false
+  },
+  target: {
+    type: String,
+    maxlength: 1024,
     required: false
   },
   status: {
