@@ -6,36 +6,50 @@ import { generate } from 'password-hash'
 
 let division1: Division = {
   id: '5aa9359a2b21732a73d54068',
-  name: 'Divisi 1',
+  name: 'Bidang Rumah Amal',
   enabled: true
 }
+
 
 let division2: Division = {
-  id: '5aaa860001e1901b03651171',
-  name: 'Divisi 2',
+  id: '5aa9359a2b21732a73d54069',
+  name: 'Bidang LPP',
   enabled: true
 }
 
-let user1: User = {
+
+let division3: Division = {
   id: '5aa9359a2b21732a73d5406a',
-  name: 'Test User 1',
-  username: 'test_user_1',
-  email: 'test_user_1@test.com',
-  password: generate('test_user_1_pass'),
-  division: division1,
-  enabled: true,
-  admin: false
+  name: 'Bidang Mahasiswa & Kaderisasi',
+  enabled: true
 }
 
-let admin1: User = {
-  id: '5aa9359a2b21732a73d54069',
-  name: 'Test Admin 1',
-  username: 'test_admin_1',
-  email: 'test_admin_1@test.com',
-  password: generate('test_admin_1_pass'),
-  division: null,
-  enabled: true,
-  admin: true
+
+let division4: Division = {
+  id: '5aa9359a2b21732a73d5406b',
+  name: 'Bidang Dakwah',
+  enabled: true
+}
+
+
+let division5: Division = {
+  id: '5aa9359a2b21732a73d5406c',
+  name: 'Bidang Pelayanan & Pemberdayaan',
+  enabled: true
+}
+
+
+let division6: Division = {
+  id: '5aa9359a2b21732a73d5406d',
+  name: 'Bidang Sumberdaya',
+  enabled: true
+}
+
+
+let division7: Division = {
+  id: '5aa9359a2b21732a73d5406e',
+  name: 'Bidang Pengkajian & Penerbitan',
+  enabled: true
 }
 
 let location1: Location = {
@@ -190,18 +204,9 @@ export let divisions = {
   accessor: new DivisionMongoAccessor(),
   documents: [division1, division2]
 }
-export let users = {
-  accessor: new UserMongoAccessor(),
-  documents: [user1, admin1]
-}
 
 export let locations = {
   accessor: new LocationMongoAccessor(),
-  documents: [location1, location2]
-}
-
-export let requests = {
-  accessor: new RequestMongoAccessor(),
-  documents: [request1, request2, request3, request4, request5, request6,
-              request7, request8, request9, request10, request11, request12]
+  documents: [location1, location2, location3, location4, location5, location6, location7, location8, location9, location10,
+     location11, location12, location13, location14, location15, location16, location17, location18, location19, location20, location21]
 }
