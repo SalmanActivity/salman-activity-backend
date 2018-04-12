@@ -38,7 +38,7 @@ export default interface Request extends Item {
 
   speaker?: string
 
-  target: string
+  target?: string
 
   status: RequestStatus
 
