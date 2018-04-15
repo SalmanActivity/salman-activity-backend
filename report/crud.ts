@@ -129,3 +129,78 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
     filterFieldOne: filterField
   })
 }
+
+async function validatePutUserInput(userInput: any) {
+  let rules = {
+    image: joi.string().min(3),
+    description: joi.string().max(1024),
+    division: joi.string().hex().length(24),
+    request: joi.string().hex().length(24),
+    status: joi.string().allow(['pending','accepted','rejected']),
+    enabled: joi.boolean().default(true),
+  }
+  let schema = joi.object().keys(rules)
+  let validationResult = schema.validate(userInput)
+  if (validationResult.error)
+    throw validationResult.error.details[0].message
+
+  let validatedValue = validationResult.value
+  return validatedValue
+}
+
+export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor(),
+                                 divisionAccessor: DivisionAccessor = new DivisionMongoAccessor(),
+                                 requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
+  return crudUtil.updateOne({
+    fetchOne: (req, context) => {
+      context.body = req.body
+      context.user = req.user
+      return reportAccessor.getById(req.params.reportId)
+    },
+    validateOne: async (item, context) => {
+      let data = await validatePutUserInput(context.body)
+
+      if (!context.user.admin && item.status === 'accepted')
+        throw {status:403, cause:'trying to update accepted report'}
+
+      if (!context.user.admin) {
+        if ('division' in context.body)
+          throw {status:400, cause:'"division" is not allowed'}
+        if ('status' in context.body)
+          throw {status:400, cause:'"status" is not allowed'}
+        if ('enabled' in context.body)
+          throw {status:400, cause:'"enabled" is not allowed'}
+      }
+
+      if (data.division) {
+        data.division = await divisionAccessor.getById(data.division)
+        if (!data.division)
+          throw 'division not found'
+      }
+
+      if (data.request) {
+        data.request = await requestAccessor.getById(data.request)
+        if (!data.request)
+          throw 'request not found'
+      }
+
+      context.updatingItem = item
+      let result = Object.assign(item, data)
+
+      return result
+    },
+    updateOne: (reqObject, context) => reportAccessor.update(reqObject),
+    filterFieldOne: filterField
+  })
+}
+
+export function deleteOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor()) {
+  return crudUtil.deleteOne({
+    fetchOne: (req, context) => reportAccessor.getById(req.params.reportId),
+    deleteOne: (reqObject, context) => {
+      reqObject.enabled = false
+      return reportAccessor.update(reqObject)
+    },
+    filterFieldOne: filterField
+  })
+}
