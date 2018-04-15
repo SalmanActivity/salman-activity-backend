@@ -11,7 +11,7 @@ export enum ReportStatus {
 
 export default interface Report extends Item {
 
-  image: Buffer
+  image: string
 
   description: string
 

@@ -6,7 +6,7 @@ import { DivisionMongoModel } from '../division'
 
 let reportSchema:Schema = new Schema({
   image: {
-    type: Buffer,
+    type: String,
     required: true
   },
   description: {
