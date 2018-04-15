@@ -74,7 +74,7 @@ let user2: User = {
   admin: false
 }
 
-let use3: User = {
+let user3: User = {
   id: '5aa9359a2b21732a73d54082',
   name: 'Bidang Mahasiswa & Kaderisasi',
   username: 'bmk',
