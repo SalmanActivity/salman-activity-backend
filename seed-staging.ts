@@ -10,7 +10,6 @@ let division1: Division = {
   enabled: true
 }
 
-
 let division2: Division = {
   id: '5aa9359a2b21732a73d54069',
   name: 'Bidang LPP',
@@ -281,7 +280,6 @@ let location21: Location = {
   name: 'Kamar Tamu Putra',
   enabled: true
 }
-
 
 let location22: Location = {
   id: '5aaa89e2a892471e3cdc84ed',

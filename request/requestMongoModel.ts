@@ -79,7 +79,7 @@ let requestSchema:Schema = new Schema({
     type: Boolean,
     required: true,
     default: true
-  },
+  }
 })
 
 let requestModel: Model<Document> = model('request', requestSchema)
