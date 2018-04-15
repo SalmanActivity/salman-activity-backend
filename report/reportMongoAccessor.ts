@@ -14,7 +14,7 @@ import { RequestMongoDocumentSerializer } from '../request/requestMongoAccessor'
 export class ReportMongoDocumentSerializer implements MongoDocumentSerializer<Report> {
   constructor(protected userSerializer:MongoDocumentSerializer<User> = new UserMongoDocumentSerializer(),
               protected divisionSerializer:MongoDocumentSerializer<Division> = new DivisionMongoDocumentSerializer(),
-              protected requestSerializer:MongoDocumentSerializer<Request> = new LocationMongoDocumentSerializer()) {
+              protected requestSerializer:MongoDocumentSerializer<Request> = new RequestMongoDocumentSerializer()) {
   }
 async serialize(mongoDocument: Document): Promise<Report> {
     if (!mongoDocument)
@@ -33,9 +33,9 @@ async serialize(mongoDocument: Document): Promise<Report> {
     if (division)
       division = await this.divisionSerializer.serialize(division)
 
-    let Request:any = mongoDocument.get('Request')
-    if (Request)
-      Request = await this.requestSerializer.serialize(Request)
+    let request:any = mongoDocument.get('request')
+    if (request)
+      request = await this.requestSerializer.serialize(request)
 
     return {
       id: mongoDocument._id ? mongoDocument._id.toString() : undefined,
@@ -70,10 +70,10 @@ async serialize(mongoDocument: Document): Promise<Report> {
 
 export default class ReportMongoAccessor extends MongoAccessor<Report> implements ReportAccessor {
   constructor() {
-    super(ReportModel, new ReportMongoDocumentSerializer())
+    super(ReportMongoModel, new ReportMongoDocumentSerializer())
   }
 
-	async getAllBetween(start:Date, end:Date):Promise<Request[]> {
+	async getAllBetween(start:Date, end:Date):Promise<Report[]> {
 		let condition = {
 		  'startTime': {
 		    '$gte': start,

@@ -3,6 +3,6 @@ import { Accessor } from '../accessor'
 
 export default interface ReportAccessor extends Accessor<Report> {
 
-	getAllBetween(start:Date, end:Date):Promise<Request[]>
+	getAllBetween(start:Date, end:Date):Promise<Report[]>
 
 }
