@@ -23,6 +23,10 @@ let reportSchema:Schema = new Schema({
     ref: DivisionMongoModel.modelName,
     required: true
   },
+  reportTime: {
+    type: Date,
+    required: true,
+  },
   request: {
     type: Schema.Types.ObjectId,
     ref: RequestMongoModel.modelName,

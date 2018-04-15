@@ -43,6 +43,7 @@ async serialize(mongoDocument: Document): Promise<Report> {
       description: mongoDocument.get('description'),
       reporter,
       division,
+      reportTime : mongoDocument.get('reportTime'),
       request,
       status: mongoDocument.get('status'),
       enabled: mongoDocument.get('enabled')
@@ -58,9 +59,32 @@ async serialize(mongoDocument: Document): Promise<Report> {
       description: 'description' in document ? document.description : undefined,
       reporter: 'reporter' in document ? await this.userSerializer.deserialize(document.reporter) : undefined,
       division: 'division' in document ? await this.divisionSerializer.deserialize(document.division) : undefined,
+      reportTime: 'reportTime' in document ? document.reportTime : undefined,
       request: 'request' in document ? await this.requestSerializer.deserialize(document.request) : undefined,
       status: 'status' in document ? document.status : undefined,
       enabled: 'enabled' in document ? document.enabled : undefined
     }
   }
+}
+
+
+export default class ReportMongoAccessor extends MongoAccessor<Report> implements ReportAccessor {
+  constructor() {
+    super(ReportModel, new ReportMongoDocumentSerializer())
+  }
+
+	async getAllBetween(start:Date, end:Date):Promise<Request[]> {
+		let condition = {
+		  'startTime': {
+		    '$gte': start,
+		    '$lt': end
+		  }
+	}
+
+		let result:Document[] = await this.mongoModel.find(condition).exec()
+		let promiseList:Promise<Report>[] = result.map<Promise<Report>>((val, idx) => this.docSerializer.serialize(val))
+		let itemArray:Report[] = await Promise.all(promiseList)
+		return itemArray
+	}
+
 }

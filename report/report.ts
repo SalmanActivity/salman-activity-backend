@@ -1,5 +1,5 @@
 import { Item } from '../accessor'
-import { Request } from '../request
+import { Request } from '../request'
 import { User } from '../user'
 import { Division } from '../division'
 
@@ -18,6 +18,8 @@ export default interface Report extends Item {
   reporter: User
 
   division: Division
+
+  reportTime: Date
 
   request: Request
 
