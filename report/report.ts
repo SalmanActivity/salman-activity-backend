@@ -1,5 +1,7 @@
 import { Item } from '../accessor'
 import { Request } from '../request
+import { User } from '../user'
+import { Division } from '../division'
 
 export enum ReportStatus {
   pending = 'pending',
@@ -12,6 +14,10 @@ export default interface Report extends Item {
   image: Buffer
 
   description: string
+
+  reporter: User
+
+  division: Division
 
   request: Request
 

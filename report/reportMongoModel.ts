@@ -1,5 +1,7 @@
 import { Schema, Model, Document, model } from 'mongoose'
 import { RequestMongoModel } from '../request'
+import { UserMongoModel } from '../user'
+import { DivisionMongoModel } from '../division'
 
 
 let reportSchema:Schema = new Schema({
@@ -9,6 +11,16 @@ let reportSchema:Schema = new Schema({
   },
   description: {
     type: String,
+    required: true
+  },
+   reporter: {
+    type: Schema.Types.ObjectId,
+    ref: UserMongoModel.modelName,
+    required: true
+  },
+   division: {
+    type: Schema.Types.ObjectId,
+    ref: DivisionMongoModel.modelName,
     required: true
   },
   request: {
