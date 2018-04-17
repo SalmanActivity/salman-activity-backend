@@ -33,19 +33,22 @@ async function filterResultByUser (currentUser, report: Report) {
     if (currentUser.admin) {
       return report
     } else {
-      return report.division.id === currentUser.division.id ? report : null
+      return report.request.division.id === currentUser.division.id ? report : null
     }
   } else {
-    return report.status === 'accepted' && report.enabled ? report : null
+    return report.request.status === 'accepted' && report.request.enabled ? report : null
   }
 }
 
-let filterField = crudUtil.filterOne.fields(['id','image','description',
-  'reporter.id','reporter.name','reporter.username','reporter.email',
-  'division.id', 'division.name', 'division.enabled',
-  'reportTime',
-  'request.id',
-  'status', 'enabled'])
+let filterField = crudUtil.filterOne.fields(['id', 'issuedTime',
+  'request.id', 'request.name', 'request.description', 'request.personInCharge', 'request.phoneNumber',
+  'request.issuer.id','request.issuer.name','request.issuer.username','request.issuer.email',
+  'request.issuedTime',
+  'request.division.id', 'request.division.name', 'request.division.enabled',
+  'request.location.id', 'request.location.name', 'request.location.enabled',
+  'request.startTime', 'request.endTime', 'request.participantNumber',
+  'request.participantDescription', 'request.speaker', 'request.target', 'request.status', 'request.enabled',
+  'content', 'photo'])
 
 export function findReportInMonth(reportAccessor: ReportAccessor = new ReportMongoAccessor()) {
   return crudUtil.readMany({
@@ -60,13 +63,13 @@ export function findReportInMonth(reportAccessor: ReportAccessor = new ReportMon
 }
 
 
-export function findOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor()) {
+export function findReportByRequest(reportAccessor: ReportAccessor = new ReportMongoAccessor()) {
   return crudUtil.readOne({
     init: async (req, context) => {
       context.user = req.user
       return req
     },
-    fetchOne: (req, context) => reportAccessor.getById(req.params.reportId),
+    fetchOne: (req, context) => reportAccessor.getById(req.params.requestId),
     filterOne: (reqObject, context) => filterResultByUser(context.user, reqObject),
     filterFieldOne: filterField
   })
@@ -74,13 +77,10 @@ export function findOneReport(reportAccessor: ReportAccessor = new ReportMongoAc
 
 async function validatePostUserInput(userInput: any) {
   let rules = {
-    image: joi.string().min(3).required(),
-    description: joi.string().max(1024),
-    division: joi.string().hex().length(24),
-    ///reportTime: joi.number().integer().positive().required(),
-    request: joi.string().hex().length(24),
-    status: joi.string().allow(['pending','accepted','rejected']),
-    enabled: joi.boolean().default(true),
+    issuedTime: joi.number().integer().positive().required(),
+    request: joi.string().hex().length(24).required(),
+    content: joi.string().min(3).max(1024).required(),
+    photo: joi.string().min(3).max(1024).required()
   }
   let schema = joi.object().keys(rules)
   let validationResult = schema.validate(userInput)
@@ -88,42 +88,36 @@ async function validatePostUserInput(userInput: any) {
     throw validationResult.error.details[0].message
 
   let validatedValue = validationResult.value
+  validatedValue.issuedTime = new Date(validatedValue.issuedTime)
   return validatedValue
 }
 
 export function createOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor(),
-                                 divisionAccessor: DivisionAccessor = new DivisionMongoAccessor(),
                                  requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
   return crudUtil.createOne({
     validateOne: async (req, context) => {
-      let data = await validatePostUserInput(req.body)
-
-      if (req.user && !req.user.admin) {
-        if (req.body.division)
-          throw {status:400, cause:'"division" is not allowed'}
-        if (req.body.status)
-          throw {status:400, cause:'"status" is not allowed'}
-        if (req.body.enabled)
-          throw {status:400, cause:'"enabled" is not allowed'}
-        data.division = req.user.division.id
-        data.status = 'pending'
-      }
-      data.issuer = req.user
-
-      let res = await Promise.all([
-        divisionAccessor.getById(data.division),
-        requestAccessor.getById(data.request),
+      let request = await Promise.all([
+        requestAccessor.getById(req.params.requestId)
       ])
 
-      if (!res[0])
-        throw 'division not found'
-      if (!res[1])
+      if (!request[0])
         throw 'request not found'
 
-      data.division = res[0]
-      data.request = res[1]
-      data.reportTime = new Date()
-      return data
+      let data
+      data.request = request[0]
+      
+      if (req.user && !req.user.admin) {
+        if (data.request.division.id !== req.user.division.id)
+          throw {status:400, cause:'"division" is not allowed'}
+        if (data.request.status !== 'accepted')
+          throw {status:400, cause:'"status" is not allowed'}
+      }
+
+      data.issuedTime = new Date()
+      data.content = req.body.content
+      data.photo = req.body.photo
+      let dataValidated = await validatePostUserInput(data)
+      return dataValidated
     },
     insertOne: (object, context) => reportAccessor.insert(object),
     filterFieldOne: filterField
@@ -132,12 +126,10 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
 
 async function validatePutUserInput(userInput: any) {
   let rules = {
-    image: joi.string().min(3),
-    description: joi.string().max(1024),
-    division: joi.string().hex().length(24),
+    issuedTime: joi.number().integer().positive(),
     request: joi.string().hex().length(24),
-    status: joi.string().allow(['pending','accepted','rejected']),
-    enabled: joi.boolean().default(true),
+    content: joi.string().min(3).max(1024),
+    photo: joi.string().min(3).max(1024) 
   }
   let schema = joi.object().keys(rules)
   let validationResult = schema.validate(userInput)
@@ -149,33 +141,20 @@ async function validatePutUserInput(userInput: any) {
 }
 
 export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor(),
-                                 divisionAccessor: DivisionAccessor = new DivisionMongoAccessor(),
                                  requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
   return crudUtil.updateOne({
     fetchOne: (req, context) => {
+
       context.body = req.body
       context.user = req.user
-      return reportAccessor.getById(req.params.reportId)
+      return reportAccessor.getByRequest(req.params.requestId)
     },
     validateOne: async (item, context) => {
       let data = await validatePutUserInput(context.body)
 
-      if (!context.user.admin && item.status === 'accepted')
-        throw {status:403, cause:'trying to update accepted report'}
-
       if (!context.user.admin) {
-        if ('division' in context.body)
+        if (context.user.id !== item.request.division.id)
           throw {status:400, cause:'"division" is not allowed'}
-        if ('status' in context.body)
-          throw {status:400, cause:'"status" is not allowed'}
-        if ('enabled' in context.body)
-          throw {status:400, cause:'"enabled" is not allowed'}
-      }
-
-      if (data.division) {
-        data.division = await divisionAccessor.getById(data.division)
-        if (!data.division)
-          throw 'division not found'
       }
 
       if (data.request) {
@@ -196,7 +175,7 @@ export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongo
 
 export function deleteOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor()) {
   return crudUtil.deleteOne({
-    fetchOne: (req, context) => reportAccessor.getById(req.params.reportId),
+    fetchOne: (req, context) => reportAccessor.getByRequest(req.params.requestId),
     deleteOne: (reqObject, context) => {
       reqObject.enabled = false
       return reportAccessor.update(reqObject)
