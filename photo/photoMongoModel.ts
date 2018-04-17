@@ -13,10 +13,6 @@ let photoSchema:Schema = new Schema({
     type: Date,
     required: true
   },
-  checksum: {
-    type: String,
-    required: true
-  }
 })
 
 let photoModel: Model<Document> = model('photo', photoSchema)
