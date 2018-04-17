@@ -1,29 +1,10 @@
 import { Schema, Model, Document, model } from 'mongoose'
 import { RequestMongoModel } from '../request'
-import { UserMongoModel } from '../user'
-import { DivisionMongoModel } from '../division'
+
 
 
 let reportSchema:Schema = new Schema({
-  image: {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-   reporter: {
-    type: Schema.Types.ObjectId,
-    ref: UserMongoModel.modelName,
-    required: true
-  },
-   division: {
-    type: Schema.Types.ObjectId,
-    ref: DivisionMongoModel.modelName,
-    required: true
-  },
-  reportTime: {
+  issuedTime: {
     type: Date,
     required: true,
   },
@@ -32,17 +13,15 @@ let reportSchema:Schema = new Schema({
     ref: RequestMongoModel.modelName,
     required: true
   },
-  status: {
+  content: {
     type: String,
-    enum: ['pending', 'accepted', 'rejected'],
-    required: true,
-    default: 'pending'
-  },
-  enabled: {
-    type: Boolean,
-    required: true,
-    default: true
+    required: true
+  }, 
+  photo: {
+    type: String,
+    required: true
   }
+
 })
 
 let reportModel: Model<Document> = model('report', reportSchema)

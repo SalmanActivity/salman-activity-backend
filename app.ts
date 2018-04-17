@@ -54,7 +54,7 @@ app.use('/api/v1/users', user.router)
 app.use('/api/v1/divisions', division.router)
 app.use('/api/v1/locations', location.router)
 app.use('/api/v1/requests', request.router)
-app.use('/api/v1/reports', report.router)
+app.use('/api/v1/', report.router)
 
 
 export default app
