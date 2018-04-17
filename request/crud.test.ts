@@ -254,6 +254,8 @@ describe('request crud endpoint test', () => {
       .send({
         name: 'request test 1',
         description: 'description of request test 1',
+        personInCharge: 'the charged person',
+        phoneNumber: '000000000000',
         location: '5aaa89e2a892471e3cdc84d8', // location 1
         startTime: new Date(2018, 5, 28, 13).getTime(),
         endTime: new Date(2018, 5, 28, 17).getTime(),
@@ -261,6 +263,8 @@ describe('request crud endpoint test', () => {
         assert.equal(res.status, 200)
         assert.isNotEmpty(res.body.id)
         assert.equal(res.body.description, 'description of request test 1')
+        assert.equal(res.body.personInCharge, 'the charged person')
+        assert.equal(res.body.phoneNumber, '000000000000')
         assert.equal(res.body.name, 'request test 1')
         assert.equal(res.body.issuer.id, '5aa9359a2b21732a73d5406a')
         assert.equal(res.body.division.id, '5aa9359a2b21732a73d54068') // division 1
@@ -275,6 +279,8 @@ describe('request crud endpoint test', () => {
       .send({
         name: 'request test 2',
         description: 'description of request test 2',
+        personInCharge: 'the charged person 2',
+        phoneNumber: '1111111111111',
         division: '5aaa860001e1901b03651171', // divisi 2
         location: '5aaa89e2a892471e3cdc84d8', // location 1
         startTime: new Date(2018, 5, 28, 13).getTime(),
@@ -284,6 +290,8 @@ describe('request crud endpoint test', () => {
         assert.isNotEmpty(res.body.id)
         assert.equal(res.body.name, 'request test 2')
         assert.equal(res.body.description, 'description of request test 2')
+        assert.equal(res.body.personInCharge, 'the charged person 2')
+        assert.equal(res.body.phoneNumber, '1111111111111')
         assert.equal(res.body.issuer.id, '5aa9359a2b21732a73d54069')
         assert.equal(res.body.division.id, '5aaa860001e1901b03651171') // division 2
         assert.equal(res.body.status, 'pending')
