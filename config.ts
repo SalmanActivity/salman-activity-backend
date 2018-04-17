@@ -3,7 +3,8 @@ import * as crypto from 'crypto'
 
 export interface Config {
     mongoConnection: string,
-    secretKey: string
+    secretKey: string,
+    photoStorage: string
 }
 
 function loadConfiguration(environment:string): Config {
