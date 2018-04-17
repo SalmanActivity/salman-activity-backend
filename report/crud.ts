@@ -97,11 +97,11 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
     validateOne: async (req, context) => {
       let request = await requestAccessor.getById(req.params.requestId) 
 
-      if (!request[0])
+      if (!request)
         throw 'request not found'
 
       let data = {}
-      data.request = request[0]
+      data.request = requestAccessor
       
       if (req.user && !req.user.admin) {
         if (data.request.division.id !== req.user.division.id)
@@ -149,7 +149,7 @@ export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongo
       let data = await validatePutUserInput(context.body)
 
       if (!context.user.admin) {
-        if (context.user.id !== item.request.division.id)
+        if (context.user.division.id !== item.request.division.id)
           throw {status:400, cause:'"division" is not allowed'}
       }
 
