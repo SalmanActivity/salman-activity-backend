@@ -13,12 +13,19 @@ import config from '../config'
 
 export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Photo> {
 
-  constructor(private storageLocation: string) {
+  constructor(private storageLocation: string = config.photoStorage) {
   }
 
   async serialize(mongoDocument: Document): Promise<Photo> {
     if (!mongoDocument)
       return null
+
+    try {
+      await util.promisify(fs.mkdir)(config.photoStorage)
+    } catch (err) {
+      if (err.code != 'EEXIST')
+        throw err
+    }
 
     let filename = `${config.photoStorage}/${mongoDocument._id}.${mongoDocument.get('mime').split('/')[1]}`
     return {
@@ -33,7 +40,7 @@ export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Pho
   async deserialize(document: Photo): Promise<any> {
     if (!document)
       return null
-
+    
     return {
       _id: document.id,
       name: document.name,
@@ -49,19 +56,32 @@ export default class PhotoMongoAccessor extends MongoAccessor<Photo> implements 
     super(PhotoModel, new PhotoMongoDocumentSerializer(config.photoStorage))
   }
 
-  async insert(object: Photo): Promise<Photo> {
-    let photo: Photo = await super.insert(object)
+  private async writePhoto(photo: Photo) {
+    try {
+      await util.promisify(fs.mkdir)(config.photoStorage)
+    } catch (err) {
+      if (err.code != 'EEXIST')
+        throw err
+    }
+    
     let filename = `${config.photoStorage}/${photo.id}.${photo.mime.split('/')[1]}`
-    let writeStream = photo.readableStream.pipe(fs.createWriteStream(filename))
-    await util.promisify(writeStream.end)()
+    let writeStream = fs.createWriteStream(filename)
+    photo.readableStream.pipe(writeStream)
+
+    await util.promisify(writeStream.on.bind(writeStream, 'finish'))()
+
+    photo.readableStream = fs.createReadStream(filename)
+  }
+
+  async insert(object: Photo): Promise<Photo> {
+    await this.writePhoto(object)
+    let photo: Photo = await super.insert(object)
     return photo
   }
 
   async update(object: Photo): Promise<Photo> {
+    await this.writePhoto(object)
     let photo: Photo = await super.update(object)
-    let filename = `${config.photoStorage}/${photo.id}.${photo.mime.split('/')[1]}`
-    let writeStream = photo.readableStream.pipe(fs.createWriteStream(filename))
-    await util.promisify(writeStream.end)()
     return photo
   }
 
