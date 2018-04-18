@@ -13,6 +13,16 @@ let requestSchema:Schema = new Schema({
     type: String,
     maxlength: 1024,
   },
+  personInCharge: {
+    type: String,
+    maxlength: 256,
+    required: true
+  },
+  phoneNumber: {
+    type: String,
+    maxlength: 50,
+    required: true
+  },
   issuer: {
     type: Schema.Types.ObjectId,
     ref: UserMongoModel.modelName,
@@ -54,6 +64,11 @@ let requestSchema:Schema = new Schema({
     maxlength: 512,
     required: false
   },
+  target: {
+    type: String,
+    maxlength: 1024,
+    required: false
+  },
   status: {
     type: String,
     enum: ['pending', 'accepted', 'rejected'],
@@ -64,7 +79,7 @@ let requestSchema:Schema = new Schema({
     type: Boolean,
     required: true,
     default: true
-  },
+  }
 })
 
 let requestModel: Model<Document> = model('request', requestSchema)

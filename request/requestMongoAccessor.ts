@@ -18,7 +18,7 @@ export class RequestMongoDocumentSerializer implements MongoDocumentSerializer<R
   async serialize(mongoDocument: Document): Promise<Request> {
     if (!mongoDocument)
       return null
-    
+
     mongoDocument = await mongoDocument.populate('division')
       .populate('issuer')
       .populate('location')
@@ -40,6 +40,8 @@ export class RequestMongoDocumentSerializer implements MongoDocumentSerializer<R
       id: mongoDocument._id ? mongoDocument._id.toString() : undefined,
       name: mongoDocument.get('name'),
       description: mongoDocument.get('description'),
+      personInCharge: mongoDocument.get('personInCharge'),
+      phoneNumber: mongoDocument.get('phoneNumber'),
       issuer,
       issuedTime: mongoDocument.get('issuedTime'),
       division,
@@ -49,6 +51,7 @@ export class RequestMongoDocumentSerializer implements MongoDocumentSerializer<R
       participantNumber: mongoDocument.get('participantNumber'),
       participantDescription: mongoDocument.get('participantDescription'),
       speaker: mongoDocument.get('speaker'),
+      target: mongoDocument.get('target'),
       status: mongoDocument.get('status'),
       enabled: mongoDocument.get('enabled'),
     }
@@ -56,11 +59,13 @@ export class RequestMongoDocumentSerializer implements MongoDocumentSerializer<R
   async deserialize(document: Request): Promise<any> {
     if (!document)
       return null
-    
+
     return {
       _id: document.id,
       name: 'name' in document ? document.name : undefined,
       description: 'description' in document ? document.description : undefined,
+      personInCharge: 'personInCharge' in document ? document.personInCharge : undefined,
+      phoneNumber: 'phoneNumber' in document ? document.phoneNumber : undefined,
       issuer: 'issuer' in document ? await this.userSerializer.deserialize(document.issuer) : undefined,
       issuedTime: 'issuedTime' in document ? document.issuedTime : undefined,
       division: 'division' in document ? await this.divisionSerializer.deserialize(document.division) : undefined,
@@ -70,6 +75,7 @@ export class RequestMongoDocumentSerializer implements MongoDocumentSerializer<R
       participantNumber: 'participantNumber' in document ? document.participantNumber : undefined,
       participantDescription: 'participantDescription' in document ? document.participantDescription : undefined,
       speaker: 'speaker' in document ? document.speaker : undefined,
+      target: 'target' in document ? document.target : undefined,
       status: 'status' in document ? document.status : undefined,
       enabled: 'enabled' in document ? document.enabled : undefined
     }
@@ -80,7 +86,7 @@ export default class RequestMongoAccessor extends MongoAccessor<Request> impleme
   constructor() {
     super(RequestMongoModel, new RequestMongoDocumentSerializer())
   }
-  
+
   async getAllBetween(start:Date, end:Date):Promise<Request[]> {
     let condition = {
       'startTime': {
