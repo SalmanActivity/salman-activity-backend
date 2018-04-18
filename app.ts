@@ -12,7 +12,6 @@ import * as location from './location'
 import * as request from './request'
 import * as report from './report'
 
-
 let debug = require('debug')('salman-activity-backend:server')
 
 // bootstrapping server
@@ -34,11 +33,10 @@ export function stop() {
   return server.stop().then(() => mongoose.disconnect())
 }
 
-mongoose.connect(config.mongoConnection).then(resp => {
-    debug('connected to mongo server')
-    console.log('connected to mongo server')
+mongoose.connect(config.mongoConnection).then(() => {
+  debug('connected to mongo server')
 }).catch(error => {
-    debug('error connecting to mongo server')
+  debug('error connecting to mongo server')
 })
 
 // routing server
@@ -56,6 +54,5 @@ app.use('/api/v1/divisions', division.router)
 app.use('/api/v1/locations', location.router)
 app.use('/api/v1/requests', request.router)
 app.use('/api/v1/', report.router)
-
 
 export default app
