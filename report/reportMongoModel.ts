@@ -1,7 +1,6 @@
 import { Schema, Model, Document, model } from 'mongoose'
 import { RequestMongoModel } from '../request'
-
-
+import { PhotoMongoModel } from '../photo'
 
 let reportSchema:Schema = new Schema({
   issuedTime: {
@@ -18,10 +17,10 @@ let reportSchema:Schema = new Schema({
     required: true
   }, 
   photo: {
-    type: String,
+    type: Schema.Types.ObjectId,
+    ref: PhotoMongoModel.modelName,
     required: true
   }
-
 })
 
 let reportModel: Model<Document> = model('report', reportSchema)
