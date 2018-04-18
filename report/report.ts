@@ -1,6 +1,6 @@
 import { Item } from '../accessor'
 import { Request } from '../request'
-
+import { Photo } from '../photo'
 
 export default interface Report extends Item {
 
@@ -10,6 +10,6 @@ export default interface Report extends Item {
 
   content: string
 
-  photo: string
+  photo: Photo
   
 }	
