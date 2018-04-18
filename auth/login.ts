@@ -9,7 +9,7 @@ export default function login(userAccessor: UserAccessor = new UserMongoAccessor
   return async (req, res) => {
     let username = undefined
     let password = undefined
-
+    console.log("req bodyusername di login " + req.body.username)
     try {
       let usernameAndPasswordCheck = null
       if (req.body.username && req.body.password) {
