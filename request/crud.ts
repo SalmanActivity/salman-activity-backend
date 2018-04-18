@@ -39,16 +39,17 @@ async function filterResultByUser (currentUser, request: Request) {
 }
 
 let filterField = crudUtil.filterOne.fields(['id','name','description',
+  'personInCharge', 'phoneNumber',
   'issuer.id','issuer.name','issuer.username','issuer.email',
   'issuedTime',
   'division.id', 'division.name', 'division.enabled',
   'location.id', 'location.name', 'location.enabled',
   'startTime', 'endTime', 'participantNumber',
-  'participantDescription', 'speaker', 'status', 'enabled'])
+  'participantDescription', 'speaker', 'target', 'status', 'enabled'])
 
 export function findRequestInMonth(requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
   return crudUtil.readMany({
-    init: async (req, context) => { 
+    init: async (req, context) => {
       context.user = req.user
       return req
     },
@@ -60,7 +61,7 @@ export function findRequestInMonth(requestAccessor: RequestAccessor = new Reques
 
 export function findOneRequest(requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
   return crudUtil.readOne({
-    init: async (req, context) => { 
+    init: async (req, context) => {
       context.user = req.user
       return req
     },
@@ -74,6 +75,8 @@ async function validatePostUserInput(userInput: any) {
   let rules = {
     name: joi.string().min(3).max(255).required(),
     description: joi.string().max(1024),
+    personInCharge: joi.string().min(3).max(255).required(),
+    phoneNumber: joi.string().min(3).max(50).required(),
     division: joi.string().hex().length(24),
     location: joi.string().hex().length(24).required(),
     startTime: joi.number().integer().positive().required(),
@@ -81,6 +84,7 @@ async function validatePostUserInput(userInput: any) {
     participantNumber: joi.number().integer().positive(),
     participantDescription: joi.string().max(1024),
     speaker: joi.string().max(512),
+    target: joi.string().max(1024),
     status: joi.string().allow(['pending','accepted','rejected']),
     enabled: joi.boolean().default(true),
   }
@@ -118,12 +122,12 @@ export function createOneRequest(requestAccessor: RequestAccessor = new RequestM
         divisionAccessor.getById(data.division),
         locationAccessor.getById(data.location),
       ])
-      
+
       if (!res[0])
         throw 'division not found'
       if (!res[1])
         throw 'location not found'
-    
+
       data.division = res[0]
       data.location = res[1]
       data.issuedTime = new Date()
@@ -138,6 +142,8 @@ async function validatePutUserInput(userInput: any) {
   let rules = {
     name: joi.string().min(3).max(255),
     description: joi.string().max(1024),
+    personInCharge: joi.string().min(3).max(255),
+    phoneNumber: joi.string().min(3).max(50),
     division: joi.string().hex().length(24),
     location: joi.string().hex().length(24),
     startTime: joi.number().integer().positive(),
@@ -145,6 +151,7 @@ async function validatePutUserInput(userInput: any) {
     participantNumber: joi.number().integer().positive(),
     participantDescription: joi.string().max(1024),
     speaker: joi.string().max(512),
+    target: joi.string().max(1024),
     status: joi.string().allow(['pending','accepted','rejected']),
     enabled: joi.boolean().default(true),
   }
@@ -179,7 +186,7 @@ export function updateOneRequest(requestAccessor: RequestAccessor = new RequestM
 
       if (!context.user.admin && item.status === 'accepted')
         throw {status:403, cause:'trying to update accepted request'}
-      
+
       if (!context.user.admin) {
         if ('division' in context.body)
           throw {status:400, cause:'"division" is not allowed'}
@@ -197,7 +204,7 @@ export function updateOneRequest(requestAccessor: RequestAccessor = new RequestM
 
       if (data.location) {
         data.location = await locationAccessor.getById(data.location)
-        if (!data.location) 
+        if (!data.location)
           throw 'location not found'
       }
 
