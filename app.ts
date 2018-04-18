@@ -36,6 +36,7 @@ export function stop() {
 
 mongoose.connect(config.mongoConnection).then(resp => {
     debug('connected to mongo server')
+    console.log('connected to mongo server')
 }).catch(error => {
     debug('error connecting to mongo server')
 })

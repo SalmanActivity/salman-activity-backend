@@ -100,8 +100,13 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
       if (!request)
         throw 'request not found'
 
-      let data = {}
-      data.request = requestAccessor
+      interface LooseObject {
+        [key: string]: any
+      }
+
+      let data: LooseObject = {};
+
+      data.request = request
       
       if (req.user && !req.user.admin) {
         if (data.request.division.id !== req.user.division.id)
