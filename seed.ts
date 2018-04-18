@@ -2,7 +2,10 @@ import { UserMongoAccessor, User } from './user'
 import { DivisionMongoAccessor, Division } from './division'
 import { LocationMongoAccessor, Location } from './location'
 import { RequestMongoAccessor, Request, RequestStatus } from './request'
+import { ReportMongoAccessor, Report } from './report'
+import { Photo, PhotoMongoAccessor } from './photo'
 import { generate } from 'password-hash'
+import * as fs from 'fs'
 
 let division1: Division = {
   id: '5aa9359a2b21732a73d54068',
@@ -246,6 +249,22 @@ let request12: Request = {
   enabled: true
 }
 
+let photo1: Photo = {
+  id: '5aaa89e2a892471e3cdc84e6',
+  name: 'krabby patty',
+  uploadTime: new Date(2018, 1, 2, 10),
+  mime: 'image/jpeg',
+  readableStream: fs.createReadStream('data/photo1.jpg')
+}
+
+let report1: Report = {
+  id: '5aaa89e2a892471e3cdc84e7',
+  issuedTime: new Date(2018, 1, 2, 10),
+  request: request1,
+  content: 'just another report content, lorem ipsum dos color sit amet',
+  photo: photo1
+}
+
 export let divisions = {
   accessor: new DivisionMongoAccessor(),
   documents: [division1, division2]
@@ -258,6 +277,16 @@ export let users = {
 export let locations = {
   accessor: new LocationMongoAccessor(),
   documents: [location1, location2]
+}
+
+export let photos = {
+  accessor: new PhotoMongoAccessor(),
+  documents: [photo1]
+}
+
+export let reports = {
+  accessor: new ReportMongoAccessor(),
+  documents: [report1]
 }
 
 export let requests = {
