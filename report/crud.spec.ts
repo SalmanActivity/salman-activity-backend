@@ -352,7 +352,7 @@ describe('report crud endpoint test', () => {
         params: {requestId: '5aaa89e2a892471e3cdc84f0'},
         body: {
           'content': 'new report content',
-          'photo': 'some base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       createOneReportEndpoint(req, res, next).then(() => {
@@ -369,7 +369,7 @@ describe('report crud endpoint test', () => {
         params: {requestId: '5aaa89e2a892471e3cdc84f0'},
         body: {
           'content': 'new report content',
-          'photo': 'some base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       createOneReportEndpoint(req, res, next).then(() => {
@@ -385,7 +385,7 @@ describe('report crud endpoint test', () => {
         user: {admin: true},
         params: {requestId: '5aaa89e2a892471e3cdc84f0'},
         body: {
-          'photo': 'some base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       createOneReportEndpoint(req, res, next).then(() => {
@@ -400,7 +400,7 @@ describe('report crud endpoint test', () => {
         params: {requestId: '5aaa89e2a892471e3cdc84f0'},
         body: {
           'content': 'a',
-          'photo': 'some base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       createOneReportEndpoint(req, res, next).then(() => {
@@ -415,7 +415,7 @@ describe('report crud endpoint test', () => {
         params: {requestId: '5aaa89e2a892471e3cdc84e5'},
         body: {
           'content': 'new report content',
-          'photo': 'some base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       createOneReportEndpoint(req, res, next).then(() => {
@@ -430,7 +430,7 @@ describe('report crud endpoint test', () => {
         params: {requestId: '5aaa89e2a892471e3cdc84f1'},
         body: {
           'content': 'new report content',
-          'photo': 'some base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       createOneReportEndpoint(req, res, next).then(() => {
@@ -445,7 +445,7 @@ describe('report crud endpoint test', () => {
         params: {requestId: '5aaa89e2a892471e3cdc84f1'},
         body: {
           'content': 'new report content',
-          'photo': 'some base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       createOneReportEndpoint(req, res, next).then(() => {
@@ -460,7 +460,7 @@ describe('report crud endpoint test', () => {
         params: {requestId: '5aaa89e2a892471e3cdc84ff'},
         body: {
           'content': 'new report content',
-          'photo': 'some base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       createOneReportEndpoint(req, res, next).then(() => {
@@ -479,7 +479,7 @@ describe('report crud endpoint test', () => {
         params:{requestId: '5aaa89e2a892471e3cdc84e5'},
         body: {
           'content': 'updated report content',
-          'photo': 'some updated base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       updateOneReportEndpoint(req, res, next).then(() => {
@@ -497,7 +497,7 @@ describe('report crud endpoint test', () => {
         params:{requestId: '5aaa89e2a892471e3cdc84ea'},
         body: {
           'content': 'updated report content',
-          'photo': 'some updated base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       updateOneReportEndpoint(req, res, next).then(() => {
@@ -515,7 +515,7 @@ describe('report crud endpoint test', () => {
         params:{requestId: '5aaa89e2a892471e3cdc84e5'},
         body: {
           'content': 'a',
-          'photo': 'some updated base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       updateOneReportEndpoint(req, res, next).then(() => {
@@ -530,7 +530,7 @@ describe('report crud endpoint test', () => {
         params:{requestId: '5aaa89e2a892471e3cdc84f2'},
         body: {
           'content': 'updated report content',
-          'photo': 'some updated base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       updateOneReportEndpoint(req, res, next).then(() => {
@@ -545,7 +545,7 @@ describe('report crud endpoint test', () => {
         params:{requestId: '5aaa89e2a892471e3cdc84ea'},
         body: {
           'content': 'updated report content',
-          'photo': 'some updated base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       updateOneReportEndpoint(req, res, next).then(() => {
@@ -560,7 +560,7 @@ describe('report crud endpoint test', () => {
         params:{requestId: '5aaa89e2a892471e3cdc84f0'},
         body: {
           'content': 'updated report content',
-          'photo': 'some updated base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       updateOneReportEndpoint(req, res, next).then(() => {
@@ -575,7 +575,7 @@ describe('report crud endpoint test', () => {
         params:{requestId: '5aaa89e2a892471e3cdc84aa'},
         body: {
           'content': 'updated report content',
-          'photo': 'some updated base 64 image is here'
+          'photo': 'data:image/jpeg;base64,a'
         }
       }
       updateOneReportEndpoint(req, res, next).then(() => {

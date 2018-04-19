@@ -281,7 +281,7 @@ export let locations = {
 
 export let photos = {
   accessor: new PhotoMongoAccessor(),
-  documents: [photo1]
+  documents: []
 }
 
 export let reports = {

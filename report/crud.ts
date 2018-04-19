@@ -6,6 +6,7 @@ import { LocationAccessor, LocationMongoAccessor } from '../location'
 import { RequestAccessor, RequestMongoAccessor } from '../request'
 import * as crudUtil from '../crud'
 import * as joi from 'joi'
+import { loadPhotoFromBase64 } from '../photo'
 
 async function fetchReportByMonth(req, reportAccessor: ReportAccessor) {
   let monthFilter = new Date().getMonth()
@@ -79,6 +80,40 @@ export function findReportByRequest(reportAccessor: ReportAccessor = new ReportM
   })
 }
 
+export function findReportImageByRequest(reportAccessor: ReportAccessor = new ReportMongoAccessor()) {
+  return async (req, res) => {
+    try {
+      let report = await reportAccessor.getByRequestId(req.params.requestId)
+
+      if (!report)
+        throw {status: 404, cause: 'no report found'}
+      
+      if (!req.user)
+        throw {status:403, cause: 'unauthorized access'}
+
+      if (!req.user.admin && req.user.division.id !== report.request.division.id)
+        throw {status:403, cause: 'unauthorized division'}
+      
+      res.set('Content-Type', report.photo.mime)
+      report.photo.readableStream.pipe(res)
+    } catch (err) {
+      if (err.status)
+        return res.status(err.status).json({
+          error: {
+            msg: 'fetch image error',
+            cause: err.cause
+          }
+        })
+      return res.status(500).json({
+        error: {
+          msg: 'internal server error',
+          cause: err
+        }
+      })
+    }
+  }
+}
+
 async function validatePostUserInput(userInput: any) {
   let rules = {
     content: joi.string().min(3).max(1024).required(),
@@ -117,7 +152,20 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
         content: req.body.content,
         photo: req.body.photo
       })
-      data['request'] = request
+
+      if (data.photo)
+        try {
+          let photo = await loadPhotoFromBase64(data.photo)
+          data.photo = {
+            name: req.params.requestId,
+            uploadTime: new Date(),
+            readableStream: photo.readableStream,
+            mime: photo.mime
+          }
+        } catch (err) {
+          throw {status: 400, cause: 'cannot parse base64 image'}
+        }
+
       return data
     },
     insertOne: (object, context) => reportAccessor.insert(object),
@@ -155,7 +203,20 @@ export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongo
       }
 
       let data = await validatePutUserInput(context.body)
-      return Object.assign(item, data)
+      if (data.photo)
+        try {
+          let photo = await loadPhotoFromBase64(data.photo)
+          item.photo.uploadTime = new Date()
+          item.photo.readableStream = photo.readableStream
+          item.photo.mime = photo.mime
+        } catch (err) {
+          throw {status: 400, cause: 'cannot parse base64 image'}
+        }
+
+      if (data.content)
+        item.content = data.content
+
+      return item
     },
     updateOne: (reqObject, context) => reportAccessor.update(reqObject),
     filterFieldOne: filterField

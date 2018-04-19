@@ -5,7 +5,7 @@ import ReportMongoModel from './reportMongoModel'
 import Report from './report'
 import { Request } from '../request'
 import { RequestMongoDocumentSerializer } from '../request/requestMongoAccessor'
-import { Photo, PhotoMongoDocumentSerializer } from '../photo'
+import { Photo, PhotoMongoAccessor, PhotoAccessor, PhotoMongoDocumentSerializer } from '../photo'
 
 export class ReportMongoDocumentSerializer implements MongoDocumentSerializer<Report> {
   
@@ -53,7 +53,8 @@ export class ReportMongoDocumentSerializer implements MongoDocumentSerializer<Re
 
 export default class ReportMongoAccessor extends MongoAccessor<Report> implements ReportAccessor {
   
-  constructor(reportSerializer: MongoDocumentSerializer<Report> = new ReportMongoDocumentSerializer()) {
+  constructor(reportSerializer: MongoDocumentSerializer<Report> = new ReportMongoDocumentSerializer(),
+              protected photoAccessor: PhotoAccessor = new PhotoMongoAccessor()) {
     super(ReportMongoModel, reportSerializer)
   }
 
@@ -77,6 +78,24 @@ export default class ReportMongoAccessor extends MongoAccessor<Report> implement
       return undefined
     let item: Report = await this.docSerializer.serialize(result)
     return item
+  }
+
+  async deleteAll(): Promise<void> {
+    let allReports = await super.getAll()
+    allReports = allReports.filter(report => report.photo)
+    let promises = allReports.map(report => this.photoAccessor.delete(report.photo))
+    await Promise.all(promises)
+    await super.deleteAll()
+  }
+
+  async insert(object: Report): Promise<Report>{
+    await this.photoAccessor.insert(object.photo)
+    return await super.insert(object)
+  }
+
+  async update(object: Report): Promise<Report>{
+    await this.photoAccessor.update(object.photo)
+    return await super.update(object)
   }
 
 }

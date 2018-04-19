@@ -1,10 +1,8 @@
 import * as stream from 'stream'
 import * as fs from 'fs'
 import * as util from 'util'
-
 import { Schema, Model, Document, model } from 'mongoose'
 import { MongoAccessor, MongoDocumentSerializer } from '../accessor/mongo'
-
 import PhotoAccessor from './photoAccessor'
 import Photo from './photo'
 import PhotoModel from './photoMongoModel'
@@ -28,6 +26,7 @@ export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Pho
     }
 
     let filename = `${config.photoStorage}/${mongoDocument._id}.${mongoDocument.get('mime').split('/')[1]}`
+    let readableStream = fs.createReadStream(filename)
     return {
       id: mongoDocument._id ? mongoDocument._id.toString() : undefined,
       name: mongoDocument.get('name'),
@@ -74,14 +73,14 @@ export default class PhotoMongoAccessor extends MongoAccessor<Photo> implements 
   }
 
   async insert(object: Photo): Promise<Photo> {
-    await this.writePhoto(object)
     let photo: Photo = await super.insert(object)
+    await this.writePhoto(object)
     return photo
   }
 
   async update(object: Photo): Promise<Photo> {
-    await this.writePhoto(object)
     let photo: Photo = await super.update(object)
+    await this.writePhoto(object)
     return photo
   }
 

@@ -4,10 +4,11 @@ import * as crud from './crud'
 
 export let router: Router = Router()
 
-router.get('/reports', user(), crud.findReportInMonth())
-router.get('/requests/:requestId/report', user(), crud.findReportByRequest())
+router.get('/reports', auth(), crud.findReportInMonth())
+router.get('/requests/:requestId/report', auth(), crud.findReportByRequest())
+router.get('/requests/:requestId/report/photo', auth(), crud.findReportImageByRequest())
 router.post('/requests/:requestId/report', auth(), crud.createOneReport())
-router.put('/requests/:requestId/report', user(), crud.updateOneReport())
+router.put('/requests/:requestId/report', auth(), crud.updateOneReport())
 router.delete('/requests/:requestId/report', auth(), crud.deleteOneReport())
 
 export { default as Report } from './report'

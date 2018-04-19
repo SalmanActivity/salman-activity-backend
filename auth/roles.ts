@@ -23,6 +23,8 @@ export function user(userAccessor: UserAccessor = new UserMongoAccessor(), confi
     let token = undefined
     if (req.body.token)
       token = req.body.token
+    if (req.query && req.query.token)
+      token = req.query.token
     if (req.header('Authorization')) {
       let tokenHeader = req.header('Authorization')
       let tokenArr = tokenHeader.split(/\s+/)
