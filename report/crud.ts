@@ -48,7 +48,7 @@ let filterField = crudUtil.filterOne.fields(['id', 'issuedTime',
   'request.startTime', 'request.endTime', 'request.participantNumber',
   'request.participantDescription', 'request.speaker', 'request.target', 'request.status', 'request.enabled',
   'content',
-  'photo.id', 'photo.name', 'photo.uploadTime', 'photo.mime'])
+  'photo'])
 
 export function findReportInMonth(reportAccessor: ReportAccessor = new ReportMongoAccessor()) {
   return crudUtil.readMany({
@@ -82,7 +82,7 @@ export function findReportByRequest(reportAccessor: ReportAccessor = new ReportM
 async function validatePostUserInput(userInput: any) {
   let rules = {
     content: joi.string().min(3).max(1024).required(),
-    photo: joi.string().required()
+    photo: joi.string()
   }
   let schema = joi.object().keys(rules)
   let validationResult = schema.validate(userInput)
@@ -99,22 +99,26 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
   return crudUtil.createOne({
     validateOne: async (req, context) => {
       let request = await requestAccessor.getById(req.params.requestId) 
-
       if (!request)
         throw {status: 404, cause: 'request not found'}
-
-      let data: any = {request}
       
       if (req.user && !req.user.admin) {
-        if (data.request.division.id !== req.user.division.id)
-          throw {status: 400, cause: '"division" is not allowed'}
-        if (data.request.status !== 'accepted')
+        if (request.division.id !== req.user.division.id)
+          throw {status: 403, cause: 'unauthorized division'}
+        if (request.status !== 'accepted')
           throw {status: 400, cause: 'request not yet accepted'}
       }
 
-      data.content = req.body.content
-      data.photo = req.body.photo
-      return await validatePostUserInput(data)
+      let report = await reportAccessor.getByRequestId(req.params.requestId)
+      if (report)
+        throw {status: 400, cause: 'report already created'}
+
+      let data = await validatePostUserInput({
+        content: req.body.content,
+        photo: req.body.photo
+      })
+      data['request'] = request
+      return data
     },
     insertOne: (object, context) => reportAccessor.insert(object),
     filterFieldOne: filterField
