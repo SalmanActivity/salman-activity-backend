@@ -62,6 +62,12 @@ describe('report crud endpoint test', () => {
         division: {
           id: '5aaa89e2a892471e3cdc84eb'
         }
+      },
+      {
+        id: '5aaa89e2a892471e3cdc84f0',
+        division: {
+          id: '5aaa89e2a892471e3cdc84eb'
+        }
       }
     ]
 
@@ -190,6 +196,128 @@ describe('report crud endpoint test', () => {
         sinon.assert.match(ret[0].content, 'just another report content 5, lorem ipsum dos color sit amet')
         done()
       }).catch(done)
+    })
+
+  })
+
+  describe('GET specific report by request endpoint', () => {
+
+    it('return specific report when loggin as admin', done => {
+      let req = {user: {admin: true}, params:{requestId: '5aaa89e2a892471e3cdc84e5'}}
+      findReportByRequestEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let ret = res.json.getCall(0).args[0]
+        sinon.assert.match(ret.id, '5aaa89e2a892471e3cdc84e7')
+        sinon.assert.match(ret.content, 'just another report content 1, lorem ipsum dos color sit amet')
+        done()
+      }).catch(done)
+    })
+
+    it('return specific report in its division when loggin as division', done => {
+      let req = {user: {division: {id:'5aaa89e2a892471e3cdc84eb'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}}
+      findReportByRequestEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let ret = res.json.getCall(0).args[0]
+        sinon.assert.match(ret.id, '5aaa89e2a892471e3cdc84e8')
+        sinon.assert.match(ret.content, 'just another report content 3, lorem ipsum dos color sit amet')
+        done()
+      }).catch(done)
+    })
+
+    it('return 403 when division want to read report from another division', done => {
+      let req = {user: {division: {id:'5aaa89e2a892471e3cdc84e4'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}}
+      findReportByRequestEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 403)
+        done()
+      }).catch(done)
+    })
+
+    it('return 404 when report has not been created', done => {
+      let req = {user: {admin:true}, params:{requestId: '5aaa89e2a892471e3cdc84f0'}}
+      findReportByRequestEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        done()
+      }).catch(done)
+    })
+
+    it('return 404 when request not found', done => {
+      let req = {user: {admin:true}, params:{requestId: '5aaa89e2a892471e3cdc84ef'}}
+      findReportByRequestEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        done()
+      }).catch(done)
+    })
+
+  })
+
+  describe('POST report endpoint', () => {
+    
+    it('should store a new report and return the report', done => {
+      done()
+    })
+
+    it('should return validation error when content is missing', done => {
+      done()
+    })
+
+    it('should return validation error when content is too short', done => {
+      done()
+    })
+
+    it('should return validation error when report has been created', done => {
+      done()
+    })
+
+    it('should return validation error when request status is not accepted', done => {
+      done()
+    })
+
+    it('should return 403 when division want to create report of another division request', done => {
+      done()
+    })
+
+    it('should return 404 when request not found', done => {
+      done()
+    })
+
+  })
+
+  describe('PUT specific report endpoint', () => {
+
+    it('should update report and return the updated report', done => {
+      done()
+    })
+
+    it('should return validation error when content is too short', done => {
+      done()
+    })
+
+    it('should return 403 when division want to create report of another division request', done => {
+      done()
+    })
+
+    it('should return 404 when report has not been created', done => {
+      done()
+    })
+
+    it('should return 404 when request not found', done => {
+      done()
+    })
+
+  })
+
+  describe('DELETE specific report endpoint', () => {
+
+    it('should delete a specific report', done => {
+      done()
+    })
+
+    it('should return 403 when division want to delete report of another division request', done => {
+      done()
+    })
+
+    it('should return 404 when request not found', done => {
+      done()
     })
 
   })
