@@ -151,7 +151,7 @@ export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongo
 
       if (!context.user.admin) {
         if (context.user.division.id !== item.request.division.id)
-          throw {status:400, cause:'"division" is not allowed'}
+          throw {status:403, cause:'unauthorized division'}
       }
 
       context.updatingItem = item
@@ -162,13 +162,22 @@ export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongo
   })
 }
 
-export function deleteOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor()) {
+export function deleteOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor(),
+                                requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
   return crudUtil.deleteOne({
-    fetchOne: (req, context) => reportAccessor.getByRequestId(req.params.requestId),
-    deleteOne: (reqObject, context) => {
-      reqObject.enabled = false
-      return reportAccessor.update(reqObject)
+    fetchOne: async (req, context) => {
+      let request = await requestAccessor.getById(req.params.requestId) 
+      if (!request)
+        throw {status: 404, cause: 'request not found'}
+      
+      let report = await reportAccessor.getByRequestId(req.params.requestId)
+      if (!req.user.admin) {
+        if (req.user.division.id !== report.request.division.id)
+          throw {status:403, cause:'unauthorized division'}
+      }
+      return report
     },
+    deleteOne: (reqObject, context) => reportAccessor.delete(reqObject),
     filterFieldOne: filterField
   })
 }
