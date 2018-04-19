@@ -147,14 +147,14 @@ export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongo
       return reportAccessor.getByRequestId(req.params.requestId)
     },
     validateOne: async (item, context) => {
-      let data = await validatePutUserInput(context.body)
-
-      if (!context.user.admin) {
-        if (context.user.division.id !== item.request.division.id)
-          throw {status:403, cause:'unauthorized division'}
+      if (context.user && !context.user.admin) {
+        if (item.request.division.id !== context.user.division.id)
+          throw {status: 403, cause: 'unauthorized division'}
+        if (item.request.status !== 'accepted')
+          throw {status: 400, cause: 'request not yet accepted'}
       }
 
-      context.updatingItem = item
+      let data = await validatePutUserInput(context.body)
       return Object.assign(item, data)
     },
     updateOne: (reqObject, context) => reportAccessor.update(reqObject),
