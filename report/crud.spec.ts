@@ -203,7 +203,7 @@ describe('report crud endpoint test', () => {
     findReportInMonthEndpoint = crud.findReportInMonth(reportAccessor)
     findReportByRequestEndpoint = crud.findReportByRequest(reportAccessor)
     createOneReportEndpoint = crud.createOneReport(reportAccessor, requestAccessor)
-    deleteOneReportEndpoint = crud.deleteOneReport(reportAccessor)
+    deleteOneReportEndpoint = crud.deleteOneReport(reportAccessor, requestAccessor)
     updateOneReportEndpoint = crud.updateOneReport(reportAccessor)
 
     sandbox = sinon.sandbox.create()
@@ -483,16 +483,42 @@ describe('report crud endpoint test', () => {
 
   describe('DELETE specific report endpoint', () => {
 
-    it('should delete a specific report', done => {
-      done()
+    it('should delete specific report when loggin as admin', done => {
+      let req = {user: {admin: true}, params:{requestId: '5aaa89e2a892471e3cdc84e5'}}
+      deleteOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 202)
+        let ret = res.json.getCall(0).args[0]
+        sinon.assert.match(ret.id, '5aaa89e2a892471e3cdc84e7')
+        sinon.assert.match(ret.content, 'just another report content 1, lorem ipsum dos color sit amet')
+        done()
+      }).catch(done)
+    })
+
+    it('should delete specific report in when loggin as division', done => {
+      let req = {user: {division: {id:'5aaa89e2a892471e3cdc84eb'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}}
+      deleteOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 202)
+        let ret = res.json.getCall(0).args[0]
+        sinon.assert.match(ret.id, '5aaa89e2a892471e3cdc84e8')
+        sinon.assert.match(ret.content, 'just another report content 3, lorem ipsum dos color sit amet')
+        done()
+      }).catch(done)
     })
 
     it('should return 403 when division want to delete report of another division request', done => {
-      done()
+      let req = {user: {division: {id:'5aaa89e2a892471e3cdc84e4'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}}
+      deleteOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 403)
+        done()
+      }).catch(done)
     })
 
     it('should return 404 when request not found', done => {
-      done()
+      let req = {user: {division: {id:'5aaa89e2a892471e3cdc84e4'}}, params:{requestId: '5aaa89e2a892471e3cdc84ff'}}
+      deleteOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        done()
+      }).catch(done)
     })
 
   })
