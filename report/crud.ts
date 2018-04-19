@@ -68,7 +68,12 @@ export function findReportByRequest(reportAccessor: ReportAccessor = new ReportM
       context.user = req.user
       return req
     },
-    fetchOne: (req, context) => reportAccessor.getByRequestId(req.params.requestId),
+    fetchOne: async (req, context) => {
+      let report = await reportAccessor.getByRequestId(req.params.requestId)
+      if (!context.user.admin && context.user.division.id !== report.request.division.id)
+        throw {status:403, cause: 'unauthorized division'}
+      return report
+    },
     filterOne: (reqObject, context) => filterResultByUser(context.user, reqObject),
     filterFieldOne: filterField
   })
