@@ -1,0 +1,923 @@
+swagger: "2.0"
+
+info:
+  version: "1.0"
+  title: Salman Activity Backend API
+  description: API aplikasi manajemen aktivitas YPM Salman
+
+schemes:
+  - https
+host: salman-activity.herokuapp.com
+basePath: /api/v1/
+
+paths:
+  /status/healthcheck:
+    get:
+      summary: melakukan healthchecking pada server
+      description: mengembalikan json berupa status server
+      produces:
+       - application/json
+      responses:
+        200:
+          description: server berjalan dengan baik
+          schema:
+            type: string
+            default: up and running
+          examples:
+            application/json: up and running
+      tags:
+        - status
+        
+  /users:
+    get:
+      summary: list semua user
+      description: mendapatkan semua user yang ada. Jika admin yang melakukan akses, akan mengembalikan seluruh user yang ada, jika penggua divisi, hanya akan menampilkan anggota satu divisinya.
+      produces:
+      - application/json
+      responses:
+        200:
+          description: berhasil melihat daftar user
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        403:
+          description: tidak diizinkan melihat daftar user
+      tags: [users]
+    post:
+      summary: menciptakan pengguna baru.
+      description: menciptakan pengguna baru. Hanya dapat dilakukan oleh admin.
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - name: name
+          type: string
+          in: formData
+          required: true
+          description: nama dari pengguna
+        - name: username
+          type: string
+          in: formData
+          required: true
+          description: username dari pengguna, digunakan untuk login
+        - name: email
+          type: string
+          in: formData
+          required: true
+          description: email dari pengguna, digunakan untuk login
+        - name: password
+          type: string
+          in: formData
+          required: true
+          description: kata sandi dari pengguna, digunakan untuk login
+        - name: division
+          type: string
+          in: formData
+          description: id dari divisi pengguna
+        - name: admin
+          type: boolean
+          in: formData
+          description: apakah pengguna merupakan admin
+      responses:
+        201:
+          description: berhasil menciptakan pengguna baru.
+          schema:
+            $ref: '#/definitions/User'
+        403:
+          description: akses ditolak.
+        400:
+          description: data tidak valid.
+        500:
+          description: terjadi kesalahan dalam menciptakan pengguna baru.
+      tags: [users]
+      
+  /users/{user_id}:
+    get:
+      summary: mendapatkan detail user
+      description: mengembalikan informasi detail tentang user dengan id tertentu
+      produces:
+        - application/json
+      parameters:
+        - name: user_id
+          in: path
+          description: id dari user yang ingin diinspeksi
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil melihat detail informasi user
+          schema:
+            $ref: '#/definitions/User'
+        403:
+          description: akses ditolak.
+        404:
+          description: pengguna tidak ditemukan.
+      tags: [users]
+    put:
+      summary: mengubah informasi pengguna.
+      description: mengubah informasi pengguna tertentu. Hanya dapat dilakukan oleh admin.
+      produces:
+        - application/json
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: user_id
+          in: path
+          description: id dari pengguna yang ingin diubah.
+          required: true
+          type: string
+        - name: name
+          type: string
+          in: formData
+          description: nama dari pengguna
+        - name: username
+          type: string
+          in: formData
+          description: username dari pengguna, digunakan untuk login
+        - name: email
+          type: string
+          in: formData
+          description: email dari pengguna, digunakan untuk login
+        - name: password
+          type: string
+          in: formData
+          description: kata sandi dari pengguna, digunakan untuk login
+        - name: admin
+          type: boolean
+          in: formData
+          description: apakah pengguna merupakan admin
+      responses:
+        200:
+          description: berhasil mengubah informasi pengguna
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: data tidak valid
+        403:
+          description: akses ditolak.
+        500:
+          description: terjadi kesalahan dalam mengubah informasi pengguna.
+        404:
+          description: pengguna tidak ditemukan.
+      tags: [users]
+    delete:
+      summary: menghapus pengguna.
+      description: menghapus pengguna tertentu. Hanya dapat dilakukan oleh admin.
+      produces:
+        - application/json
+      parameters:
+        - name: user_id
+          in: path
+          description: id dari pengguna yang ingin dihapus.
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil menghapus pengguna
+          schema:
+            $ref: '#/definitions/User'
+        403:
+          description: akses ditolak.
+        500:
+          description: terjadi kesalahan dalam menghapus pengguna.
+        404:
+          description: pengguna tidak ditemukan.
+      tags: [users]
+  
+  /users/me:
+    get:
+      summary: mendapatkan detail user yang telah terautentikasi
+      description: mengembalikan informasi detail tentang user yang telah terautentikasi.
+      produces:
+        - application/json
+      responses:
+        200:
+          description: berhasil melihat detail informasi user
+          schema:
+            $ref: '#/definitions/User'
+        403:
+          description: akses ditolak.
+      tags: [users]
+    
+  /auth/login:
+    post:
+      summary: melakukan autentikasi pengguna
+      description: melakukan autentikasi pengguna berdasarkan username dan password. Mengembalikan access_token jika autentikasi berhasil.
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: username
+          type: string
+          in: formData
+          required: true
+          description: username pengguna
+        - name: password
+          type: string
+          in: formData
+          required: true
+          description: password pengguna
+      produces:
+        - application/json
+      responses:
+        200:
+          description: autentikasi sukses.
+        400:
+          description: input user tidak valid.
+        403:
+          description: credential yang diinputkan salah
+      tags: [auth]
+    
+  /auth/check_auth:
+    post:
+      summary: melakukan pengecekan sesi
+      description: mengembalikan status login pengguna
+      produces:
+        - application/json
+      responses:
+        200:
+          description: pengguna sudah terautentikasi.
+        403:
+          description: pengguna belum melakukan autentikasi.
+      tags: [auth]
+      
+  /locations:
+    get:
+      summary: mendapatkan daftar ruang yang ada
+      description: mengembalikan array ruang yang ada.
+      produces:
+        - application/json
+      responses:
+        200:
+          description: berhasil mengambil daftar ruang
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Location'
+        403:
+          description: akses ditolak.
+      tags: [locations]
+    post:
+      summary: menciptakan ruangan baru.
+      description: menciptakan pengguna baru. Hanya dapat dilakukan oleh admin.
+      produces:
+        - application/json
+      consumes: 
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: name
+          in: formData
+          description: nama ruangan yang ingin ditambahkan
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil menciptakan ruangan baru.
+          schema:
+            $ref: '#/definitions/Location'
+        403:
+          description: akses ditolak.
+        500:
+          description: terjadi kesalahan dalam menciptakan ruangan baru.
+      tags: [locations]
+      
+  /locations/{location_id}:
+    get:
+      summary: mendapatkan detail ruangan
+      description: mengembalikan informasi detail tentang ruangan dengan id tertentu
+      produces:
+        - application/json
+      parameters:
+        - name: location_id
+          in: path
+          description: id dari ruangan yang ingin diinspeksi
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil melihat detail informasi ruangan
+          schema:
+            $ref: '#/definitions/Location'
+        403:
+          description: akses ditolak.
+        404:
+          description: ruangan tidak ditemukan.
+      tags: [locations]
+    put:
+      summary: mengubah informasi ruangan.
+      description: mengubah informasi ruangan tertentu. Hanya dapat dilakukan oleh admin.
+      produces:
+        - application/json
+      consumes: 
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: location_id
+          in: path
+          description: id dari ruangan yang ingin diubah.
+          required: true
+          type: string
+        - name: name
+          in: formData
+          description: nama ruangan yang ingin ditambahkan
+          type: string
+      responses:
+        200:
+          description: berhasil mengubah informasi ruangan
+          schema:
+            $ref: '#/definitions/Location'
+        400:
+          description: data tidak valid.
+        403:
+          description: akses ditolak.
+        500:
+          description: terjadi kesalahan dalam mengubah ruangan.
+        404:
+          description: ruangan tidak ditemukan.
+      tags: [locations]
+    delete:
+      summary: menghapus pengguna.
+      description: menghapus ruangan tertentu. Hanya dapat dilakukan oleh admin.
+      produces:
+        - application/json
+      parameters:
+        - name: location_id
+          in: path
+          description: id dari ruangan yang ingin dihapus.
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil menghapus ruangan
+          schema:
+            $ref: '#/definitions/Location'
+        403:
+          description: akses ditolak.
+        500:
+          description: terjadi kesalahan dalam menghapus ruangan.
+        404:
+          description: ruangan tidak ditemukan.
+      tags: [locations]
+    
+  /divisions:
+    get:
+      summary: mendapatkan daftar bagian yang ada
+      description: mengembalikan array bidang yang ada.
+      produces:
+        - application/json
+      responses:
+        200:
+          description: berhasil mengambil daftar bidang
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Division'
+        403:
+          description: akses ditolak.
+      tags: [divisions]
+    post:
+      summary: menciptakan bidang baru.
+      description: menciptakan bidang baru. Hanya dapat dilakukan oleh admin.
+      produces:
+        - application/json
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: name
+          in: formData
+          description: nama ruangan yang ingin ditambahkan
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil menciptakan bidang baru.
+          schema:
+            $ref: '#/definitions/Division'
+        403:
+          description: akses ditolak.
+        500:
+          description: terjadi kesalahan dalam menciptakan bidang baru.
+      tags: [divisions]
+      
+  /divisions/{division_id}:
+    get:
+      summary: mendapatkan detail bidang
+      description: mengembalikan informasi detail tentang bidang dengan id tertentu
+      produces:
+        - application/json
+      parameters:
+        - name: division_id
+          in: path
+          description: id dari bidang yang ingin diinspeksi
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil melihat detail informasi bidang
+          schema:
+            $ref: '#/definitions/Division'
+        403:
+          description: akses ditolak.
+      tags: [divisions]
+    put:
+      summary: mengubah informasi bidang.
+      description: mengubah informasi bidang tertentu. Hanya dapat dilakukan oleh admin.
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - name: division_id
+          in: path
+          description: id dari bidang yang ingin diubah.
+          required: true
+          type: string
+        - name: name
+          in: formData
+          description: nama ruangan yang ingin ditambahkan
+          type: string
+      responses:
+        200:
+          description: berhasil mengubah informasi bidang
+          schema:
+            $ref: '#/definitions/Division'
+        400:
+          description: data tidak valid.
+        403:
+          description: akses ditolak.
+        500:
+          description: terjadi kesalahan dalam mengubah informasi bidang.
+        404:
+          description: bidang tidak ditemukan.
+      tags: [divisions]
+    delete:
+      summary: menghapus bidang.
+      description: menghapus bidang tertentu. Hanya dapat dilakukan oleh admin.
+      produces:
+        - application/json
+      parameters:
+        - name: division_id
+          in: path
+          description: id dari bidang yang ingin dihapus.
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil menghapus bidang
+          schema:
+            $ref: '#/definitions/Division'
+        403:
+          description: akses ditolak.
+        500:
+          description: terjadi kesalahan dalam menghapus bidang.
+        404:
+          description: bidang tidak ditemukan.
+      tags: [divisions]
+  
+  /requests:
+    get:
+      summary: mendapatkan daftar request yang ada
+      description: mengembalikan array request yang ada di bulan ini. Jika pengguna login sebagai admin, maka akan ditampilkan seluruh request yang ada. Jika pengguna login sebagai anggota divisi maka akan ditampilkan seluruh request yang satu divisi dengannya. Pengguna umum akan mendapatkan aktivitas yang disetujui dan enabled saja.
+      parameters:
+        - in: query
+          name: month
+          type: integer
+          description: bulan yang request-nya ingin ditampilkan. Defaultnya bulan saat ini.
+        - in: query
+          name: year
+          type: integer
+          description: tahun yang request-nya ingin ditampilkan. Defaultnya adalah tahun saat ini.
+      produces:
+        - application/json
+      responses:
+        200:
+          description: berhasil mengambil daftar request
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Request'
+        403:
+          description: akses ditolak.
+      tags: [requests]
+    post:
+      summary: membuat permintaan peminjaman ruangan
+      description: digunakan untuk membuat permintaan peminjaman ruangan
+      produces:
+        - application/json
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: name
+          in: formData
+          description: nama kegiatan yang diajukan
+          required: true
+          type: string
+        - name: description
+          in: formData
+          description: deskripsi kegiatan
+          required: false
+          type: string
+        - name: personInCharge
+          in: formData
+          description: orang yang bertanggung jawab terhadap aktivitas yang diajukan
+          required: true
+          type: string
+        - name: phoneNumber
+          in: formData
+          description: nomor telepon orang yang bertanggung jawab terhadap acara
+          required: true
+          type: string
+        - name: division
+          description: id divisi yang mengajukan, hanya berlaku jika admin yang melakukan pengisian. Jika divisi yang melakukan, maka akan menggunakan divisi user yang sedang login
+          required: false
+          in: formData
+          type: string
+        - name: location
+          description: id ruang yang ingin digunakan
+          required: true
+          in: formData
+          type: string
+        - name: startTime
+          description: waktu mulai kegiatan (UTC timestamp in milisecond)
+          required: true
+          type: number
+          format: itneger
+          in: formData
+        - name: endTime
+          required: true
+          description: waktu selesai kegiatan (UTC timestamp in miliseconnd)
+          type: number
+          in: formData
+          format: string
+        - name: participantNumber
+          required: false
+          in: formData
+          description: banyaknya peserta
+          type: number
+        - name: participantDescription
+          required: false
+          description: deskripsi peserta seperti mahasiswa, anak2, dll
+          type: string
+          in: formData
+        - name: speaker
+          required: false
+          description: pembicara dalam acara
+          type: string
+          in: formData
+        - name: target
+          required: false
+          description: target acara
+          type: string
+          in: formData
+      responses:
+        200:
+          description: berhasil menambahkan pengajuan peminjaman ruangan
+          schema:
+            $ref: '#/definitions/Request'
+      tags: [requests]
+      
+  /requests/{request_id}:
+    get:
+      summary: mendapatkan detail request
+      description: mengembalikan informasi detail tentang request dengan id tertentu
+      produces:
+        - application/json
+      parameters:
+        - name: request_id
+          in: path
+          description: id dari request yang ingin diinspeksi
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil melihat detail informasi request
+          schema:
+            $ref: '#/definitions/Request'
+        403:
+          description: akses ditolak.
+      tags: [requests]
+    put:
+      summary: mengubah informasi request.
+      description: mengubah informasi request tertentu. Hanya dapat dilakukan oleh admin atau bidang yang sama dengan request. Jika status dari request sudah accepted maka bidang tidak dapat melakukan perubahan. Bidang juga tidak dapat melakukan perubahan pada field status dan enabled
+      consumes:
+        - application/x-www-form-urlencoded
+      produces:
+        - application/json
+      parameters:
+        - name: request_id
+          in: path
+          description: id dari request yang ingin diubah.
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil mengubah informasi request
+          schema:
+            $ref: '#/definitions/Request'
+        400:
+          description: data tidak valid.
+        403:
+          description: akses ditolak. Dapat terjadi karena bidang berusaha melakukan perubahan pada request yang statusnya accepted. Dapat terjadi karena bidang berusaha mengubah status. Dapat terjadi karena bidang berusaha mengubah field enable
+        500:
+          description: terjadi kesalahan dalam mengubah request baru.
+        404:
+          description: request tidak ditemukan.
+      tags: [requests]
+    delete:
+      summary: menghapus request.
+      description: menghapus request tertentu. Hanya dapat dilakukan oleh admin atau divisi yang membuat request tersebut. Admin dapat menghapus seluruh request yang ada, sedangkan divisi hanya dapaet menghapus request yang berasal dari divisinya dan statusnya belum accepted.
+      produces:
+        - application/json
+      parameters:
+        - name: request_id
+          in: path
+          description: id dari request yang ingin dihapus.
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil menghapus request
+          schema:
+            $ref: '#/definitions/Request'
+        403:
+          description: akses ditolak.
+        500:
+          description: terjadi kesalahan dalam menghapus request.
+        404:
+          description: request tidak ditemukan.
+      tags: [requests]
+      
+  /reports:
+    get:
+      summary: mendapatkan daftar report yang dibuat pada bulan tertentu
+      description: mengembalikan array report pada suatu bulan. Jika pengguna login sebagai admin, maka akan ditampilkan seluruh report yang ada. Jika pengguna login sebagai anggota divisi maka akan ditampilkan seluruh report yang mengacu pada aktivitas yang dibuat divisinya. Pengguna umum tidak dapat megakses report. Report yang sudah dihapus tidak ditampilkan.
+      parameters:
+        - in: query
+          name: month
+          type: integer
+          description: bulan yang request-nya ingin ditampilkan. Defaultnya bulan saat ini.
+        - in: query
+          name: year
+          type: integer
+          description: tahun yang request-nya ingin ditampilkan. Defaultnya adalah tahun saat ini.
+      produces:
+        - application/json
+      responses:
+        200:
+          description: berhasil mengambil daftar report
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Report'
+        403:
+          description: akses ditolak.
+      tags: [reports]
+      
+  /requests/{request_id}/report:
+    get:
+      summary: mendapatkan detail report dari sebuah request
+      description: mengembalikan informasi detail tentang report dari request dengan id tertentu. Akses ditolak ketika divisi ingin melihat report divisi lain. Akses akan ditolak juga untuk pengguna umum. Jika report sudah dihapus maka tidak akan ditampilkan.
+      produces:
+        - application/json
+      parameters:
+        - name: request_id
+          in: path
+          description: id dari request yang ingin ditampilkan reportnya
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil melihat detail informasi report request
+          schema:
+            $ref: '#/definitions/Report'
+        403:
+          description: akses ditolak. Terjadi jika divisi ingin membuat report di divisi lain.
+        404:
+          description: request tidak ditemukan atau report belum diciptakan.
+      tags: [reports]
+    
+    post:
+      summary: membuat report dari request
+      description: digunakan untuk membuat report dari request. report hanya dapat dibuat jika request-nya sudah accepted. Report hanya dapat dibuat oleh admin atau divisi yang mengeluarkan aktivitas tersebut. Apabila sudah terdapat report untuk request yang bersangkutan dan status-nya enabled, maka akan mengembalikan error.
+      produces:
+        - application/json
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: request_id
+          in: path
+          description: id dari request yang ingin diinspeksi
+          required: true
+          type: string
+        - name: content
+          in: formData
+          description: statement singkat mengenai hasil kegiatan
+          required: true
+          type: string
+        - name: photo
+          in: formData
+          description: url foto bukti kegiatan
+          type: string
+      responses:
+        200:
+          description: berhasil menambahkan laporan aktivitas
+          schema:
+            $ref: '#/definitions/Report'
+        400:
+          description: input tidak valid atau sudah terdapat report pada request yang bersangkutan.
+        403:
+          description: akses ditolak. Terjadi jika divisi ingin membuat report di divisi lain.
+        404:
+          description: request tidak ditemukan.
+      tags: [reports]
+      
+    put:
+      summary: mengubah report dari request
+      description: digunakan untuk mengubah report dari request. report hanya dapat diubah jika report-nya sudah diciptakan. Report hanya dapat dibuat oleh admin atau divisi yang mengeluarkan aktivitas tersebut.
+      produces:
+        - application/json
+      consumes:
+        - application/x-www-form-urlencoded
+      parameters:
+        - name: request_id
+          in: path
+          description: id dari request yang ingin diinspeksi
+          required: true
+          type: string
+        - name: content
+          in: formData
+          description: statement singkat mengenai hasil kegiatan
+          type: string
+        - name: photo
+          in: formData
+          description: url foto bukti kegiatan
+          type: string
+      responses:
+        200:
+          description: berhasil mengubah laporan aktivitas
+          schema:
+            $ref: '#/definitions/Report'
+        403:
+          description: akses ditolak. Terjadi jika divisi ingin membuat report di divisi lain.
+        404:
+          description: request tidak ditemukan atau report belum diciptakan.
+      tags: [reports]
+      
+    delete:
+      summary: menghapus report
+      description: menghapus report dari request. Hanya dapat dilakukan oleh admin atau divisi yang membuat request tersebut. Admin dapat menghapus seluruh report yang ada, sedangkan divisi hanya dapaet menghapus report yang berasal dari divisinya. Pengguna umum tidak dapat menghapus report. 
+      produces:
+        - application/json
+      parameters:
+        - name: request_id
+          in: path
+          description: id dari request yang ingin dihapus reportnya.
+          required: true
+          type: string
+      responses:
+        200:
+          description: berhasil menghapus report
+          schema:
+            $ref: '#/definitions/Report'
+        403:
+          description: akses ditolak. Terjadi jika divisi ingin membuat report di divisi lain.
+        500:
+          description: terjadi kesalahan dalam menghapus request.
+        404:
+          description: request tidak ditemukan.
+      tags: [reports]
+        
+definitions:
+  Request:
+    description: permintaan peminjaman ruangan
+    required:
+      - id
+      - name
+      - personInCharge
+      - phoneNumber
+      - division
+      - location
+      - startTime
+      - endTime
+      - status
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+      personInCharge:
+        type: string
+      phoneNumber:
+        type: string
+      issuer:
+        $ref: '#/definitions/User'
+      issuedTime:
+        type: string
+        format: date-time
+      division:
+        $ref: '#/definitions/Division'
+      location:
+        $ref: '#/definitions/Location'
+      startTime:
+        type: string
+        format: date-time
+      endTime:
+        type: string
+        format: date-time
+      participantNumber:
+        type: number
+      participantDescription:
+        type: string
+      speaker:
+        type: string
+      target:
+        type: string
+      status:
+        type: string
+        enum: [pending, accepted, rejected]
+      enabled:
+        type: boolean
+  
+  Report:
+    description: laporan terkait permintaan peminjaman ruangan
+    required:
+      - id
+      - issuedTime
+      - request
+      - content
+      - photo
+    properties:
+      id:
+        type: string
+      issuedTime:
+        type: string
+        format: date-time
+      request:
+        $ref: '#/definitions/Request'
+      content:
+        type: string
+      photo:
+        type: string
+        description: url yang mengarah ke gambar laporan
+  
+  Location:
+    description: ruangan yang digunakan untuk aktivitas YPM Salman
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      enabled:
+        type: boolean
+    
+  Division:
+    description: divisi yang ada pada YPM Salman
+    required:
+      - id
+      - name
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      enabled:
+        type: boolean
+  
+  User:
+    description: pengguna aplikasi salman activity
+    required:
+      - id
+      - name
+      - username
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      username:
+        type: string
+      email:
+        type: string
+      division:
+        $ref: '#/definitions/Division'
+      admin:
+        type: boolean
+      enabled:
+        type: boolean
+        
+  Error:
+    description: detail error
+    required:
+      - msg
+      - cause
+    properties:
+      msg:
+        type: string
+      cause:
+        type: string
+
