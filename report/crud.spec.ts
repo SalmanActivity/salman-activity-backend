@@ -5,6 +5,7 @@ import * as crud from './crud'
 import {InMemoryAccessor } from '../accessor'
 import Report from './report'
 import ReportAccessor from './reportAccessor'
+import { RequestStatus, Request, RequestAccessor } from '../request'
 
 class FakeReportAccessor extends InMemoryAccessor<Report> implements ReportAccessor {
   async getAllBetween(start: Date, end: Date): Promise<Report[]> {
@@ -21,11 +22,66 @@ class FakeReportAccessor extends InMemoryAccessor<Report> implements ReportAcces
   }
 }
 
+class FakeRequestAccessor extends InMemoryAccessor<Request> implements RequestAccessor {
+  getAllBetween(start: Date, end: Date): Promise<Request[]> {
+    throw new Error("Method not implemented.");
+  }
+}
+
+function createDefaultUser(obj) {
+  if (!obj) obj = {}
+  let defaultUser = {
+    id: '',
+    name: '',
+    username: '',
+    email: '',
+    password: '',
+    division: createDefaultDivision(obj.division),
+    enabled: true,
+    admin: false,
+  }
+  return Object.assign(defaultUser, obj)
+}
+
+function createDefaultDivision(obj) {
+  if (!obj) obj = {}
+  return Object.assign({
+    id: '',
+    name: '',
+    enabled: true
+  }, obj)
+}
+
+function createDefaultRequest(obj) {
+  if (!obj) obj = {}
+  let defaultRequest = {
+    id: '',
+    name: '',
+    description: '',
+    personInCharge: '',
+    phoneNumber: '',
+    issuer: createDefaultUser(obj.issuer),
+    issuedTime: null,
+    division: createDefaultDivision(obj.division),
+    location: null,
+    startTime: null,
+    endTime: null,
+    participantNumber: '',
+    participantDescription: '',
+    speaker: '',
+    target: '',
+    status: RequestStatus.accepted ,
+    enabled: true,
+  }
+  return Object.assign(defaultRequest, obj)
+}
+
 describe('report crud endpoint test', () => {
   
   let reportDocuments = []
   let findStub, findOneStub, populateStub, req = {}, res, next, sandbox, clock
   let reportAccessor: ReportAccessor
+  let requestAccessor: RequestAccessor
   let findReportInMonthEndpoint,
       findReportByRequestEndpoint,
       createOneReportEndpoint,
@@ -39,37 +95,59 @@ describe('report crud endpoint test', () => {
     res.json.returnsThis()
 
     let requestDocuments = [
-      {
+      createDefaultRequest({
         id: '5aaa89e2a892471e3cdc84e5',
         division: {
           id: '5aaa89e2a892471e3cdc84e4'
         }
-      },
-      {
+      }),
+      createDefaultRequest({
         id: '5aaa89e2a892471e3cdc84ec',
         division: {
           id: '5aaa89e2a892471e3cdc84e4'
         }
-      },
-      {
+      }),
+      createDefaultRequest({
         id: '5aaa89e2a892471e3cdc84ea',
         division: {
           id: '5aaa89e2a892471e3cdc84eb'
         }
-      },
-      {
+      }),
+      createDefaultRequest({
         id: '5aaa89e2a892471e3cdc84ee',
         division: {
           id: '5aaa89e2a892471e3cdc84eb'
         }
-      },
-      {
+      }),
+      createDefaultRequest({
         id: '5aaa89e2a892471e3cdc84f0',
         division: {
           id: '5aaa89e2a892471e3cdc84eb'
         }
-      }
+      }),
+      createDefaultRequest({
+        id: '5aaa89e2a892471e3cdc84f1',
+        division: {
+          id: '5aaa89e2a892471e3cdc84e4'
+        },
+        status: RequestStatus.pending
+      })
     ]
+    for (let request of requestDocuments) {
+      request['name'] = undefined
+      request['description'] = undefined
+      request['personInCharge'] = undefined
+      request['phoneNumber'] = undefined
+      request['issuer'] = undefined
+      request['issuedTime'] = undefined
+      request['startTime'] = undefined
+      request['endTime'] = undefined
+      request['participantNumber'] = undefined
+      request['participantDescription'] = undefined
+      request['speaker'] = undefined
+      request['target'] = undefined
+      request['enabled'] = undefined
+    }
 
     let photoDocuments = [
       {
@@ -120,9 +198,11 @@ describe('report crud endpoint test', () => {
     ]
 
     reportAccessor = new FakeReportAccessor(reportDocuments)
+    requestAccessor = new FakeRequestAccessor(requestDocuments)
+
     findReportInMonthEndpoint = crud.findReportInMonth(reportAccessor)
     findReportByRequestEndpoint = crud.findReportByRequest(reportAccessor)
-    createOneReportEndpoint = crud.createOneReport(reportAccessor)
+    createOneReportEndpoint = crud.createOneReport(reportAccessor, requestAccessor)
     deleteOneReportEndpoint = crud.deleteOneReport(reportAccessor)
     updateOneReportEndpoint = crud.updateOneReport(reportAccessor)
 
@@ -252,32 +332,127 @@ describe('report crud endpoint test', () => {
 
   describe('POST report endpoint', () => {
     
-    it('should store a new report and return the report', done => {
-      done()
+    it('should store a new report and return the report when user login as admin', done => {
+      let req = {
+        user: {admin: true},
+        params: {requestId: '5aaa89e2a892471e3cdc84f0'},
+        body: {
+          'content': 'new report content',
+          'photo': 'some base 64 image is here'
+        }
+      }
+      createOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let ret = res.json.getCall(0).args[0]
+        sinon.assert.match(ret.content, 'new report content')
+        done()
+      }).catch(done)
+    })
+
+    it('should store a new report when user login as division and create report on its division', done => {
+      let req = {
+        user: {division: {id: '5aaa89e2a892471e3cdc84eb'}},
+        params: {requestId: '5aaa89e2a892471e3cdc84f0'},
+        body: {
+          'content': 'new report content',
+          'photo': 'some base 64 image is here'
+        }
+      }
+      createOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let ret = res.json.getCall(0).args[0]
+        sinon.assert.match(ret.content, 'new report content')
+        done()
+      }).catch(done)
     })
 
     it('should return validation error when content is missing', done => {
-      done()
+      let req = {
+        user: {admin: true},
+        params: {requestId: '5aaa89e2a892471e3cdc84f0'},
+        body: {
+          'photo': 'some base 64 image is here'
+        }
+      }
+      createOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        done()
+      }).catch(done)
     })
 
     it('should return validation error when content is too short', done => {
-      done()
+      let req = {
+        user: {admin: true},
+        params: {requestId: '5aaa89e2a892471e3cdc84f0'},
+        body: {
+          'content': 'a',
+          'photo': 'some base 64 image is here'
+        }
+      }
+      createOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        done()
+      }).catch(done)
     })
 
     it('should return validation error when report has been created', done => {
-      done()
+      let req = {
+        user: {admin: true},
+        params: {requestId: '5aaa89e2a892471e3cdc84e5'},
+        body: {
+          'content': 'new report content',
+          'photo': 'some base 64 image is here'
+        }
+      }
+      createOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        done()
+      }).catch(done)
     })
 
     it('should return validation error when request status is not accepted', done => {
-      done()
+      let req = {
+        user: {division: {id: '5aaa89e2a892471e3cdc84e4'}},
+        params: {requestId: '5aaa89e2a892471e3cdc84f1'},
+        body: {
+          'content': 'new report content',
+          'photo': 'some base 64 image is here'
+        }
+      }
+      createOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        done()
+      }).catch(done)
     })
 
     it('should return 403 when division want to create report of another division request', done => {
-      done()
+      let req = {
+        user: {division: {id: '5aaa89e2a892471e3cdc84eb'}},
+        params: {requestId: '5aaa89e2a892471e3cdc84f1'},
+        body: {
+          'content': 'new report content',
+          'photo': 'some base 64 image is here'
+        }
+      }
+      createOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 403)
+        done()
+      }).catch(done)
     })
 
     it('should return 404 when request not found', done => {
-      done()
+      let req = {
+        user: {division: {id: '5aaa89e2a892471e3cdc84eb'}},
+        params: {requestId: '5aaa89e2a892471e3cdc84ff'},
+        body: {
+          'content': 'new report content',
+          'photo': 'some base 64 image is here'
+        }
+      }
+      createOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        done()
+      }).catch(done)
     })
 
   })
