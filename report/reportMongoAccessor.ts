@@ -5,30 +5,37 @@ import ReportMongoModel from './reportMongoModel'
 import Report from './report'
 import { Request } from '../request'
 import { RequestMongoDocumentSerializer } from '../request/requestMongoAccessor'
-
+import { Photo, PhotoMongoDocumentSerializer } from '../photo'
 
 export class ReportMongoDocumentSerializer implements MongoDocumentSerializer<Report> {
-  constructor(protected requestSerializer:MongoDocumentSerializer<Request> = new RequestMongoDocumentSerializer()) {
+  
+  constructor(protected requestSerializer: MongoDocumentSerializer<Request> = new RequestMongoDocumentSerializer(),
+              protected photoSerializer: MongoDocumentSerializer<Photo> = new PhotoMongoDocumentSerializer()) {
   }
-async serialize(mongoDocument: Document): Promise<Report> {
+  
+  async serialize(mongoDocument: Document): Promise<Report> {
     if (!mongoDocument)
       return null
 
-    mongoDocument = await mongoDocument.populate('request')
-      .execPopulate()
+    mongoDocument = await mongoDocument.populate('request').populate('photo').execPopulate()
 
     let request:any = mongoDocument.get('request')
     if (request)
       request = await this.requestSerializer.serialize(request)
+
+    let photo:any = mongoDocument.get('photo')
+    if (photo)
+      photo = await this.photoSerializer.serialize(photo)
 
     return {
       id: mongoDocument._id ? mongoDocument._id.toString() : undefined,
       issuedTime: mongoDocument.get('issuedTime'),
       request,
       content: mongoDocument.get('content'),
-      photo: mongoDocument.get('photo')
+      photo
     }
   }
+
   async deserialize(document: Report): Promise<any> {
     if (!document)
       return null
@@ -38,17 +45,17 @@ async serialize(mongoDocument: Document): Promise<Report> {
       issuedTime: 'issuedTime' in document ? document.issuedTime : undefined,
       request: 'request' in document ? await this.requestSerializer.deserialize(document.request) : undefined,
       content: 'content' in document ? document.content : undefined,
-      photo: 'photo' in document ? document.photo : undefined
+      photo: 'photo' in document ? await this.photoSerializer.deserialize(document.photo) : undefined
     }
   }
 }
 
 
 export default class ReportMongoAccessor extends MongoAccessor<Report> implements ReportAccessor {
-  constructor() {
-    super(ReportMongoModel, new ReportMongoDocumentSerializer())
+  
+  constructor(reportSerializer: MongoDocumentSerializer<Report> = new ReportMongoDocumentSerializer()) {
+    super(ReportMongoModel, reportSerializer)
   }
-
 
   async getAllBetween(start:Date, end:Date):Promise<Report[]> {
     let condition = {
@@ -59,16 +66,16 @@ export default class ReportMongoAccessor extends MongoAccessor<Report> implement
     }
 
     let result:Document[] = await this.mongoModel.find(condition).exec()
-    let promiseList:Promise<Report>[] = result.map<Promise<Report>>((val, idx) => this.docSerializer.serialize(val))
-    let itemArray:Report[] = await Promise.all(promiseList)
+    let promiseList: Promise<Report>[] = result.map<Promise<Report>>((val, idx) => this.docSerializer.serialize(val))
+    let itemArray: Report[] = await Promise.all(promiseList)
     return itemArray
   }
 
-  async getByRequest(request:string):Promise<Report> {
-    let result:Document = await this.mongoModel.findOne({request}).exec()
+  async getByRequestId(requestId:string):Promise<Report> {
+    let result: Document = await this.mongoModel.findOne({request: requestId}).exec()
     if (!result)
       return undefined
-    let item:Report = await this.docSerializer.serialize(result)
+    let item: Report = await this.docSerializer.serialize(result)
     return item
   }
 

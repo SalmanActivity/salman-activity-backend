@@ -13,6 +13,8 @@ export function createOne(option) {
       try {
         object = await validateOne(object, context)
       } catch (err) {
+        if (err.status)
+          throw err
         throw {status:400, cause:err}
       }
       object = await insertOne(object, context)
