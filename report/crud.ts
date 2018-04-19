@@ -156,10 +156,12 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
       if (data.photo)
         try {
           let photo = await loadPhotoFromBase64(data.photo)
-          data.photo.name = report.id
-          data.photo.uploadTime = new Date()
-          data.photo.readableStream = photo.readableStream
-          data.photo.mime = photo.mime
+          data.photo = {
+            name: req.params.requestId,
+            uploadTime: new Date(),
+            readableStream: photo.readableStream,
+            mime: photo.mime
+          }
         } catch (err) {
           throw {status: 400, cause: 'cannot parse base64 image'}
         }
