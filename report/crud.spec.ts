@@ -131,6 +131,13 @@ describe('report crud endpoint test', () => {
           id: '5aaa89e2a892471e3cdc84e4'
         },
         status: RequestStatus.pending
+      }),
+      createDefaultRequest({
+        id: '5aaa89e2a892471e3cdc84f2',
+        division: {
+          id: '5aaa89e2a892471e3cdc84e4'
+        },
+        status: RequestStatus.pending
       })
     ]
     for (let request of requestDocuments) {
@@ -192,6 +199,13 @@ describe('report crud endpoint test', () => {
         id: '5aaa89e2a892471e3cdc84ef',
         issuedTime: new Date(2019, 5, 6, 10),
         request: requestDocuments[3],
+        content: 'just another report content 5, lorem ipsum dos color sit amet',
+        photo: photoDocuments[0]
+      },
+      {
+        id: '5aaa89e2a892471e3cdc84f3',
+        issuedTime: new Date(2019, 5, 6, 10),
+        request: requestDocuments[6],
         content: 'just another report content 5, lorem ipsum dos color sit amet',
         photo: photoDocuments[0]
       }
@@ -459,24 +473,115 @@ describe('report crud endpoint test', () => {
 
   describe('PUT specific report endpoint', () => {
 
-    it('should update report and return the updated report', done => {
-      done()
+    it('should update report and return the updated report if login as admin', done => {
+      let req = {
+        user: {admin: true},
+        params:{requestId: '5aaa89e2a892471e3cdc84e5'},
+        body: {
+          'content': 'updated report content',
+          'photo': 'some updated base 64 image is here'
+        }
+      }
+      updateOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let ret = res.json.getCall(0).args[0]
+        sinon.assert.match(ret.id, '5aaa89e2a892471e3cdc84e7')
+        sinon.assert.match(ret.content, 'updated report content')
+        done()
+      }).catch(done)
+    })
+
+    it('should update report in same division if login as division', done => {
+      let req = {
+        user: {division: {id:'5aaa89e2a892471e3cdc84eb'}},
+        params:{requestId: '5aaa89e2a892471e3cdc84ea'},
+        body: {
+          'content': 'updated report content',
+          'photo': 'some updated base 64 image is here'
+        }
+      }
+      updateOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 200)
+        let ret = res.json.getCall(0).args[0]
+        sinon.assert.match(ret.id, '5aaa89e2a892471e3cdc84e8')
+        sinon.assert.match(ret.content, 'updated report content')
+        done()
+      }).catch(done)
     })
 
     it('should return validation error when content is too short', done => {
-      done()
+      let req = {
+        user: {admin: true},
+        params:{requestId: '5aaa89e2a892471e3cdc84e5'},
+        body: {
+          'content': 'a',
+          'photo': 'some updated base 64 image is here'
+        }
+      }
+      updateOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        done()
+      }).catch(done)
+    })
+
+    it('should return validation error when request status is not accepted', done => {
+      let req = {
+        user: {division: {id:'5aaa89e2a892471e3cdc84e4'}},
+        params:{requestId: '5aaa89e2a892471e3cdc84f2'},
+        body: {
+          'content': 'updated report content',
+          'photo': 'some updated base 64 image is here'
+        }
+      }
+      updateOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 400)
+        done()
+      }).catch(done)
     })
 
     it('should return 403 when division want to create report of another division request', done => {
-      done()
+      let req = {
+        user: {division: {id:'5aaa89e2a892471e3cdc84e4'}},
+        params:{requestId: '5aaa89e2a892471e3cdc84ea'},
+        body: {
+          'content': 'updated report content',
+          'photo': 'some updated base 64 image is here'
+        }
+      }
+      updateOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 403)
+        done()
+      }).catch(done)
     })
 
     it('should return 404 when report has not been created', done => {
-      done()
+      let req = {
+        user: {division: {id:'5aaa89e2a892471e3cdc84eb'}},
+        params:{requestId: '5aaa89e2a892471e3cdc84f0'},
+        body: {
+          'content': 'updated report content',
+          'photo': 'some updated base 64 image is here'
+        }
+      }
+      updateOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        done()
+      }).catch(done)
     })
 
     it('should return 404 when request not found', done => {
-      done()
+      let req = {
+        user: {admin:true},
+        params:{requestId: '5aaa89e2a892471e3cdc84aa'},
+        body: {
+          'content': 'updated report content',
+          'photo': 'some updated base 64 image is here'
+        }
+      }
+      updateOneReportEndpoint(req, res, next).then(() => {
+        sinon.assert.calledWith(res.status, 404)
+        done()
+      }).catch(done)
     })
 
   })
