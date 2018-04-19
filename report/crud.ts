@@ -6,7 +6,7 @@ import { LocationAccessor, LocationMongoAccessor } from '../location'
 import { RequestAccessor, RequestMongoAccessor } from '../request'
 import * as crudUtil from '../crud'
 import * as joi from 'joi'
-import { loadPhotoFromBase64 } from '../photo';
+import { loadPhotoFromBase64 } from '../photo'
 
 async function fetchReportByMonth(req, reportAccessor: ReportAccessor) {
   let monthFilter = new Date().getMonth()
@@ -153,13 +153,16 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
         photo: req.body.photo
       })
 
-      if (data.photo) {
-        let photo = await loadPhotoFromBase64(data.photo)
-        data.photo.name = report.id
-        data.photo.uploadTime = new Date()
-        data.photo.readableStream = photo.readableStream
-        data.photo.mime = photo.mime
-      }
+      if (data.photo)
+        try {
+          let photo = await loadPhotoFromBase64(data.photo)
+          data.photo.name = report.id
+          data.photo.uploadTime = new Date()
+          data.photo.readableStream = photo.readableStream
+          data.photo.mime = photo.mime
+        } catch (err) {
+          throw {status: 400, cause: 'cannot parse base64 image'}
+        }
 
       return data
     },
@@ -198,12 +201,15 @@ export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongo
       }
 
       let data = await validatePutUserInput(context.body)
-      if (data.photo) {
-        let photo = await loadPhotoFromBase64(data.photo)
-        item.photo.uploadTime = new Date()
-        item.photo.readableStream = photo.readableStream
-        item.photo.mime = photo.mime
-      }
+      if (data.photo)
+        try {
+          let photo = await loadPhotoFromBase64(data.photo)
+          item.photo.uploadTime = new Date()
+          item.photo.readableStream = photo.readableStream
+          item.photo.mime = photo.mime
+        } catch (err) {
+          throw {status: 400, cause: 'cannot parse base64 image'}
+        }
 
       if (data.content)
         item.content = data.content
