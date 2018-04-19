@@ -15,5 +15,3 @@ test_async:
    - npm test
    - npm run integration-test
    - npm run seed-dev
-  tags:
-    - docker-runner
