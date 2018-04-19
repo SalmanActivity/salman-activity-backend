@@ -27,12 +27,13 @@ export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Pho
 
     let filename = `${config.photoStorage}/${mongoDocument._id}.${mongoDocument.get('mime').split('/')[1]}`
     let readableStream = fs.createReadStream(filename)
+
     return {
       id: mongoDocument._id ? mongoDocument._id.toString() : undefined,
       name: mongoDocument.get('name'),
       mime: mongoDocument.get('mime'),
       uploadTime: mongoDocument.get('uploadTime'),
-      readableStream: fs.createReadStream(filename)
+      readableStream
     }
   }
 
@@ -73,14 +74,14 @@ export default class PhotoMongoAccessor extends MongoAccessor<Photo> implements 
   }
 
   async insert(object: Photo): Promise<Photo> {
-    let photo: Photo = await super.insert(object)
     await this.writePhoto(object)
+    let photo: Photo = await super.insert(object)
     return photo
   }
 
   async update(object: Photo): Promise<Photo> {
-    let photo: Photo = await super.update(object)
     await this.writePhoto(object)
+    let photo: Photo = await super.update(object)
     return photo
   }
 
