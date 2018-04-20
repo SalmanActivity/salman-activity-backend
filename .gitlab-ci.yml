@@ -10,7 +10,7 @@ cache:
 stages:
   - test
 
-unit-test:
+test:
   stage: test
   script:
    - npm config set proxy $proxy
