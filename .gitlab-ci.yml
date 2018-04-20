@@ -1,4 +1,7 @@
-image: node:8.0.0
+image: node:9.0.0
+
+services:
+  - mongo:3.0
 
 cache:
   paths:
@@ -7,11 +10,13 @@ cache:
 stages:
   - test
 
-test_async:
+unit-test:
   stage: test
   script:
+   - npm config set proxy $proxy
+   - npm config set strict-ssl false
+   - npm config set registry http://registry.npmjs.org/
    - npm install
-   - npm run seed-dev
    - npm test
-   - npm run integration-test
    - npm run seed-dev
+   - npm run integration-test

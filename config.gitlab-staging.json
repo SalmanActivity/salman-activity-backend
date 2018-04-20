@@ -1,0 +1,5 @@
+{
+    "mongoConnection": "mongodb://mongo/salman-activity-db",
+    "secretKey": "secret_key",
+    "photoStorage": "./storage"
+}
