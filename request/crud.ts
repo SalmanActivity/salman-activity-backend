@@ -3,6 +3,7 @@ import Request from './request'
 import RequestMongoAccessor from './requestMongoAccessor'
 import { DivisionAccessor, DivisionMongoAccessor } from '../division'
 import { LocationAccessor, LocationMongoAccessor } from '../location'
+import { calculateAvailability } from '../schedule'
 import * as crudUtil from '../crud'
 import * as joi from 'joi'
 
@@ -45,6 +46,7 @@ let filterField = crudUtil.filterOne.fields(['id','name','description',
   'division.id', 'division.name', 'division.enabled',
   'location.id', 'location.name', 'location.enabled',
   'startTime', 'endTime', 'participantNumber',
+  'availability', 'cause',
   'participantDescription', 'speaker', 'target', 'status', 'enabled'])
 
 export function findRequestInMonth(requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
@@ -53,7 +55,12 @@ export function findRequestInMonth(requestAccessor: RequestAccessor = new Reques
       context.user = req.user
       return req
     },
-    fetchMany: (req, context) => fetchRequestByMonth(req, requestAccessor),
+    fetchMany: async (req, context) => {
+      let requests = await fetchRequestByMonth(req, requestAccessor)
+      if (context.user && context.user.admin)
+        await calculateAvailability(requests)
+      return requests
+    },
     filterOne: (reqObject, context) => filterResultByUser(context.user, reqObject),
     filterFieldOne: filterField
   })

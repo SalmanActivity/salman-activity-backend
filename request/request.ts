@@ -39,6 +39,10 @@ export default interface Request extends Item {
 
   target?: string
 
+  availability?: boolean
+
+  cause?: string
+
   status: RequestStatus
 
   enabled: boolean
