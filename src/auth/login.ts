@@ -4,8 +4,18 @@ import defaultConfig, { Config } from '../config';
 import { User, UserAccessor } from '../user';
 import UserMongoAccessor from '../user/userMongoAccessor';
 
-export default function login(userAccessor: UserAccessor = new UserMongoAccessor(),
-                              config:Config = defaultConfig) {
+/**
+ * Endpoint ini digunakan untuk melakukan autentikasi pengguna menggunakan username dan password.
+ * Jika pengguna terautentikasi, maka response berupa token yang menyatakan bahwa pengguna tersebut
+ * terautentikasi. Token tersebut dapat digunakan untuk melakukan aksi-aksi berikutnya tanpa perlu
+ * mengirimkan username dan password untuk setiap aksi.
+ * @param userAccessor accessor yang digunakan untuk mendapatkan user berdasarkan username
+ * @param config configuration untuk mendapatkan secret key dari server
+ */
+export function login(
+  userAccessor: UserAccessor = new UserMongoAccessor(),
+  config:Config = defaultConfig
+) {
   return async (req, res) => {
     let username = undefined;
     let password = undefined;

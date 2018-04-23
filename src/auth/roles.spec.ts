@@ -5,7 +5,7 @@ import { admin } from './roles';
 describe('admin middleware test', function() {
 
   let responseSpy, adminEndpoint;
-  beforeEach(function() {
+  beforeEach(() => {
     responseSpy = {
       status: sinon.stub().returnsThis(),
       json: sinon.stub().returnsThis(),

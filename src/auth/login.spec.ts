@@ -1,10 +1,13 @@
 import 'mocha';
 import * as sinon from 'sinon';
 import * as passwordHash from 'password-hash';
-import login from './login';
+import { login } from './login';
 import { InMemoryAccessor } from '../accessor';
 import { User, UserAccessor } from '../user';
 
+/**
+ * Kelas ini berperan sebagai mock object untuk accessor pada user.
+ */
 class FakeUserAccessor extends InMemoryAccessor<User> implements UserAccessor {
   async getByEmail(email: string): Promise<User> {
     for (const item of this.documents) {
@@ -22,16 +25,16 @@ class FakeUserAccessor extends InMemoryAccessor<User> implements UserAccessor {
     }
     return null;
   }
-  constructor(documents:any[]) {
+  constructor(documents:User[]) {
     super(documents);
   }
 }
 
-describe('login endpoint test', function() {
+describe('login endpoint test', () => {
 
-  let responseSpy, userModelMocked, loginEndpoint;
+  let responseSpy, loginEndpoint;
 
-  beforeEach(function() {
+  beforeEach(() => {
     const userDocuments = [
       {
         id: '5aa9359a2b21732a73d54068',
@@ -54,13 +57,19 @@ describe('login endpoint test', function() {
         password: passwordHash.generate('password_of_username_sample_3'),
       },
     ];
-    loginEndpoint = login(new FakeUserAccessor(userDocuments));
+    loginEndpoint = login(new FakeUserAccessor(userDocuments as User[]));
     
     responseSpy = {
       status: sinon.stub().returnsThis(),
       json: sinon.stub().returnsThis(),
       header: sinon.stub().returnsThis()
     };
+  });
+
+  afterEach(() => {
+    responseSpy.status.reset();
+    responseSpy.json.reset();
+    responseSpy.header.reset();
   });
   
   it('should return access token when username and password matched and user is enabled', (done) => {
@@ -180,12 +189,6 @@ describe('login endpoint test', function() {
     }).catch((err) => {
       done('return rejected promise' + err);
     });
-  });
-
-  afterEach(function() {
-    responseSpy.status.reset();
-    responseSpy.json.reset();
-    responseSpy.header.reset();
   });
 
 });
