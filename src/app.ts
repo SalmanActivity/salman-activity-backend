@@ -2,7 +2,7 @@ import { Server } from './server';
 import * as bodyParser from 'body-parser';
 import * as morgan from 'morgan';
 import { Application } from 'express';
-import config from './config';
+import { config } from './config';
 import * as mongoose from 'mongoose';
 import * as auth from './auth';
 import * as status from './status';
@@ -17,7 +17,7 @@ const debug = require('debug')('salman-activity-backend:server');
 // bootstrapping server
 
 function normalizePort(val: string): number {
-  const port: number = parseInt(val, 10);
+  const port: number = Number(val);
   if (port >= 0) {
     return port;
   }
@@ -26,7 +26,7 @@ function normalizePort(val: string): number {
 const port: number = normalizePort(process.env.PORT || '3000');
 
 export let server:Server = new Server(port);
-const app:Application = server.app;
+export const app:Application = server.app;
 
 server.bootstrap();
 
@@ -55,5 +55,3 @@ app.use('/api/v1/divisions', division.router);
 app.use('/api/v1/locations', location.router);
 app.use('/api/v1/requests', request.router);
 app.use('/api/v1/', report.router);
-
-export default app;

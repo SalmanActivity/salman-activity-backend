@@ -37,6 +37,4 @@ function loadConfiguration(environment:string): Config {
     return config;
 }
 
-const config: Config = loadConfiguration(process.env.ENV || 'dev');
-
-export default config;
+export const config: Config = loadConfiguration(process.env.ENV || 'dev');

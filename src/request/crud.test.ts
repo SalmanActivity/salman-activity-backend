@@ -3,7 +3,7 @@ import * as sinon from 'sinon';
 import { assert } from 'chai';
 import * as crud from './crud';
 import * as supertest from 'supertest';
-import app, { stop } from '../app';
+import { app, stop } from '../app';
 const server = supertest.agent(app);
 
 describe('request crud endpoint test', () => {

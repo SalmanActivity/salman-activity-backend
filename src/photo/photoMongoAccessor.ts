@@ -6,7 +6,7 @@ import { MongoAccessor, MongoDocumentSerializer } from '../accessor/mongo';
 import PhotoAccessor from './photoAccessor';
 import Photo from './photo';
 import PhotoModel from './photoMongoModel';
-import config from '../config';
+import { config } from '../config';
 
 
 export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Photo> {

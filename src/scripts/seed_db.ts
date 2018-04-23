@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import config from '../config';
+import { config } from '../config';
 import * as models from '../seed';
 import { Item, Accessor } from '../accessor';
 
