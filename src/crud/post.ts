@@ -1,0 +1,29 @@
+import { displayError } from './error';
+import * as crudUtil from './util';
+
+export function createOne(option) {
+  const requiredFunctions = ['init','validateOne','insertOne','convertOne','filterFieldOne'];
+  const {init,validateOne,insertOne,convertOne,filterFieldOne} = crudUtil.fetchOptionFunctions(option, requiredFunctions);
+
+  return async (req, res, next) => {
+    const context = {};
+    
+    try {
+      let object:any = await init(req, context);
+      try {
+        object = await validateOne(object, context);
+      } catch (err) {
+        if (err.status) {
+          throw err;
+        }
+        throw {status:400, cause:err};
+      }
+      object = await insertOne(object, context);
+      object = await convertOne(object, context);
+      object = await filterFieldOne(object, context);
+      res.status(200).json(object);
+    } catch (err) {
+      displayError(res, 'cannot insert object')(err);
+    }
+  };
+}
