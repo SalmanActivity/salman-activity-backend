@@ -1,2 +1,3 @@
-export { default as MongoAccessor } from './mongoAccessor'
-export { default as MongoDocumentSerializer } from './mongoDocumentSerializer'
+export { MongoAccessor } from './mongoAccessor';
+export { MongoDocumentSerializer } from './mongoDocumentSerializer';
+export { DefaultMongoDocumentSerializer } from './defaultMongoDocumentSerializer';

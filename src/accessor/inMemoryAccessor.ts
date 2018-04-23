@@ -1,8 +1,16 @@
-import Accessor from './accessor';
-import Item from './item';
+import { Accessor } from './accessor';
+import { Item } from './item';
 
-export default class InMemoryAccessor<T extends Item> implements Accessor<T> {
+/**
+ * Kelas ini merupakan implementasi dari interface Accessor yang melakukan penyimpanan object di memory aplikasi.
+ * Kelas ini banyak digunakan untuk melakukan testing dengan berperan sebagai mock object dari accessor. 
+ */
+export class InMemoryAccessor<T extends Item> implements Accessor<T> {
 
+  /**
+   * Digunakan untuk membuat Accessor pada memory dengan dokumen awal sesuai parameter.
+   * @param documents object awal yang ada di dalam penyimpanan.
+   */
   constructor(protected documents: T[]) {
   }
 
