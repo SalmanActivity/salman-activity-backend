@@ -7,19 +7,19 @@ import { Photo, PhotoMongoAccessor } from './photo';
 import { generate } from 'password-hash';
 import * as fs from 'fs';
 
-let division1: Division = {
+const division1: Division = {
   id: '5aa9359a2b21732a73d54068',
   name: 'Divisi 1',
   enabled: true
-}
+};
 
-let division2: Division = {
+const division2: Division = {
   id: '5aaa860001e1901b03651171',
   name: 'Divisi 2',
   enabled: true
-}
+};
 
-let user1: User = {
+const user1: User = {
   id: '5aa9359a2b21732a73d5406a',
   name: 'Test User 1',
   username: 'test_user_1',
@@ -28,9 +28,9 @@ let user1: User = {
   division: division1,
   enabled: true,
   admin: false
-}
+};
 
-let admin1: User = {
+const admin1: User = {
   id: '5aa9359a2b21732a73d54069',
   name: 'Test Admin 1',
   username: 'test_admin_1',
@@ -39,21 +39,21 @@ let admin1: User = {
   division: null,
   enabled: true,
   admin: true
-}
+};
 
-let location1: Location = {
+const location1: Location = {
   id: '5aaa89e2a892471e3cdc84d8',
   name: 'Location 1',
   enabled: true
-}
+};
 
-let location2: Location = {
+const location2: Location = {
   id: '5aaa89e2a892471e3cdc84d9',
   name: 'Location 2',
   enabled: true
-}
+};
 
-let request1: Request = {
+const request1: Request = {
   id: '5aaa89e2a892471e3cdc84da',
   name: 'request 1',
   description: 'description of request 1',
@@ -71,9 +71,9 @@ let request1: Request = {
   target: 'target',
   status: RequestStatus.pending,
   enabled: true
-}
+};
 
-let request2: Request = {
+const request2: Request = {
   id: '5aaa89e2a892471e3cdc84db',
   name: 'request 2',
   description: 'description of request 2',
@@ -87,9 +87,9 @@ let request2: Request = {
   endTime: new Date(2018, 2, 2, 17),
   status: RequestStatus.accepted,
   enabled: true
-}
+};
 
-let request3: Request = {
+const request3: Request = {
   id: '5aaa89e2a892471e3cdc84dc',
   name: 'request 3',
   description: 'description of request 3',
@@ -103,9 +103,9 @@ let request3: Request = {
   endTime: new Date(2018, 2, 19, 17),
   status: RequestStatus.rejected,
   enabled: true
-}
+};
 
-let request4: Request = {
+const request4: Request = {
   id: '5aaa89e2a892471e3cdc84dd',
   name: 'request 4',
   description: 'description of request 4',
@@ -119,9 +119,9 @@ let request4: Request = {
   endTime: new Date(2018, 1, 1, 17),
   status: RequestStatus.pending,
   enabled: true
-}
+};
 
-let request5: Request = {
+const request5: Request = {
   id: '5aaa89e2a892471e3cdc84de',
   name: 'request 5',
   description: 'description of request 5',
@@ -135,9 +135,9 @@ let request5: Request = {
   endTime: new Date(2018, 1, 1, 17),
   status: RequestStatus.accepted,
   enabled: true
-}
+};
 
-let request6: Request = {
+const request6: Request = {
   id: '5aaa89e2a892471e3cdc84df',
   name: 'request 6',
   description: 'description of request 6',
@@ -151,9 +151,9 @@ let request6: Request = {
   endTime: new Date(2018, 1, 1, 17),
   status: RequestStatus.rejected,
   enabled: false
-}
+};
 
-let request7: Request = {
+const request7: Request = {
   id: '5aaa89e2a892471e3cdc84e0',
   name: 'request 7',
   description: 'description of request 7',
@@ -167,9 +167,9 @@ let request7: Request = {
   endTime: new Date(2018, 1, 23, 17),
   status: RequestStatus.pending,
   enabled: true
-}
+};
 
-let request8: Request = {
+const request8: Request = {
   id: '5aaa89e2a892471e3cdc84e1',
   name: 'request 8',
   description: 'description of request 8',
@@ -183,9 +183,9 @@ let request8: Request = {
   endTime: new Date(2018, 1, 23, 17),
   status: RequestStatus.accepted,
   enabled: true
-}
+};
 
-let request9: Request = {
+const request9: Request = {
   id: '5aaa89e2a892471e3cdc84e2',
   name: 'request 9',
   description: 'description of request 9',
@@ -199,9 +199,9 @@ let request9: Request = {
   endTime: new Date(2018, 1, 23, 17),
   status: RequestStatus.rejected,
   enabled: true
-}
+};
 
-let request10: Request = {
+const request10: Request = {
   id: '5aaa89e2a892471e3cdc84e3',
   name: 'request 10',
   description: 'description of request 10',
@@ -215,9 +215,9 @@ let request10: Request = {
   endTime: new Date(2018, 1, 28, 17),
   status: RequestStatus.pending,
   enabled: true
-}
+};
 
-let request11: Request = {
+const request11: Request = {
   id: '5aaa89e2a892471e3cdc84e4',
   name: 'request 11',
   description: 'description of request 11',
@@ -231,9 +231,9 @@ let request11: Request = {
   endTime: new Date(2018, 1, 28, 17),
   status: RequestStatus.accepted,
   enabled: false
-}
+};
 
-let request12: Request = {
+const request12: Request = {
   id: '5aaa89e2a892471e3cdc84e5',
   name: 'request 12',
   description: 'description of request 12',
@@ -247,50 +247,50 @@ let request12: Request = {
   endTime: new Date(2018, 1, 28, 17),
   status: RequestStatus.rejected,
   enabled: true
-}
+};
 
-let photo1: Photo = {
+const photo1: Photo = {
   id: '5aaa89e2a892471e3cdc84e6',
   name: 'krabby patty',
   uploadTime: new Date(2018, 1, 2, 10),
   mime: 'image/jpeg',
   readableStream: fs.createReadStream('data/photo1.jpg')
-}
+};
 
-let report1: Report = {
+const report1: Report = {
   id: '5aaa89e2a892471e3cdc84e7',
   issuedTime: new Date(2018, 1, 2, 10),
   request: request1,
   content: 'just another report content, lorem ipsum dos color sit amet',
   photo: photo1
-}
+};
 
 export let divisions = {
   accessor: new DivisionMongoAccessor(),
   documents: [division1, division2]
-}
+};
 export let users = {
   accessor: new UserMongoAccessor(),
   documents: [user1, admin1]
-}
+};
 
 export let locations = {
   accessor: new LocationMongoAccessor(),
   documents: [location1, location2]
-}
+};
 
 export let photos = {
   accessor: new PhotoMongoAccessor(),
   documents: []
-}
+};
 
 export let reports = {
   accessor: new ReportMongoAccessor(),
   documents: [report1]
-}
+};
 
 export let requests = {
   accessor: new RequestMongoAccessor(),
   documents: [request1, request2, request3, request4, request5, request6,
               request7, request8, request9, request10, request11, request12]
-}
+};

@@ -7,6 +7,10 @@ export function displayError(res:any, errorMessage:any):any {
       err = {status: 500, cause: 'internal server error.'};
     }
 
+    if (err.cause instanceof Error) {
+      err.cause = err.cause.message;
+    }
+
     res.status(err.status).json({
       error: {
         msg: errorMessage,
