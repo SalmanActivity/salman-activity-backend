@@ -47,6 +47,6 @@ deploy_ifvm-docker:
   script:
     - ssh -o StrictHostKeyChecking=no -tT ppl@167.205.35.107 "docker volume inspect salman-activity-backend-storage || docker volume create salman-activity-backend-storage"
     - ssh -o StrictHostKeyChecking=no -tT ppl@167.205.35.107 "docker rm -f $(docker ps -a -q --filter=name=salman-activity-backend) || echo success"
-    - ssh -o StrictHostKeyChecking=no -tT ppl@167.205.35.107 "docker run -d --env ENV=$IFVM_DOCKER_ENV --env PORT=3000 --net=host -v salman-activity-backend-storage:/storage --restart=always jauhararifin/salman-activity-backend"
+    - ssh -o StrictHostKeyChecking=no -tT ppl@167.205.35.107 "docker run -d --env ENV=$IFVM_DOCKER_ENV --env PORT=3000 --net=host -v salman-activity-backend-storage:/storage --name salman-activity-backend --restart=always jauhararifin/salman-activity-backend"
 
 
