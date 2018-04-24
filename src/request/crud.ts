@@ -1,6 +1,6 @@
-import RequestAccessor from './requestAccessor';
-import Request from './request';
-import RequestMongoAccessor from './requestMongoAccessor';
+import { RequestAccessor } from './requestAccessor';
+import { Request } from './request';
+import { RequestMongoAccessor } from './requestMongoAccessor';
 import { DivisionAccessor, DivisionMongoAccessor } from '../division';
 import { LocationAccessor, LocationMongoAccessor } from '../location';
 import { calculateAvailability } from '../schedule';
@@ -81,7 +81,7 @@ export function findOneRequest(requestAccessor: RequestAccessor = new RequestMon
   });
 }
 
-async function validatePostUserInput(userInput: any) {
+async function validatePostUserInput(userInput) {
   const rules = {
     name: joi.string().min(3).max(255).required(),
     description: joi.string().max(1024),
@@ -154,7 +154,7 @@ export function createOneRequest(requestAccessor: RequestAccessor = new RequestM
   });
 }
 
-async function validatePutUserInput(userInput: any) {
+async function validatePutUserInput(userInput) {
   const rules = {
     name: joi.string().min(3).max(255),
     description: joi.string().max(1024),

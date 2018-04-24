@@ -1,8 +1,8 @@
 import { Schema, Model, Document, model } from 'mongoose';
-import { MongoAccessor, MongoDocumentSerializer } from '../accessor/mongo';
-import RequestAccessor from './requestAccessor';
-import RequestMongoModel from './requestMongoModel';
-import Request from './request';
+import { MongoAccessor, MongoDocumentSerializer, MongoItem } from '../accessor/mongo';
+import { RequestAccessor } from './requestAccessor';
+import { RequestMongoModel } from './requestMongoModel';
+import { Request } from './request';
 import { User } from '../user';
 import { Division } from '../division';
 import { Location } from '../location';
@@ -25,17 +25,17 @@ export class RequestMongoDocumentSerializer implements MongoDocumentSerializer<R
       .populate('location')
       .execPopulate();
 
-    let division:any = mongoDocument.get('division');
+    let division = mongoDocument.get('division');
     if (division) {
       division = await this.divisionSerializer.serialize(division);
     }
 
-    let location:any = mongoDocument.get('location');
+    let location = mongoDocument.get('location');
     if (location) {
       location = await this.locationSerializer.serialize(location);
     }
 
-    let issuer:any = mongoDocument.get('issuer');
+    let issuer = mongoDocument.get('issuer');
     if (issuer) {
       issuer = await this.userSerializer.serialize(issuer);
     }
@@ -60,7 +60,7 @@ export class RequestMongoDocumentSerializer implements MongoDocumentSerializer<R
       enabled: mongoDocument.get('enabled'),
     };
   }
-  async deserialize(document: Request): Promise<any> {
+  async deserialize(document: Request): Promise<MongoItem> {
     if (!document) {
       return null;
     }
@@ -83,11 +83,11 @@ export class RequestMongoDocumentSerializer implements MongoDocumentSerializer<R
       target: 'target' in document ? document.target : undefined,
       status: 'status' in document ? document.status : undefined,
       enabled: 'enabled' in document ? document.enabled : undefined
-    };
+    } as MongoItem;
   }
 }
 
-export default class RequestMongoAccessor extends MongoAccessor<Request> implements RequestAccessor {
+export class RequestMongoAccessor extends MongoAccessor<Request> implements RequestAccessor {
   constructor() {
     super(RequestMongoModel, new RequestMongoDocumentSerializer());
   }

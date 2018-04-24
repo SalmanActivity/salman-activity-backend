@@ -10,7 +10,7 @@ router.post('/', auth(), crud.createOneRequest());
 router.put('/:requestId', user(), crud.updateOneRequest());
 router.delete('/:requestId', auth(), crud.deleteOneRequest());
 
-export { default as Request, RequestStatus } from './request';
-export { default as RequestAccessor } from './requestAccessor';
-export { default as RequestMongoAccessor, RequestMongoDocumentSerializer } from './requestMongoAccessor';
-export { default as RequestMongoModel } from './requestMongoModel';
+export { Request, RequestStatus } from './request';
+export { RequestAccessor } from './requestAccessor';
+export { RequestMongoAccessor, RequestMongoDocumentSerializer } from './requestMongoAccessor';
+export { RequestMongoModel } from './requestMongoModel';

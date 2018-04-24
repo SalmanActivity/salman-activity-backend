@@ -9,7 +9,7 @@ export enum RequestStatus {
   rejected = 'rejected'
 }
 
-export default interface Request extends Item {
+export interface Request extends Item {
 
   name: string;
 

@@ -84,4 +84,4 @@ const requestSchema:Schema = new Schema({
 
 const requestModel: Model<Document> = model('request', requestSchema);
 
-export default requestModel;
+export { requestModel as RequestMongoModel };
