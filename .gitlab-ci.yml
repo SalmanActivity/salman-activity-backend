@@ -8,15 +8,44 @@ cache:
   - node_modules/
 
 stages:
+  - build
   - test
+  - deploy
+
+build_node:
+  stage: build
+  script:
+   - npm config set proxy $PROXY
+   - npm config set strict-ssl false
+   - npm config set registry http://registry.npmjs.org/
+   - npm install
 
 test:
   stage: test
   script:
-   - npm config set proxy $proxy
-   - npm config set strict-ssl false
-   - npm config set registry http://registry.npmjs.org/
-   - npm install
    - npm test
    - npm run seed-dev
    - npm run integration-test
+
+deploy_docker:
+  stage: deploy
+  script:
+   - docker build -t salman-activity-backend .
+   - docker tag salman-activity-backend salmanactivity/salman-activity-backend
+   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+   - docker push salmanactivity/salman-activity-backend
+
+deploy_ppl:
+  stage: deploy
+  before_script:
+   - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y)'
+   - eval $(ssh-agent -s)
+   - ssh-add < (echo "$SSH_PRIVATE_KEY")
+   - mkdir -p ~/.ssh
+   - ssh-keyscan 167.205.35.107
+  script:
+   - ssh -t ppl@167.205.35.107 "docker volume inspect salman-activity-backend-storage || docker volume create salman-activity-backend-storage"
+   - ssh -t ppl@167.205.35.107 "docker rm -f $(docker ps -a -q --filter=name=salman-activity-backend)"
+   - ssh -t ppl@167.205.35.107 "docker run -d --env ENV=$ENV --env PORT=3000 --net=host -v salman-activity-backend-storage:/storage --restart=always jauhararifin/salman-activity-backend"
+
+
