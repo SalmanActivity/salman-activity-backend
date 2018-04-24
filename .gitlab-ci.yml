@@ -23,6 +23,8 @@ test:
 
 build_docker_image:
   image: docker:latest
+  services:
+    - docker:dind
   stage: build
   script:
     - docker build -t salman-activity-backend .
@@ -32,6 +34,8 @@ build_docker_image:
 
 deploy_ifvm-docker:
   image: docker:latest
+  services:
+    - docker:dind
   stage: deploy
   before_script:
     - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y)'
