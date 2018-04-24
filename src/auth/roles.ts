@@ -1,8 +1,8 @@
 import * as util from 'util';
 import * as jwt from 'jsonwebtoken';
 import { config as defaultConfig, Config } from '../config';
-import UserAccessor from '../user/userAccessor';
-import UserMongoAccessor from '../user/userMongoAccessor';
+import { UserAccessor } from '../user/userAccessor';
+import { UserMongoAccessor } from '../user/userMongoAccessor';
 
 /**
  * Middleware admin digunakan untuk memberikan response 403 jika user yang mengakses suatu

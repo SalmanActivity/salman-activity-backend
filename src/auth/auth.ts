@@ -1,6 +1,6 @@
 import { user } from './roles';
 import { UserAccessor } from '../user';
-import UserMongoAccessor from '../user/userMongoAccessor';
+import { UserMongoAccessor } from '../user/userMongoAccessor';
 import { config as defaultConfig, Config } from '../config';
 
 /**

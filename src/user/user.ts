@@ -1,7 +1,7 @@
 import { Division } from '../division';
 import { Item } from '../accessor';
 
-export default interface User extends Item {
+export interface User extends Item {
 
   name: string;
 

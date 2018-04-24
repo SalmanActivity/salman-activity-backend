@@ -1,5 +1,5 @@
 import { Schema, Model, Document, model } from 'mongoose';
-import DivisionModel from '../division/divisionMongoModel';
+import { DivisionMongoModel } from '../division/divisionMongoModel';
 
 const userSchema:Schema = new Schema({
   name: {
@@ -22,7 +22,7 @@ const userSchema:Schema = new Schema({
   },
   division: {
     type: Schema.Types.ObjectId,
-    ref: DivisionModel.modelName
+    ref: DivisionMongoModel.modelName
   },
   enabled: {
     type: Boolean,
@@ -37,4 +37,4 @@ const userSchema:Schema = new Schema({
 
 const userModel: Model<Document> = model('user', userSchema);
 
-export default userModel;
+export { userModel as UserMongoModel };

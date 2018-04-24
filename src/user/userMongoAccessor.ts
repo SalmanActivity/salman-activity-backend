@@ -1,7 +1,7 @@
-import UserAccessor from './userAccessor';
-import { MongoAccessor, MongoDocumentSerializer } from '../accessor/mongo';
-import UserModel from './userMongoModel';
-import User from './user';
+import { UserAccessor } from './userAccessor';
+import { MongoAccessor, MongoDocumentSerializer, MongoItem } from '../accessor/mongo';
+import { UserMongoModel } from './userMongoModel';
+import { User } from './user';
 import { Document } from 'mongoose';
 import { Division } from '../division';
 import { DivisionMongoDocumentSerializer } from '../division/divisionMongoAccessor';
@@ -15,7 +15,7 @@ export class UserMongoDocumentSerializer implements MongoDocumentSerializer<User
     }
     
     await mongoDocument.populate('division').execPopulate();
-    let division:any = mongoDocument.get('division');
+    let division = mongoDocument.get('division');
     if (division) {
       division = await this.divisionSerializer.serialize(division);
     }
@@ -31,7 +31,7 @@ export class UserMongoDocumentSerializer implements MongoDocumentSerializer<User
       admin: mongoDocument.get('admin'),
     };
   }
-  async deserialize(document: User): Promise<any> {
+  async deserialize(document: User): Promise<MongoItem> {
     if (!document) {
       return null;
     }
@@ -45,13 +45,13 @@ export class UserMongoDocumentSerializer implements MongoDocumentSerializer<User
       division: 'division' in document ? await this.divisionSerializer.deserialize(document.division) : undefined,
       enabled: 'enabled' in document ? document.enabled : undefined,
       admin: 'admin' in document ? document.admin : undefined
-    };
+    } as MongoItem;
   }
 }
 
-export default class UserMongoAccessor extends MongoAccessor<User> implements UserAccessor {
+export class UserMongoAccessor extends MongoAccessor<User> implements UserAccessor {
   constructor() {
-    super(UserModel, new UserMongoDocumentSerializer());
+    super(UserMongoModel, new UserMongoDocumentSerializer());
   }
 
   async getByUsername(username: string): Promise<User> {

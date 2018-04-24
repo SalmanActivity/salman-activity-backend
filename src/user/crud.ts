@@ -1,5 +1,5 @@
-import UserAccessor from './userAccessor';
-import UserMongoAccessor from './userMongoAccessor';
+import { UserAccessor } from './userAccessor';
+import { UserMongoAccessor } from './userMongoAccessor';
 import { DivisionAccessor, DivisionMongoAccessor } from '../division';
 import * as crudUtil from '../crud';
 import * as joi from 'joi';
@@ -7,11 +7,11 @@ import * as passwordHash from 'password-hash';
 
 async function filterUserByRole(user, context) {
   const curUser = context.user;
-  if (curUser.id != user.id && !curUser.admin) {
+  if (curUser.id !== user.id && !curUser.admin) {
     try {
       const currDivId = curUser.division.id;
       const userDivId = user.division.id;
-      if (currDivId == userDivId) {
+      if (currDivId === userDivId) {
         return user;
       }
       else {
@@ -106,20 +106,18 @@ const validateUserInput = async (updatingUser, userInput, userAccessor:UserAcces
     
   if (validatedValue.division && !result[0]) {
     throw new Error('division not found');
-  }
-  else if (validatedValue.division) {
+  } else if (validatedValue.division) {
     validatedValue.division = result[0];
-       }
+  }
 
   const updatingUsername = updatingUser ? updatingUser.username : null;
   const updatingEmail = updatingUser ? updatingUser.email : null;
 
-  if (result[1] && result[1].username && result[1].username != updatingUsername) {
+  if (result[1] && result[1].username && result[1].username !== updatingUsername) {
     throw new Error('username already taken');
-  }
-  else if (result[2] && result[2].email && result[2].email != updatingEmail) {
+  } else if (result[2] && result[2].email && result[2].email !== updatingEmail) {
     throw new Error('email already taken');
-       }
+  }
 
   return validatedValue;
 };

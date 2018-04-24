@@ -2,14 +2,14 @@ import * as sinon from 'sinon';
 import { assert } from 'chai';
 import * as crud from './crud';
 import * as passwordHash from 'password-hash';
-import User from './user';
-import UserAccessor from './userAccessor';
+import { User } from './user';
+import { UserAccessor } from './userAccessor';
 import { InMemoryAccessor } from '../accessor';
 import { DivisionAccessor } from '../division';
 
 class FakeUserAccessor extends InMemoryAccessor<User> implements UserAccessor {
 
-  constructor(documents:any[]) {
+  constructor(documents:User[]) {
     super(documents);
   }
 
@@ -35,7 +35,8 @@ class FakeUserAccessor extends InMemoryAccessor<User> implements UserAccessor {
 
 describe('user crud endpoint test', () => {
   let userDocuments = [], divisionDocuments = [];
-  let findStub, findOneStub, populateStub, req = {}, res, next;
+  const req = {};
+  let res, next;
   let userAccessor: UserAccessor;
   let divisionAccessor: DivisionAccessor;
   let findAllUsersEndpoint,
