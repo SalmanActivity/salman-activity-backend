@@ -1,40 +1,40 @@
 stages:
-  # - test
-  # - build
+  - test
+  - build
   - deploy
 
-# test:
-#   image: node:9.0.0
-#   services:
-#    - mongo:3.0
-#   cache:
-#     paths:
-#       - node_modules/
-#   stage: test
-#   before_script:
-#     - npm config set proxy $PROXY
-#     - npm config set strict-ssl false
-#     - npm config set registry http://registry.npmjs.org/
-#     - npm install
-#   script:
-#     - npm test
-#     - npm run seed-dev
-#     - npm run integration-test
+test:
+  image: node:9.0.0
+  services:
+   - mongo:3.0
+  cache:
+    paths:
+      - node_modules/
+  stage: test
+  before_script:
+    - npm config set proxy $PROXY
+    - npm config set strict-ssl false
+    - npm config set registry http://registry.npmjs.org/
+    - npm install
+  script:
+    - npm test
+    - npm run seed-dev
+    - npm run integration-test
 
-# build_docker_image:
-#   image: docker:stable
-#   services:
-#     - docker:dind
-#   stage: build
-#   tags:
-#     - docker
-#   before_script:
-#     - docker info
-#   script:
-#     - docker build --build-arg PROXY=$PROXY -t salman-activity-backend .
-#     - docker tag salman-activity-backend salmanactivity/salman-activity-backend
-#     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-#     - docker push salmanactivity/salman-activity-backend
+build_docker_image:
+  image: docker:stable
+  services:
+    - docker:dind
+  stage: build
+  tags:
+    - docker
+  before_script:
+    - docker info
+  script:
+    - docker build --build-arg PROXY=$PROXY -t salman-activity-backend .
+    - docker tag salman-activity-backend salmanactivity/salman-activity-backend
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker push salmanactivity/salman-activity-backend
 
 deploy_ifvm-docker:
   image: kroniak/ssh-client
