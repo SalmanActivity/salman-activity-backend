@@ -37,7 +37,7 @@ build_docker_image:
     - docker push salmanactivity/salman-activity-backend
 
 deploy_ifvm-docker:
-  image: docker:stable
+  image: ubuntu:latest
   services:
     - docker:dind
   stage: deploy
