@@ -1,6 +1,14 @@
 const debug = require('debug')('salman-activity-backend:debug');
 
-export function displayError(res:any, errorMessage:any):any {
+/**
+ * Fungsi ini mengembalikan fungsi untuk mengirimkan error sebagai response endpoint.
+ * Fungsi yang dihasilkan memiliki satu buah parameter yang berisi error status dan error cause.
+ * Fungsi yang dihasilkan akan memberikan response berupa json yang berisi error message, error status
+ * dan error cause.
+ * @param res response object untuk memberikan response dari suatu endpoint.
+ * @param errorMessage pesan error yang ingin dikirimkan sebagai response.
+ */
+export function displayError(res, errorMessage:string) {
   return (err) => {
     debug(err);
     if (!err.status) {
