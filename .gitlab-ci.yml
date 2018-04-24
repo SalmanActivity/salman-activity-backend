@@ -2,33 +2,31 @@ image: node:9.0.0
 
 services:
   - mongo:3.0
+  - docker:dind
 
 cache:
   paths:
   - node_modules/
 
 stages:
-  - build
   - test
+  - build
   - deploy
 
-build_node:
-  stage: build
-  script:
+test:
+  stage: test
+  before_script:
    - npm config set proxy $PROXY
    - npm config set strict-ssl false
    - npm config set registry http://registry.npmjs.org/
    - npm install
-
-test:
-  stage: test
   script:
    - npm test
    - npm run seed-dev
    - npm run integration-test
 
-deploy_docker:
-  stage: deploy
+build_docker_image:
+  stage: build
   script:
    - docker build -t salman-activity-backend .
    - docker tag salman-activity-backend salmanactivity/salman-activity-backend
