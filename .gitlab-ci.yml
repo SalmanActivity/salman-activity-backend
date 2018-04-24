@@ -22,24 +22,25 @@ test:
     - npm run integration-test
 
 build_docker_image:
-  image: docker:latest
+  image: docker:stable
   services:
     - docker:dind
   stage: build
+  before_script:
+    - docker info
   script:
-    - export DOCKER_HOST=tcp://localhost:2375
     - docker build -t salman-activity-backend .
     - docker tag salman-activity-backend salmanactivity/salman-activity-backend
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
     - docker push salmanactivity/salman-activity-backend
 
 deploy_ifvm-docker:
-  image: docker:latest
+  image: docker:stable
   services:
     - docker:dind
   stage: deploy
   before_script:
-    - export DOCKER_HOST=tcp://localhost:2375
+    - docker info
     - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y)'
     - eval $(ssh-agent -s)
     - ssh-add < (echo "$SSH_PRIVATE_KEY")
