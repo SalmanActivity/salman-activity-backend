@@ -37,7 +37,7 @@ stages:
 #     - docker push salmanactivity/salman-activity-backend
 
 deploy_ifvm-docker:
-  image: alpine-ssh-client
+  image: kroniak/ssh-client
   stage: deploy
   before_script:
     - eval $(ssh-agent -s)
