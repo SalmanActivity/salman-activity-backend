@@ -27,6 +27,7 @@ build_docker_image:
     - docker:dind
   stage: build
   script:
+    - export DOCKER_HOST=tcp://localhost:2375
     - docker build -t salman-activity-backend .
     - docker tag salman-activity-backend salmanactivity/salman-activity-backend
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
@@ -38,6 +39,7 @@ deploy_ifvm-docker:
     - docker:dind
   stage: deploy
   before_script:
+    - export DOCKER_HOST=tcp://localhost:2375
     - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y)'
     - eval $(ssh-agent -s)
     - ssh-add < (echo "$SSH_PRIVATE_KEY")
