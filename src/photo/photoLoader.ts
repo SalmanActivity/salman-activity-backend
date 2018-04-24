@@ -1,4 +1,4 @@
-import Photo from './photo';
+import { Photo } from './photo';
 import * as stream from 'stream';
 
 export async function loadPhotoFromBase64(input: string): Promise<Photo> {
@@ -6,8 +6,9 @@ export async function loadPhotoFromBase64(input: string): Promise<Photo> {
     input = input.substring(5);
   }
 
-  let [mime, base64] = input.split(';');
-
+  const [mime, base64WithHeader] = input.split(';');
+  
+  let base64 = base64WithHeader;
   if (base64.startsWith('base64,')) {
     base64 = base64.substr(7);
   }

@@ -17,4 +17,4 @@ const photoSchema:Schema = new Schema({
 
 const photoModel: Model<Document> = model('photo', photoSchema);
 
-export default photoModel;
+export { photoModel as PhotoMongoModel };

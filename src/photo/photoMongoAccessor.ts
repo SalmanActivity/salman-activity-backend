@@ -2,10 +2,10 @@ import * as stream from 'stream';
 import * as fs from 'fs';
 import * as util from 'util';
 import { Schema, Model, Document, model } from 'mongoose';
-import { MongoAccessor, MongoDocumentSerializer } from '../accessor/mongo';
-import PhotoAccessor from './photoAccessor';
-import Photo from './photo';
-import PhotoModel from './photoMongoModel';
+import { MongoAccessor, MongoDocumentSerializer, MongoItem } from '../accessor/mongo';
+import { PhotoAccessor } from './photoAccessor';
+import { Photo } from './photo';
+import { PhotoMongoModel } from './photoMongoModel';
 import { config } from '../config';
 
 
@@ -22,7 +22,7 @@ export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Pho
     try {
       await util.promisify(fs.mkdir)(config.photoStorage);
     } catch (err) {
-      if (err.code != 'EEXIST') {
+      if (err.code !== 'EEXIST') {
         throw err;
       }
     }
@@ -39,7 +39,7 @@ export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Pho
     };
   }
 
-  async deserialize(document: Photo): Promise<any> {
+  async deserialize(document: Photo): Promise<MongoItem> {
     if (!document) {
       return null;
     }
@@ -49,21 +49,21 @@ export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Pho
       name: document.name,
       mime: document.mime,
       uploadTime: document.uploadTime,
-    };
+    } as MongoItem;
   }
 
 }
 
-export default class PhotoMongoAccessor extends MongoAccessor<Photo> implements PhotoAccessor {
+export class PhotoMongoAccessor extends MongoAccessor<Photo> implements PhotoAccessor {
   constructor() {
-    super(PhotoModel, new PhotoMongoDocumentSerializer(config.photoStorage));
+    super(PhotoMongoModel, new PhotoMongoDocumentSerializer(config.photoStorage));
   }
 
   private async writePhoto(photo: Photo) {
     try {
       await util.promisify(fs.mkdir)(config.photoStorage);
     } catch (err) {
-      if (err.code != 'EEXIST') {
+      if (err.code !== 'EEXIST') {
         throw err;
       }
     }

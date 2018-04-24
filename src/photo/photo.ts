@@ -1,7 +1,7 @@
 import { Item } from '../accessor';
 import * as stream from 'stream';
 
-export default interface Photo extends Item {
+export interface Photo extends Item {
  
   name: string;
 
