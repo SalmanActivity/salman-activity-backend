@@ -26,6 +26,8 @@ build_docker_image:
   services:
     - docker:dind
   stage: build
+  tags:
+    - docker
   before_script:
     - docker info
   script:
@@ -39,6 +41,8 @@ deploy_ifvm-docker:
   services:
     - docker:dind
   stage: deploy
+  tags:
+    - docker
   before_script:
     - docker info
     - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y)'
