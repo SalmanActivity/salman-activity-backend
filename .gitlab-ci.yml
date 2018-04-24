@@ -41,6 +41,7 @@ deploy_ifvm-docker:
   stage: deploy
   before_script:
     - eval $(ssh-agent -s)
+    - echo $SSH_PRIVATE_KEY
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
     - ssh-keyscan 167.205.35.107
