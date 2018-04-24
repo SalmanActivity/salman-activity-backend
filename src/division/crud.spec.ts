@@ -1,12 +1,13 @@
 import * as sinon from 'sinon';
 import { assert } from 'chai';
 import * as crud from './crud';
-import DivisionAccessor from './divisionAccessor';
+import { DivisionAccessor } from './divisionAccessor';
 import { InMemoryAccessor } from '../accessor';
 
 describe('division crud endpoint test', () => {
 
-  let documents = [], req = {}, res, next, divisionAccessor:DivisionAccessor;
+  let documents = [];
+  let res, next, divisionAccessor:DivisionAccessor;
   let findAllDivisionsEndpoint,
       findOneDivisionEndpoint,
       createOneDivisionEndpoint,
@@ -47,7 +48,7 @@ describe('division crud endpoint test', () => {
 
   describe('GET all division endpoint', () => {
     it('should return all division including deleted one', (done) => {
-      findAllDivisionsEndpoint(req, res, next).then(() => {
+      findAllDivisionsEndpoint({}, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
         sinon.assert.calledWith(res.json, [
           {'id':'5aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true},
@@ -62,7 +63,7 @@ describe('division crud endpoint test', () => {
     it('should return empty division with status code 200', (done) => {
       divisionAccessor = new InMemoryAccessor([]);
       findAllDivisionsEndpoint = crud.findAllDivisions(divisionAccessor);
-      findAllDivisionsEndpoint(req, res, next).then(() => {
+      findAllDivisionsEndpoint({}, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
         sinon.assert.calledWith(res.json, []);
         done();
@@ -70,7 +71,7 @@ describe('division crud endpoint test', () => {
     });
 
     it('should return only id,name,enabled field', (done) => {
-      findAllDivisionsEndpoint(req, res, next).then(() => {
+      findAllDivisionsEndpoint({}, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
         sinon.assert.calledWith(res.json, [
           {'id':'5aa9359a2b21732a73d5406a', 'name': 'div 1', 'enabled': true},

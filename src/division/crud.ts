@@ -1,5 +1,5 @@
-import DivisionAccessor from './divisionAccessor';
-import DivisionMongoAccessor from './divisionMongoAccessor';
+import { DivisionAccessor } from './divisionAccessor';
+import { DivisionMongoAccessor } from './divisionMongoAccessor';
 import * as crudUtil from '../crud';
 import * as joi from 'joi';
 

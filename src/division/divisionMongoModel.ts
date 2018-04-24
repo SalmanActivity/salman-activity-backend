@@ -14,4 +14,4 @@ const divisionSchema:Schema = new Schema({
 
 const divisionModel: Model<Document> = model('division', divisionSchema);
 
-export default divisionModel;
+export { divisionModel as DivisionMongoModel };

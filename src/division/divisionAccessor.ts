@@ -1,5 +1,5 @@
-import Division from './division';
+import { Division } from './division';
 import { Accessor } from '../accessor';
 
-export default interface DivisionAccessor extends Accessor<Division> {
+export interface DivisionAccessor extends Accessor<Division> {
 }

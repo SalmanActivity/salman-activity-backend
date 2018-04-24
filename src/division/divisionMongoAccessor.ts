@@ -1,8 +1,8 @@
 import { Schema, Model, Document, model } from 'mongoose';
-import DivisionAccessor from './divisionAccessor';
-import Division from './division';
-import { MongoAccessor, MongoDocumentSerializer } from '../accessor/mongo';
-import DivisionModel from './divisionMongoModel';
+import { DivisionAccessor } from './divisionAccessor';
+import { Division } from './division';
+import { MongoAccessor, MongoDocumentSerializer, MongoItem } from '../accessor/mongo';
+import { DivisionMongoModel } from './divisionMongoModel';
 
 export class DivisionMongoDocumentSerializer implements MongoDocumentSerializer<Division> {
   async serialize(mongoDocument: Document): Promise<Division> {
@@ -15,7 +15,7 @@ export class DivisionMongoDocumentSerializer implements MongoDocumentSerializer<
       enabled: mongoDocument.get('enabled')
     };
   }
-  async deserialize(document: Division): Promise<any> {
+  async deserialize(document: Division): Promise<MongoItem> {
     if (!document) {
       return null;
     }
@@ -23,12 +23,12 @@ export class DivisionMongoDocumentSerializer implements MongoDocumentSerializer<
       _id: document.id,
       name: document.name,
       enabled: document.enabled
-    };
+    } as MongoItem;
   }
 }
 
-export default class DivisionMongoAccessor extends MongoAccessor<Division> implements DivisionAccessor {
+export class DivisionMongoAccessor extends MongoAccessor<Division> implements DivisionAccessor {
   constructor() {
-    super(DivisionModel, new DivisionMongoDocumentSerializer());
+    super(DivisionMongoModel, new DivisionMongoDocumentSerializer());
   }
 }
