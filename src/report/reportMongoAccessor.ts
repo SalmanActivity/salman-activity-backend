@@ -1,8 +1,8 @@
 import { Schema, Model, Document, model } from 'mongoose';
-import { MongoAccessor, MongoDocumentSerializer } from '../accessor/mongo';
-import ReportAccessor from './reportAccessor';
-import ReportMongoModel from './reportMongoModel';
-import Report from './report';
+import { MongoAccessor, MongoDocumentSerializer, MongoItem } from '../accessor/mongo';
+import { ReportAccessor } from './reportAccessor';
+import { ReportMongoModel } from './reportMongoModel';
+import { Report } from './report';
 import { Request } from '../request';
 import { RequestMongoDocumentSerializer } from '../request/requestMongoAccessor';
 import { Photo, PhotoMongoAccessor, PhotoAccessor, PhotoMongoDocumentSerializer } from '../photo';
@@ -20,12 +20,12 @@ export class ReportMongoDocumentSerializer implements MongoDocumentSerializer<Re
 
     mongoDocument = await mongoDocument.populate('request').populate('photo').execPopulate();
 
-    let request:any = mongoDocument.get('request');
+    let request = mongoDocument.get('request');
     if (request) {
       request = await this.requestSerializer.serialize(request);
     }
 
-    let photo:any = mongoDocument.get('photo');
+    let photo = mongoDocument.get('photo');
     if (photo) {
       photo = await this.photoSerializer.serialize(photo);
     }
@@ -39,7 +39,7 @@ export class ReportMongoDocumentSerializer implements MongoDocumentSerializer<Re
     };
   }
 
-  async deserialize(document: Report): Promise<any> {
+  async deserialize(document: Report): Promise<MongoItem> {
     if (!document) {
       return null;
     }
@@ -50,12 +50,12 @@ export class ReportMongoDocumentSerializer implements MongoDocumentSerializer<Re
       request: 'request' in document ? await this.requestSerializer.deserialize(document.request) : undefined,
       content: 'content' in document ? document.content : undefined,
       photo: 'photo' in document ? await this.photoSerializer.deserialize(document.photo) : undefined
-    };
+    } as MongoItem;
   }
 }
 
 
-export default class ReportMongoAccessor extends MongoAccessor<Report> implements ReportAccessor {
+export class ReportMongoAccessor extends MongoAccessor<Report> implements ReportAccessor {
   
   constructor(reportSerializer: MongoDocumentSerializer<Report> = new ReportMongoDocumentSerializer(),
               protected photoAccessor: PhotoAccessor = new PhotoMongoAccessor()) {

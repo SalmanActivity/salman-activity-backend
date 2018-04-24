@@ -25,4 +25,4 @@ const reportSchema:Schema = new Schema({
 
 const reportModel: Model<Document> = model('report', reportSchema);
 
-export default reportModel;
+export { reportModel as ReportMongoModel };

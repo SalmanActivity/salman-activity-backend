@@ -11,7 +11,7 @@ router.post('/requests/:requestId/report', auth(), crud.createOneReport());
 router.put('/requests/:requestId/report', auth(), crud.updateOneReport());
 router.delete('/requests/:requestId/report', auth(), crud.deleteOneReport());
 
-export { default as Report } from './report';
-export { default as ReportAccessor } from './reportAccessor';
-export { default as ReportMongoAccessor, ReportMongoDocumentSerializer } from './reportMongoAccessor';
-export { default as ReportMongoModel } from './reportMongoModel';
+export { Report } from './report';
+export { ReportAccessor } from './reportAccessor';
+export { ReportMongoAccessor, ReportMongoDocumentSerializer } from './reportMongoAccessor';
+export { ReportMongoModel } from './reportMongoModel';

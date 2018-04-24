@@ -2,9 +2,9 @@ import 'mocha';
 import * as sinon from 'sinon';
 import { assert } from 'chai';
 import * as crud from './crud';
-import {InMemoryAccessor } from '../accessor';
-import Report from './report';
-import ReportAccessor from './reportAccessor';
+import { InMemoryAccessor } from '../accessor';
+import { Report } from './report';
+import { ReportAccessor } from './reportAccessor';
 import { RequestStatus, Request, RequestAccessor } from '../request';
 
 class FakeReportAccessor extends InMemoryAccessor<Report> implements ReportAccessor {
@@ -81,7 +81,8 @@ function createDefaultRequest(obj) {
 describe('report crud endpoint test', () => {
   
   let reportDocuments = [];
-  let findStub, findOneStub, populateStub, req = {}, res, next, sandbox, clock;
+  const req = {};
+  let res, next, sandbox, clock;
   let reportAccessor: ReportAccessor;
   let requestAccessor: RequestAccessor;
   let findReportInMonthEndpoint,

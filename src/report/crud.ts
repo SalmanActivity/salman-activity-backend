@@ -1,6 +1,6 @@
-import ReportAccessor from './reportAccessor';
-import Report from './report';
-import ReportMongoAccessor from './reportMongoAccessor';
+import { ReportAccessor } from './reportAccessor';
+import { Report } from './report';
+import { ReportMongoAccessor } from './reportMongoAccessor';
 import { DivisionAccessor, DivisionMongoAccessor } from '../division';
 import { LocationAccessor, LocationMongoAccessor } from '../location';
 import { RequestAccessor, RequestMongoAccessor } from '../request';
@@ -121,7 +121,7 @@ export function findReportImageByRequest(reportAccessor: ReportAccessor = new Re
   };
 }
 
-async function validatePostUserInput(userInput: any) {
+async function validatePostUserInput(userInput) {
   const rules = {
     content: joi.string().min(3).max(1024).required(),
     photo: joi.string()
@@ -186,7 +186,7 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
   });
 }
 
-async function validatePutUserInput(userInput: any) {
+async function validatePutUserInput(userInput) {
   const rules = {
     content: joi.string().min(3).max(1024),
     photo: joi.string()

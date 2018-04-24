@@ -1,7 +1,7 @@
-import Report from './report';
+import { Report } from './report';
 import { Accessor } from '../accessor';
 
-export default interface ReportAccessor extends Accessor<Report> {
+export interface ReportAccessor extends Accessor<Report> {
 
 	getAllBetween(start:Date, end:Date): Promise<Report[]>;
 
