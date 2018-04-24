@@ -31,7 +31,7 @@ build_docker_image:
   before_script:
     - docker info
   script:
-    - docker build -t salman-activity-backend .
+    - docker build --build-arg PROXY=$PROXY -t salman-activity-backend .
     - docker tag salman-activity-backend salmanactivity/salman-activity-backend
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
     - docker push salmanactivity/salman-activity-backend
