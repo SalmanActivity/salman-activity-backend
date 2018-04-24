@@ -45,10 +45,13 @@ mongoose.connect(config.mongoConnection).then(() => {
 app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  next();
-});
+
+if (config.trustedDomain) {
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', config.trustedDomain);
+    next();
+  });
+}
 
 app.get('/', (req,res) => res.redirect('/api/v1/status/healthcheck'));
 

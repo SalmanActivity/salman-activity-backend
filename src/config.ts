@@ -5,6 +5,7 @@ export interface Config {
     mongoConnection: string;
     secretKey: string;
     photoStorage: string;
+    trustedDomain?: string;
 }
 
 function loadConfiguration(environment:string): Config {
