@@ -1,8 +1,8 @@
 import { Schema, Model, Document, model } from 'mongoose';
-import LocationAccessor from './locationAccessor';
-import Location from './location';
-import { MongoAccessor, MongoDocumentSerializer } from '../accessor/mongo';
-import LocationModel from './locationMongoModel';
+import { LocationAccessor } from './locationAccessor';
+import { Location } from './location';
+import { MongoAccessor, MongoDocumentSerializer, MongoItem } from '../accessor/mongo';
+import { LocationMongoModel } from './locationMongoModel';
 
 export class LocationMongoDocumentSerializer implements MongoDocumentSerializer<Location> {
   async serialize(mongoDocument: Document): Promise<Location> {
@@ -15,7 +15,7 @@ export class LocationMongoDocumentSerializer implements MongoDocumentSerializer<
       enabled: mongoDocument.get('enabled')
     };
   }
-  async deserialize(document: Location): Promise<any> {
+  async deserialize(document: Location): Promise<MongoItem> {
     if (!document) {
       return null;
     }
@@ -23,12 +23,12 @@ export class LocationMongoDocumentSerializer implements MongoDocumentSerializer<
       _id: document.id,
       name: document.name,
       enabled: document.enabled
-    };
+    } as MongoItem;
   }
 }
 
-export default class LocationMongoAccessor extends MongoAccessor<Location> implements LocationAccessor {
+export class LocationMongoAccessor extends MongoAccessor<Location> implements LocationAccessor {
   constructor() {
-    super(LocationModel, new LocationMongoDocumentSerializer());
+    super(LocationMongoModel, new LocationMongoDocumentSerializer());
   }
 }

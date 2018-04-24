@@ -14,4 +14,4 @@ const locationSchema:Schema = new Schema({
 
 const locationModel: Model<Document> = model('location', locationSchema);
 
-export default locationModel;
+export { locationModel as LocationMongoModel };

@@ -1,6 +1,6 @@
 import { Item } from '../accessor';
 
-export default interface Location extends Item {
+export interface Location extends Item {
   
   name: string;
 

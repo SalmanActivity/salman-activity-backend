@@ -10,7 +10,7 @@ router.post('/', auth(), admin(), crud.createOneLocation());
 router.put('/:locationId', auth(), admin(), crud.updateOneLocation());
 router.delete('/:locationId', auth(), admin(), crud.deleteOneLocation());
 
-export { default as Location } from './location';
-export { default as LocationAccessor } from './locationAccessor';
-export { default as LocationMongoAccessor, LocationMongoDocumentSerializer } from './locationMongoAccessor';
-export { default as LocationMongoModel } from './locationMongoModel';
+export { Location } from './location';
+export { LocationAccessor } from './locationAccessor';
+export { LocationMongoAccessor, LocationMongoDocumentSerializer } from './locationMongoAccessor';
+export { LocationMongoModel } from './locationMongoModel';

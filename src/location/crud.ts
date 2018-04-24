@@ -1,5 +1,5 @@
-import LocationAccessor from './locationAccessor';
-import LocationMongoAccessor from './locationMongoAccessor';
+import { LocationAccessor } from './locationAccessor';
+import { LocationMongoAccessor } from './locationMongoAccessor';
 import * as crudUtil from '../crud';
 import * as joi from 'joi';
 

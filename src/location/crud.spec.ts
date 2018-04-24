@@ -1,12 +1,13 @@
 import * as sinon from 'sinon';
 import { assert } from 'chai';
 import * as crud from './crud';
-import LocationAccessor from './locationAccessor';
+import { LocationAccessor } from './locationAccessor';
 import { InMemoryAccessor } from '../accessor';
 
-
 describe('location crud endpoint test', () => {
-  let documents = [], findStub, findOneStub, req = {}, res, next, locationAccessor:LocationAccessor;
+  let documents = [];
+  const req = {};
+  let res, next, locationAccessor:LocationAccessor;
   let findAllLocationsEndpoint,
       findOneLocationEndpoint,
       createOneLocationEndpoint,
@@ -262,8 +263,5 @@ describe('location crud endpoint test', () => {
     });
 
   });
-
-
-
 
 });

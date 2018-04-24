@@ -1,5 +1,5 @@
-import Location from './location';
+import { Location } from './location';
 import { Accessor } from '../accessor';
 
-export default interface LocationAccessor extends Accessor<Location> {
+export interface LocationAccessor extends Accessor<Location> {
 }
