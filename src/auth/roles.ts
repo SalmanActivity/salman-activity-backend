@@ -1,6 +1,6 @@
 import * as util from 'util';
 import * as jwt from 'jsonwebtoken';
-import defaultConfig, { Config } from '../config';
+import { config as defaultConfig, Config } from '../config';
 import UserAccessor from '../user/userAccessor';
 import UserMongoAccessor from '../user/userMongoAccessor';
 

@@ -1,6 +1,6 @@
 import { verify } from 'password-hash';
 import { sign } from 'jsonwebtoken';
-import defaultConfig, { Config } from '../config';
+import { config as defaultConfig, Config } from '../config';
 import { User, UserAccessor } from '../user';
 import UserMongoAccessor from '../user/userMongoAccessor';
 

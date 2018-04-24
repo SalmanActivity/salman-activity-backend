@@ -1,7 +1,7 @@
 import { user } from './roles';
 import { UserAccessor } from '../user';
 import UserMongoAccessor from '../user/userMongoAccessor';
-import defaultConfig, { Config } from '../config';
+import { config as defaultConfig, Config } from '../config';
 
 /**
  * Digunakan untuk mengautentikasi user seperti yang dilakukan oleh middleware user.
