@@ -8,7 +8,6 @@ import { Photo } from './photo';
 import { PhotoMongoModel } from './photoMongoModel';
 import { config } from '../config';
 
-
 export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Photo> {
 
   constructor(private storageLocation: string = config.photoStorage) {
@@ -28,8 +27,12 @@ export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Pho
     }
 
     const filename = `${config.photoStorage}/${mongoDocument._id}.${mongoDocument.get('mime').split('/')[1]}`;
-    await util.promisify(fs.stat)(filename);
-    const readableStream = fs.createReadStream(filename);
+    let readableStream = null;
+    try {
+      await util.promisify(fs.stat)(filename);
+      readableStream = fs.createReadStream(filename);
+    } catch (err) {
+    }
 
     return {
       id: mongoDocument._id ? mongoDocument._id.toString() : undefined,
@@ -80,8 +83,10 @@ export class PhotoMongoAccessor extends MongoAccessor<Photo> implements PhotoAcc
   }
 
   async insert(object: Photo): Promise<Photo> {
-    await this.writePhoto(object);
+    const readableStream = object.readableStream;
     const photo: Photo = await super.insert(object);
+    photo.readableStream = readableStream;
+    await this.writePhoto(photo);
     return photo;
   }
 

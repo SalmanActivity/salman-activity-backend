@@ -94,7 +94,7 @@ export class ReportMongoAccessor extends MongoAccessor<Report> implements Report
   }
 
   async insert(object: Report): Promise<Report>{
-    await this.photoAccessor.insert(object.photo);
+    object.photo = await this.photoAccessor.insert(object.photo);
     return await super.insert(object);
   }
 
