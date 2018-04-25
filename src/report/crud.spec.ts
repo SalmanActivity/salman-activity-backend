@@ -240,7 +240,7 @@ describe('report crud endpoint test', () => {
   describe('GET reports in month endpoint', () => {
 
   	it('should return all reports in month when login as admin', (done) => {
-      const req = {user: {admin: true}, query:{}};
+      const req = {user: {admin: true}, query:{}, protocol:'http', headers:{host:'example.com'}};
       findReportInMonthEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
         const ret = res.json.getCall(0).args[0];
@@ -251,7 +251,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('should return all reports specific division in month when login as division', (done) => {
-      const req = {user: {division:{id:'5aaa89e2a892471e3cdc84e4'}}, query:{}};
+      const req = {user: {division:{id:'5aaa89e2a892471e3cdc84e4'}}, query:{}, protocol:'http', headers:{host:'example.com'}};
       findReportInMonthEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
         const ret = res.json.getCall(0).args[0];
@@ -264,7 +264,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('should return all reports in specific month when login as admin', (done) => {
-      const req = {user: {admin: true}, query:{month:6}};
+      const req = {user: {admin: true}, query:{month:6}, protocol:'http', headers:{host:'example.com'}};
       findReportInMonthEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
         const ret = res.json.getCall(0).args[0];
@@ -275,7 +275,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('should return all reports in specific year when login as admin', (done) => {
-      const req = {user: {admin: true}, query:{year:2019}};
+      const req = {user: {admin: true}, query:{year:2019}, protocol:'http', headers:{host:'example.com'}};
       findReportInMonthEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
         const ret = res.json.getCall(0).args[0];
@@ -286,7 +286,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('should return all reports in specific month and year when login as admin', (done) => {
-      const req = {user: {admin: true}, query:{year:2019, month:6}};
+      const req = {user: {admin: true}, query:{year:2019, month:6}, protocol:'http', headers:{host:'example.com'}};
       findReportInMonthEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
         const ret = res.json.getCall(0).args[0];
@@ -301,7 +301,7 @@ describe('report crud endpoint test', () => {
   describe('GET specific report by request endpoint', () => {
 
     it('return specific report when loggin as admin', done => {
-      const req = {user: {admin: true}, params:{requestId: '5aaa89e2a892471e3cdc84e5'}};
+      const req = {user: {admin: true}, params:{requestId: '5aaa89e2a892471e3cdc84e5'}, protocol:'http', headers:{host:'example.com'}};
       findReportByRequestEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
         const ret = res.json.getCall(0).args[0];
@@ -312,7 +312,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('return specific report in its division when loggin as division', done => {
-      const req = {user: {division: {id:'5aaa89e2a892471e3cdc84eb'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}};
+      const req = {user: {division: {id:'5aaa89e2a892471e3cdc84eb'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}, protocol:'http', headers:{host:'example.com'}};
       findReportByRequestEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
         const ret = res.json.getCall(0).args[0];
@@ -323,7 +323,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('return 403 when division want to read report from another division', done => {
-      const req = {user: {division: {id:'5aaa89e2a892471e3cdc84e4'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}};
+      const req = {user: {division: {id:'5aaa89e2a892471e3cdc84e4'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}, protocol:'http', headers:{host:'example.com'}};
       findReportByRequestEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 403);
         done();
@@ -331,7 +331,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('return 404 when report has not been created', done => {
-      const req = {user: {admin:true}, params:{requestId: '5aaa89e2a892471e3cdc84f0'}};
+      const req = {user: {admin:true}, params:{requestId: '5aaa89e2a892471e3cdc84f0'}, protocol:'http', headers:{host:'example.com'}};
       findReportByRequestEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 404);
         done();
@@ -339,7 +339,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('return 404 when request not found', done => {
-      const req = {user: {admin:true}, params:{requestId: '5aaa89e2a892471e3cdc84ef'}};
+      const req = {user: {admin:true}, params:{requestId: '5aaa89e2a892471e3cdc84ef'}, protocol:'http', headers:{host:'example.com'}};
       findReportByRequestEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 404);
         done();
@@ -357,7 +357,8 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'new report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        },
+        protocol:'http', headers:{host:'example.com'}
       };
       createOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
@@ -374,7 +375,8 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'new report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        },
+        protocol:'http', headers:{host:'example.com'}
       };
       createOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
@@ -390,7 +392,8 @@ describe('report crud endpoint test', () => {
         params: {requestId: '5aaa89e2a892471e3cdc84f0'},
         body: {
           'photo': 'data:image/jpeg;base64,a'
-        }
+        },
+        protocol:'http', headers:{host:'example.com'}
       };
       createOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 400);
@@ -405,7 +408,8 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'a',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        },
+        protocol:'http', headers:{host:'example.com'}
       };
       createOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 400);
@@ -420,7 +424,8 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'new report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        },
+        protocol:'http', headers:{host:'example.com'}
       };
       createOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 400);
@@ -435,7 +440,8 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'new report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        },
+        protocol:'http', headers:{host:'example.com'}
       };
       createOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 400);
@@ -450,7 +456,7 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'new report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        }, protocol:'http', headers:{host:'example.com'}
       };
       createOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 403);
@@ -465,7 +471,7 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'new report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        }, protocol:'http', headers:{host:'example.com'}
       };
       createOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 404);
@@ -484,7 +490,7 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'updated report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        }, protocol:'http', headers:{host:'example.com'}
       };
       updateOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
@@ -502,7 +508,7 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'updated report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        }, protocol:'http', headers:{host:'example.com'}
       };
       updateOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 200);
@@ -520,7 +526,7 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'a',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        }, protocol:'http', headers:{host:'example.com'}
       };
       updateOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 400);
@@ -535,7 +541,7 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'updated report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        }, protocol:'http', headers:{host:'example.com'}
       };
       updateOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 400);
@@ -550,7 +556,7 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'updated report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        }, protocol:'http', headers:{host:'example.com'}
       };
       updateOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 403);
@@ -565,7 +571,7 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'updated report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        }, protocol:'http', headers:{host:'example.com'}
       };
       updateOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 404);
@@ -580,7 +586,7 @@ describe('report crud endpoint test', () => {
         body: {
           'content': 'updated report content',
           'photo': 'data:image/jpeg;base64,a'
-        }
+        }, protocol:'http', headers:{host:'example.com'}
       };
       updateOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 404);
@@ -593,7 +599,7 @@ describe('report crud endpoint test', () => {
   describe('DELETE specific report endpoint', () => {
 
     it('should delete specific report when loggin as admin', done => {
-      const req = {user: {admin: true}, params:{requestId: '5aaa89e2a892471e3cdc84e5'}};
+      const req = {user: {admin: true}, params:{requestId: '5aaa89e2a892471e3cdc84e5'}, protocol:'http', headers:{host:'example.com'}};
       deleteOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 202);
         const ret = res.json.getCall(0).args[0];
@@ -604,7 +610,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('should delete specific report in when loggin as division', done => {
-      const req = {user: {division: {id:'5aaa89e2a892471e3cdc84eb'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}};
+      const req = {user: {division: {id:'5aaa89e2a892471e3cdc84eb'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}, protocol:'http', headers:{host:'example.com'}};
       deleteOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 202);
         const ret = res.json.getCall(0).args[0];
@@ -615,7 +621,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('should return 403 when division want to delete report of another division request', done => {
-      const req = {user: {division: {id:'5aaa89e2a892471e3cdc84e4'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}};
+      const req = {user: {division: {id:'5aaa89e2a892471e3cdc84e4'}}, params:{requestId: '5aaa89e2a892471e3cdc84ea'}, protocol:'http', headers:{host:'example.com'}};
       deleteOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 403);
         done();
@@ -623,7 +629,7 @@ describe('report crud endpoint test', () => {
     });
 
     it('should return 404 when request not found', done => {
-      const req = {user: {division: {id:'5aaa89e2a892471e3cdc84e4'}}, params:{requestId: '5aaa89e2a892471e3cdc84ff'}};
+      const req = {user: {division: {id:'5aaa89e2a892471e3cdc84e4'}}, params:{requestId: '5aaa89e2a892471e3cdc84ff'}, protocol:'http', headers:{host:'example.com'}};
       deleteOneReportEndpoint(req, res, next).then(() => {
         sinon.assert.calledWith(res.status, 404);
         done();

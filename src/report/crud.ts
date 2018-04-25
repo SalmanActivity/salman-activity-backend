@@ -193,6 +193,7 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
         }
       }
 
+      data.request = request;
       return data;
     },
     insertOne: (object, context) => reportAccessor.insert(object),
