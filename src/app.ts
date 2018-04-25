@@ -43,8 +43,8 @@ mongoose.connect(config.mongoConnection).then(() => {
 // routing server
 
 app.use(morgan('combined'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({limit: '20mb'}));
+app.use(bodyParser.urlencoded({limit: '20mb', extended: false }));
 
 if (config.trustedDomain) {
   app.use((req, res, next) => {
