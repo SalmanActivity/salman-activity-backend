@@ -6,6 +6,7 @@ import { LocationAccessor, LocationMongoAccessor } from '../location';
 import { RequestAccessor, RequestMongoAccessor } from '../request';
 import * as crudUtil from '../crud';
 import * as joi from 'joi';
+import * as url from 'url';
 import { loadPhotoFromBase64 } from '../photo';
 
 async function fetchReportByMonth(req, reportAccessor: ReportAccessor) {
@@ -56,18 +57,23 @@ const filterField = crudUtil.filterOne.fields(['id', 'issuedTime',
 export function findReportInMonth(reportAccessor: ReportAccessor = new ReportMongoAccessor()) {
   return crudUtil.readMany({
     init: async (req, context) => {
+      context.req = req;
       context.user = req.user;
       return req;
     },
     fetchMany: (req, context) => fetchReportByMonth(req, reportAccessor),
     filterOne: (reqObject, context) => filterResultByUser(context.user, reqObject),
-    filterFieldOne: filterField
+    filterFieldOne: async (object, context) => {
+      object['photo'] = `${context.req.protocol}://${context.req.headers.host}/api/v1/requests/${object.request.id}/report/photo`;
+      return filterField(object, context);
+    }
   });
 }
 
 export function findReportByRequest(reportAccessor: ReportAccessor = new ReportMongoAccessor()) {
   return crudUtil.readOne({
     init: async (req, context) => {
+      context.req = req;
       context.user = req.user;
       return req;
     },
@@ -79,7 +85,10 @@ export function findReportByRequest(reportAccessor: ReportAccessor = new ReportM
       return report;
     },
     filterOne: (reqObject, context) => filterResultByUser(context.user, reqObject),
-    filterFieldOne: filterField
+    filterFieldOne: async (object, context) => {
+      object['photo'] = `${context.req.protocol}://${context.req.headers.host}/api/v1/requests/${object.request.id}/report/photo`;
+      return filterField(object, context);
+    }
   });
 }
 
@@ -92,13 +101,14 @@ export function findReportImageByRequest(reportAccessor: ReportAccessor = new Re
         throw {status: 404, cause: 'no report found'};
       }
       
-      if (!req.user) {
-        throw {status:403, cause: 'unauthorized access'};
-      }
-
-      if (!req.user.admin && req.user.division.id !== report.request.division.id) {
-        throw {status:403, cause: 'unauthorized division'};
-      }
+      // all user can see the photo
+      // if (!req.user) {
+      //   throw {status:403, cause: 'unauthorized access'};
+      // }
+      //
+      // if (!req.user.admin && req.user.division.id !== report.request.division.id) {
+      //   throw {status:403, cause: 'unauthorized division'};
+      // }
       
       res.set('Content-Type', report.photo.mime);
       report.photo.readableStream.pipe(res);
@@ -140,6 +150,10 @@ async function validatePostUserInput(userInput) {
 export function createOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor(),
                                 requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
   return crudUtil.createOne({
+    init: async (req, context) => {
+      context.req = req;
+      return req;
+    },
     validateOne: async (req, context) => {
       const request = await requestAccessor.getById(req.params.requestId); 
       if (!request) {
@@ -182,7 +196,10 @@ export function createOneReport(reportAccessor: ReportAccessor = new ReportMongo
       return data;
     },
     insertOne: (object, context) => reportAccessor.insert(object),
-    filterFieldOne: filterField
+    filterFieldOne: async (object, context) => {
+      object['photo'] = `${context.req.protocol}://${context.req.headers.host}/api/v1/requests/${object.request.id}/report/photo`;
+      return filterField(object, context);
+    }
   });
 }
 
@@ -200,9 +217,15 @@ async function validatePutUserInput(userInput) {
   return validationResult.value;
 }
 
-export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor(),
-                                 requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
+export function updateOneReport(
+  reportAccessor: ReportAccessor = new ReportMongoAccessor(),
+  requestAccessor: RequestAccessor = new RequestMongoAccessor()
+) {
   return crudUtil.updateOne({
+    init: async (req, context) => {
+      context.req = req;
+      return req;
+    },
     fetchOne: (req, context) => {
       context.body = req.body;
       context.user = req.user;
@@ -237,13 +260,20 @@ export function updateOneReport(reportAccessor: ReportAccessor = new ReportMongo
       return item;
     },
     updateOne: (reqObject, context) => reportAccessor.update(reqObject),
-    filterFieldOne: filterField
+    filterFieldOne: async (object, context) => {
+      object['photo'] = `${context.req.protocol}://${context.req.headers.host}/api/v1/requests/${object.request.id}/report/photo`;
+      return filterField(object, context);
+    }
   });
 }
 
 export function deleteOneReport(reportAccessor: ReportAccessor = new ReportMongoAccessor(),
                                 requestAccessor: RequestAccessor = new RequestMongoAccessor()) {
   return crudUtil.deleteOne({
+    init: async (req, context) => {
+      context.req = req;
+      return req;
+    },
     fetchOne: async (req, context) => {
       const request = await requestAccessor.getById(req.params.requestId); 
       if (!request) {
@@ -259,6 +289,9 @@ export function deleteOneReport(reportAccessor: ReportAccessor = new ReportMongo
       return report;
     },
     deleteOne: (reqObject, context) => reportAccessor.delete(reqObject),
-    filterFieldOne: filterField
+    filterFieldOne: async (object, context) => {
+      object['photo'] = `${context.req.protocol}://${context.req.headers.host}/api/v1/requests/${object.request.id}/report/photo`;
+      return filterField(object, context);
+    }
   });
 }

@@ -6,7 +6,7 @@ export let router: Router = Router();
 
 router.get('/reports', auth(), crud.findReportInMonth());
 router.get('/requests/:requestId/report', auth(), crud.findReportByRequest());
-router.get('/requests/:requestId/report/photo', auth(), crud.findReportImageByRequest());
+router.get('/requests/:requestId/report/photo', crud.findReportImageByRequest());
 router.post('/requests/:requestId/report', auth(), crud.createOneReport());
 router.put('/requests/:requestId/report', auth(), crud.updateOneReport());
 router.delete('/requests/:requestId/report', auth(), crud.deleteOneReport());
