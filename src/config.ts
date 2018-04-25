@@ -11,9 +11,9 @@ export interface Config {
 function loadConfiguration(environment:string): Config {
     const [envFile, envKey] = environment.split(':');
 
-    const configurationFile = 'config.' + envFile + '.json';
+    let configurationFile = 'config.' + envFile + '.json';
     if (envKey) {
-        const configurationFile = 'config.' + envFile + '.secret';
+        configurationFile = 'config.' + envFile + '.secret';
     }
 
     let config: Config;
