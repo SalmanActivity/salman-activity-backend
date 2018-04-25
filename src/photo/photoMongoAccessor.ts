@@ -28,6 +28,7 @@ export class PhotoMongoDocumentSerializer implements MongoDocumentSerializer<Pho
     }
 
     const filename = `${config.photoStorage}/${mongoDocument._id}.${mongoDocument.get('mime').split('/')[1]}`;
+    await util.promisify(fs.stat)(filename);
     const readableStream = fs.createReadStream(filename);
 
     return {
@@ -74,6 +75,7 @@ export class PhotoMongoAccessor extends MongoAccessor<Photo> implements PhotoAcc
 
     await util.promisify(writeStream.on.bind(writeStream, 'finish'))();
 
+    await util.promisify(fs.stat)(filename);
     photo.readableStream = fs.createReadStream(filename);
   }
 
