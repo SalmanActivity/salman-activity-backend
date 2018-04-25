@@ -1,9 +1,13 @@
 import * as mongoose from 'mongoose';
 import { config } from '../config';
-import * as models from '../seed';
 import { Item, Accessor } from '../accessor';
 
 const debug = require('debug')('salman-activity-backend:seed');
+
+let models = require('../seed');
+if (process.argv.length >= 3 && process.argv[2] === 'staging') {
+  models = require('../seed-staging');
+}
 
 async function runSeeder() {
   await mongoose.connect(config.mongoConnection);

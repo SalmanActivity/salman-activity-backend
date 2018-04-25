@@ -134,7 +134,7 @@ const admin1: User = {
   name: 'admin',
   username: 'admin',
   email: 'admin@test.com',
-  password: generate('admin'),
+  password: generate('Admin1011!'),
   division: null,
   enabled: true,
   admin: true
